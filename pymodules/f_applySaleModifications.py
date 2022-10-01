@@ -1,8 +1,7 @@
 ##
 import pandas as pd
-
-from Code import ns as ns
 from Code import cf as cf
+from Code import ns as ns
 
 
 lst_script = 'e'
@@ -16,16 +15,16 @@ cte = ns.Constants()
 cur_prq = dirs.raw / f"{script_name}.parquet"
 pre_prq = dirs.raw / f"{lst_script}.parquet"
 
-def main():
+def main() :
     pass
     ##
     df = pd.read_parquet(pre_prq)
-    df = df.sort_values([rd.PublishDateTime], ascending=False)
+    df = df.sort_values([rd.PublishDateTime] , ascending = False)
     df[rd.jDate] = df[rd.jDate].astype(int)
     df[rd.jMonth] = df[rd.jDate] // 100
     print(df)
     ##
-    cd = df[rd.firmType].isin([ft.Service, ft.Production])
+    cd = df[rd.firmType].isin([ft.Service , ft.Production])
     cd &= df[rd.isBlank].ne('True')
     cd &= df[rd.succeed].eq('True')
     print(cd[cd])
@@ -33,24 +32,23 @@ def main():
     df = df[cd]
     print(df)
     ##
-    df = df.drop_duplicates(subset=[rd.Symbol, rd.jMonth])
+    df = df.drop_duplicates(subset = [rd.Symbol , rd.jMonth])
     print(df)
     ##
-    df = df[
-        [rd.TracingNo, rd.firmType, rd.Symbol, rd.jMonth, rd.PublishDateTime,
-         rd.revUntilLastMonth, rd.modification, rd.revUntilLastMonthModified,
-         rd.saleQ, rd.revenue, rd.revUntilCurrnetMonth]]
+    df = df[[rd.TracingNo , rd.firmType , rd.Symbol , rd.jMonth ,
+             rd.PublishDateTime , rd.revUntilLastMonth , rd.modification ,
+             rd.revUntilLastMonthModified , rd.saleQ , rd.revenue ,
+             rd.revUntilCurrnetMonth]]
     ##
-    for col in [rd.revUntilLastMonth, rd.modification,
-                rd.revUntilLastMonthModified, rd.revenue,
-                rd.revUntilCurrnetMonth, rd.saleQ]:
-        df[col] = df[col].apply(lambda x: str(x).split('.')[0])
-        df[col] = df[col].apply(lambda x: None if x == 'nan' else x)
+    for col in [rd.revUntilLastMonth , rd.modification ,
+                rd.revUntilLastMonthModified , rd.revenue ,
+                rd.revUntilCurrnetMonth , rd.saleQ] :
+        df[col] = df[col].apply(lambda x : str(x).split('.')[0])
+        df[col] = df[col].apply(lambda x : None if x == 'nan' else x)
     ##
     df[rd.modificationCheck] = False
-    for el in [0, 1, -1]:
-        df[rd.modificationCheck] |= df[
-                                        rd.revUntilLastMonth].fillna(0).astype(
+    for el in [0 , 1 , -1] :
+        df[rd.modificationCheck] |= df[rd.revUntilLastMonth].fillna(0).astype(
                 int) + df[rd.modification].fillna(0).astype(int) == df[
                                         rd.revUntilLastMonthModified].fillna(0).astype(
                 int) + el
@@ -59,14 +57,13 @@ def main():
     ch1df = df[ch1]
     print(ch1df)
     ##
-    df.loc[ch1, rd.modification] = df[
-                                       rd.revUntilLastMonthModified].fillna(0).astype(
+    df.loc[ch1 , rd.modification] = df[
+                                        rd.revUntilLastMonthModified].fillna(0).astype(
             int) - df[rd.revUntilLastMonth].fillna(0).astype(int)
     print(df)
     ##
-    for el in [0, 1, -1]:
-        df[rd.modificationCheck] |= df[
-                                        rd.revUntilLastMonth].fillna(0).astype(
+    for el in [0 , 1 , -1] :
+        df[rd.modificationCheck] |= df[rd.revUntilLastMonth].fillna(0).astype(
                 int) + df[rd.modification].fillna(0).astype(int) == df[
                                         rd.revUntilLastMonthModified].fillna(0).astype(
                 int) + el
@@ -105,14 +102,12 @@ def main():
     print(ch61df)
     ##
     df[rd.untilCurMonthCheck] = False
-    for el in [0, 1, -1]:
+    for el in [0 , 1 , -1] :
         df[rd.untilCurMonthCheck] |= df[
                                          rd.revUntilLastMonthModified].fillna(0).astype(
-                int) + \
-                                     df[rd.revenue].fillna(0).astype(int) == \
-                                     df[
+                int) + df[rd.revenue].fillna(0).astype(int) == df[
                                          rd.revUntilCurrnetMonth].fillna(0).astype(
-                                             int) + el
+                int) + el
 
     ch7 = df[rd.untilCurMonthCheck].eq(False)
     ch7df = df[ch7]
@@ -127,28 +122,27 @@ def main():
     ch8df = df[ch8]
     print(ch8df)
     ##
-    df4 = df[[rd.Symbol, rd.jMonth, rd.modification]]
+    df4 = df[[rd.Symbol , rd.jMonth , rd.modification]]
     print(df4)
     ##
-    df4[rd.jMonth] = df4[rd.jMonth].apply(lambda x: cf.find_n_month_before(x))
+    df4[rd.jMonth] = df4[rd.jMonth].apply(lambda x : cf.find_n_month_before(x))
     ##
     df4[rd.modificationFromNextMonth] = df4[rd.modification]
     ##
-    df4 = df4[[rd.Symbol, rd.jMonth, rd.modificationFromNextMonth]]
+    df4 = df4[[rd.Symbol , rd.jMonth , rd.modificationFromNextMonth]]
     ##
-    df = df.merge(df4, how='left')
+    df = df.merge(df4 , how = 'left')
     ##
     df[rd.modifiedMonthRevenue] = df[rd.revenue].astype(int) + df[
         rd.modificationFromNextMonth].fillna(0).astype(int)
     ##
     df = df.applymap(str)
-    df.to_parquet(cur_prq, index=False)
+    df.to_parquet(cur_prq , index = False)
     print(df)
 
 ##
-if __name__ == "__main__":
+if __name__ == "__main__" :
     main()
     print(f"{script_name}.py done!")
-else:
-    pass
-    ##
+else :
+    pass  ##
