@@ -1,5 +1,6 @@
 {
   "CodalCol": "CodalCol",
   "CodalLetterCode": "CodalLetterCode",
-  "Col": "Col"
+  "Col": "Col",
+  "DAllCodalLetters": "DAllCodalLetters"
 }

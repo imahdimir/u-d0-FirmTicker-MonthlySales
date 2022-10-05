@@ -39,6 +39,17 @@ async def get_render_js(url_in) :
         print(e)
         return ""
 
+def find_jmonth_fr_titl(df) :
+    pat = '(\d{4}/\d{2}/\d{2})'
+    cl = c.jm
+    df[cl] = df[cc.Title].str.extract(pat)
+    df[cl] = df[cl].str.replace('\D' , '')
+    df[cl] = df[cl].str[:6]
+    df[cl] = df[cl].astype(int)
+    df[cl] = df[cl].astype('string')
+    df[cl] = df[cl].str[:4] + '-' + df[cl].str[4 :6]
+    return df
+
 def main() :
     pass
 
