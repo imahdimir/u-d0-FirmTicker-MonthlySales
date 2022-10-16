@@ -167,33 +167,62 @@ class MonthlyActivityReport :
     def read_tables(self) :
         try :
             self.dfs = pd.read_html(self.html)
-            self.df = self.dfs[0]
+            self.make_headers_and_reset_index()
+            self.drop_empty_dup_and_sub_dfs()
         except ValueError as e :
             print(e)
             return 'no_table'
 
-    def clean_tables(self) :
+    def make_headers_and_reset_index(self) :
+        for i in range(len(self.dfs)) :
+            self.dfs[i] = make_headers_row_and_reset_index(self.dfs[i])
+
+    def make_lengthy_cells_none(self) :
+        for i in range(len(self.dfs)) :
+            self.dfs[i] = make_lengthy_cells_none(self.dfs[i])
+
+        self.drop_empty_dup_and_sub_dfs()
+
+    def make_unnamed_cells_none(self) :
+        for i in range(len(self.dfs)) :
+            self.dfs[i] = make_unnamed_cell_none(self.dfs[i])
+
+        self.drop_empty_dup_and_sub_dfs()
+
+    def make_kadr_tozihat_none(self) :
+        for i in range(len(self.dfs)) :
+            self.dfs[i] = make_kadr_tozihat_none(self.dfs[i])
+
+        self.drop_empty_dup_and_sub_dfs()
+
+    def drop_all_nan_rows_and_cols(self) :
         for i in range(len(self.dfs)) :
             self.dfs[i] = drop_all_nan_rows_and_cols(self.dfs[i])
-            self.dfs[i] = make_headers_row_and_reset_index(self.dfs[i])
+
+        self.drop_empty_dup_and_sub_dfs()
+
 
     def drop_rows_with_consc_nums(self) :
         for i in range(len(self.dfs)) :
             self.dfs[i] = drop_rows_with_with_consecutive_nums(self.dfs[i])
+        self.drop_empty_dup_and_sub_dfs()
 
-    def drop_empty_dfs(self) :
+
+    def _drop_empty_dfs(self) :
         self.dfs = [x for x in self.dfs if not x.empty]
 
-    def drop_dup_dfs(self) :
+    def _drop_dup_dfs(self) :
         self.dfs = pyoccur.remove_dup(self.dfs)
 
-    def drop_sub_dfs(self) :
+    def drop_empty_dup_and_sub_dfs(self) :
+        self._drop_empty_dfs()
+        self._drop_dup_dfs()
         if len(self.dfs) == 0 :
             return 'no_dfs'
         elif len(self.dfs) >= 2 :
             self.dfs = ddasd(self.dfs)
 
-    def save_table(self) :
+    def save_tables(self) :
         if len(self.dfs) == 1 :
             fp = dyr.tbls / (self.fp.stem + '.xlsx')
             self.dfs[0].to_excel(fp , index = False)
@@ -207,6 +236,10 @@ class MonthlyActivityReport :
 def make_headers_row_and_reset_index(df) :
     df = df.T.reset_index()
     return df.T
+
+
+def make_lengthy_cells_none(df) :
+    return df.applymap(lambda x : None if len(str(x)) >= 50 else x)
 
 
 def drop_all_nan_rows_and_cols(df) :
@@ -233,6 +266,15 @@ def drop_rows_with_with_consecutive_nums(df) :
     return df[~ ms]
 
 
+def make_unnamed_cell_none(df) :
+    return df.applymap(lambda x : None if str(x).startswith('Unnamed') else x)
+
+
+def make_kadr_tozihat_none(df) :
+    st = 'کادر توضیحات در مورد اصلاحات'
+    return df.applymap(lambda x : None if str(x).startswith(st) else x)
+
+
 def update_with_last_run_data(df , fp) :
     if fp.exists() :
         lastdf = pd.read_parquet(fp)
@@ -247,33 +289,29 @@ class RTrg :
 
 
 def trg(fp: Path) -> RTrg :
-    print(fp)
+    # print(fp)
 
     ma = MonthlyActivityReport(fp)
 
-    ma.read_html()
-    ma.parse_tree_fr_html()
-    ma.rm_hidden_els()
+    _fus = {
+            ma.read_html                  : None ,
+            ma.parse_tree_fr_html         : None ,
+            ma.rm_hidden_els              : None ,
+            ma.find_firmtype              : None ,
+            ma.tree_2_to_html             : None ,
+            ma.read_tables                : None ,
+            ma.make_lengthy_cells_none    : None ,
+            ma.make_unnamed_cells_none    : None ,
+            ma.make_kadr_tozihat_none     : None ,
+            ma.drop_all_nan_rows_and_cols : None ,
+            ma.drop_rows_with_consc_nums  : None ,
+            ma.save_tables                : None ,
+            }
 
-    o = ma.find_firmtype()
-    if o :
-        return RTrg(err = o , ft = None)
-
-    ma.tree_2_to_html()
-    o = ma.read_tables()
-    if o :
-        return RTrg(err = o , ft = None)
-
-    ma.clean_tables()
-    ma.drop_rows_with_consc_nums()
-    ma.drop_empty_dfs()
-    ma.drop_dup_dfs()
-
-    o = ma.drop_sub_dfs()
-    if o :
-        return RTrg(err = o , ft = None)
-
-    ma.save_table()
+    for fu , _ in _fus.items() :
+        o = fu()
+        if o :
+            return RTrg(o , None)
 
     return RTrg(err = None , ft = ma.ft)
 
@@ -433,9 +471,9 @@ if False :
     ma.read_tables()
 
     ##
-    ma.clean_tables()
+    ma.make_headers_and_reset_index()
     ma.drop_rows_with_consc_nums()
-    ma.drop_empty_dfs()
+    ma._drop_empty_dfs()
 
     ##
     dfs = ma.dfs

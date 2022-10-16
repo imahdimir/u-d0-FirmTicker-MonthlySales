@@ -382,11 +382,7 @@ class m :
         return self.output
 
 
-def fix_table(df) :
-    df = df.applymap(cf.wos)
-    df = df.applymap(lambda x : np.nan if len(x) >= 100 else x)
-    df = df.reset_index(drop = True)
-    return df
+
 
 def trg(trace_no , jdate) :
     try :
