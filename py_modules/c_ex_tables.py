@@ -17,6 +17,7 @@ from mirutil.string_funcs import normalize_fa_str_completely as nfsc
 from multiprocess import Pool
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from mirutil.df_utils import save_as_prq_wo_index as sprq
+from mirutil.df_utils import drop_dup_and_sub_dfs as ddasd
 from pyoccur import pyoccur
 from py_modules import b_get_htmls as prev_module
 
@@ -187,7 +188,10 @@ class MonthlyActivityReport :
         self.dfs = pyoccur.remove_dup(self.dfs)
 
     def drop_sub_dfs(self) :
-        pass
+        if len(self.dfs) == 0 :
+            return 'no_dfs'
+        elif len(self.dfs) >= 2 :
+            self.dfs = ddasd(self.dfs)
 
     def save_table(self) :
         if len(self.dfs) == 1 :
@@ -224,7 +228,7 @@ def rm_hidden_elements_of_html(tree) :
 
 def drop_rows_with_with_consecutive_nums(df) :
     nc = len(df.columns)
-    sr = pd.Series(range(nc) , dtype = 'int16')
+    sr = pd.Series(range(nc) , dtype = 'int8')
     ms = df.eq(sr).all(axis = 1)
     return df[~ ms]
 
@@ -243,6 +247,8 @@ class RTrg :
 
 
 def trg(fp: Path) -> RTrg :
+    print(fp)
+
     ma = MonthlyActivityReport(fp)
 
     ma.read_html()
@@ -261,6 +267,12 @@ def trg(fp: Path) -> RTrg :
     ma.clean_tables()
     ma.drop_rows_with_consc_nums()
     ma.drop_empty_dfs()
+    ma.drop_dup_dfs()
+
+    o = ma.drop_sub_dfs()
+    if o :
+        return RTrg(err = o , ft = None)
+
     ma.save_table()
 
     return RTrg(err = None , ft = ma.ft)
@@ -391,5 +403,41 @@ if False :
 
     ##
     df = pd.read_parquet(dfp)
+
+    ##
+    fp = Path(
+            '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/249227.html')
+    trg(fp)
+
+    ##
+
+    cls = rci(_df)
+    ##
+    for ind , ro in _df.iterrows() :
+        o = trg(ro[cn.fp])
+
+        df.loc[inds , cn.err] = o.err
+        df.loc[inds , cn.ft] = o.ft
+
+        # break
+
+    ##
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/233485.html'
+    ma = MonthlyActivityReport(fp)
+
+    ma.read_html()
+    ma.parse_tree_fr_html()
+    ma.rm_hidden_els()
+    ma.find_firmtype()
+    ma.tree_2_to_html()
+    ma.read_tables()
+
+    ##
+    ma.clean_tables()
+    ma.drop_rows_with_consc_nums()
+    ma.drop_empty_dfs()
+
+    ##
+    dfs = ma.dfs
 
     ##
