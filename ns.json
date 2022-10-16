@@ -2,5 +2,6 @@
   "CodalCol": "CodalCol",
   "CodalLetterCode": "CodalLetterCode",
   "Col": "Col",
-  "DAllCodalLetters": "DAllCodalLetters"
+  "DAllCodalLetters": "DAllCodalLetters",
+  "FirmType": "CodalMonthlySalesFirmType"
 }

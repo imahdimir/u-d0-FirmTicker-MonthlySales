@@ -2,7 +2,11 @@ class GDU :
     slf = "https://github.com/imahdimir/u-d0-FirmTicker-MonthlySales"
     tmp = "https://github.com/imahdimir/td-u-d0-FirmTicker-MonthlySales"
     src0 = "https://github.com/imahdimir/d-all-Codal-letters"
-    trg0 = "https://github.com/imahdimir/Codal-monthly-sales-htmls"
+    trg0 = "https://github.com/imahdimir/rd-Codal-monthly-sales-htmls"
+    trg1 = "https://github.com/imahdimir/rd-Codal-monthly-sales-low-size-htmls"
+    trg2 = "https://github.com/imahdimir/rd-Codal-monthly-sales-link-htmls"
+    trg3 = "https://github.com/imahdimir/rd0-Codal-monthly-sales-dled-files"
+    trg4 = "https://github.com/imahdimir/rd-Codal-monthly-sales-htmls-tables"
 
 class CodalCol :
     TracingNo = "TracingNo"
@@ -57,4 +61,12 @@ class DAllCodalLetters :
     PdfUrl = "PdfUrl"
     HasXbrl = "HasXbrl"
     XbrlUrl = "XbrlUrl"
+
+class FirmType :
+    p = "Production"
+    s = "Service"
+    b = "Bank"
+    i = "Insurance"
+    l = "Leasing"
+    r = "RealEstate"
 

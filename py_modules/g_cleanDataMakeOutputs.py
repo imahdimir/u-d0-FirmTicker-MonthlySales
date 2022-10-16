@@ -17,13 +17,14 @@ script_name = 'g'
 dirs = ns.Dirs()
 rd = ns.RawDataColumns()
 oc = ns.OutputColumns()
-ft = ns.FirmTypes()
+ft = ns.FirmType()
 fc = ns.FormalCols()
 imf = ns.VeryImportantFiles()
 cte = ns.Constants()
 
 cur_prq = dirs.raw / f"{script_name}.parquet"
 pre_prq = dirs.raw / f"{lst_script_name}.parquet"
+
 
 def main() :
     pass
@@ -98,6 +99,7 @@ def main() :
     cf.save_df_to_xl(formal_data ,
                      dirs.out_data / final_data_n ,
                      float_format = "%.3f")
+
 
 ##
 if __name__ == '__main__' :

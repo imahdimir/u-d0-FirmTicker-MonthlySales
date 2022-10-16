@@ -2,39 +2,69 @@
 
     """
 
-# from multiprocess import Pool
-import re
-from io import StringIO
-from multiprocessing import cpu_count
-from multiprocessing import Pool
+import importlib
+from dataclasses import dataclass
+from pathlib import Path
 
-import numpy as np
 import pandas as pd
-from lxml import etree
+import githubdata as gd
 
 
-parser = etree.HTMLParser()
+from py_modules import c_ex_tables as prev_module
 
-lst_script_name = 'd'
-script_name = 'e'
+importlib.reload(prev_module)
 
-dirs = ns.Dirs()
-rd = ns.RawDataColumns()
-ft = ns.FirmTypes()
-em = ns.ErrorMessages()
-cte = ns.Constants()
+import ns
 
-cur_prq = dirs.raw / f"{script_name}.parquet"
-pre_prq = dirs.raw / f"{lst_script_name}.parquet"
+from py_modules.c_ex_tables import ColName as CNc
+
+
+
+
+ft = ns.FirmType()
+
+
+@dataclass
+class ColName(CNc) :
+    blnk = 'IsBlank'
+    ft = 'FirmType'
+    err = 'ErrMsg'
+    rev_until_prev_month = 'RevUntilPrevMonth'
+    has_modi = 'HasModifications'
+    modif_val = 'ModificationValue'
+    modif_rev_until_prev_month = 'Modified' + rev_until_prev_month
+    sale_q = 'SalesQ'
+    rev = 'Revenue'
+    rev_until_cur_month = 'RevUntilCurrentMonth'
+
+
+cn = ColName()
+
+
+
+
+def main() :
+    pass
+
+    ##
+
+
+    ##
+
+##
+if __name__ == "__main__" :
+    main()
+    print(f'{Path(__file__).name} Done!')
+
+
+
+
 
 current_period = ['دوره یک ماهه منتهی به']
 sale_mil_rial = ['مبلغ فروش']
 sum_row = ['جمع' , 'Total Amount']
 modif_keys = ['اصلاحات']
-type_prod = ['تولید و فروش' , 'محصولات']
-type_serv = ['خدمات و فروش']
-type_realstate = ['Building']
-type_leasing = ['هزینه تامین منابع مالی عملیات لیزینگ محقق شده']
+
 since_start_financial_year = ['از ابتدای سال مالی']
 since_modified = ['اصلاح شده']
 sale_quant = ['تعداد فروش' , 'مقدار/تعداد فروش']
@@ -44,74 +74,49 @@ current_period_srch = [cf.wos(x) for x in current_period]
 sale_mil_srch = [cf.wos(x) for x in sale_mil_rial]
 sum_row_srch = [cf.wos(x) for x in sum_row]
 modif_srch = [cf.wos(x) for x in modif_keys]
-type_prod_srch = [cf.wos(x) for x in type_prod]
-type_serv_srch = [cf.wos(x) for x in type_serv]
 since_start_financial_year_srch = [cf.wos(x) for x in
                                    since_start_financial_year]
 since_modified_srch = [cf.wos(x) for x in since_modified]
 sale_quant_srch = [cf.wos(x) for x in sale_quant]
 since_start_finyear_serv_srch = [cf.wos(x) for x in since_start_finyear_serv]
 
-outputs = [rd.isBlank , rd.firmType , rd.errMsg , rd.revUntilLastMonth ,
-           rd.hasModification , rd.modification , rd.revUntilLastMonthModified ,
-           rd.saleQ , rd.revenue , rd.revUntilCurrnetMonth , rd.succeed]
 
-outputs_dct = cf.make_output_dict(outputs)
+class m :
+    self.jdate = int(jdate)
+    self.jmonth = jdate // 100
 
-class FirmsMonthlySale :
+    self.fixed_table = fix_table(self.df)
 
-    def __init__(self , tracingno , jdate) :
+    self.date_df = self.fixed_table.applymap(cf.find_jdate)
+    self.jmonth_df = self.date_df.applymap(lambda x : x // 100)
 
-        self.htmlpn = dirs.htmls / f'{tracingno}.html'
+    self.output = outputs_dct.copy()
 
-        with open(self.htmlpn , 'r') as f :
-            self.raw_html = f.read()
+    self.output[rd.isBlank] = self.fixed_table.empty
+    self.output[rd.firmType] = self.find_firmtype()
+    self.output[rd.hasModification] = True
 
-        self.jdate = int(jdate)
-        self.jmonth = jdate // 100
+    self.sum_row = None
+    self.sale_cols = None
+    self.cur_per_cells = None
+    self.cur_per_cols = None
+    self.modification_cols = None
+    self.since_start_cols = None
+    self.prev_month = cf.find_n_month_before(self.jmonth)
+    self.prev_month_cols = None
+    self.modified_cols = None
+    self.cur_jdate_cols = None
 
-        self.fixed_html = cf.fix_html(self.raw_html)
-        self.tree = etree.parse(StringIO(self.fixed_html) , parser)
 
-        self.table = pd.read_html(self.fixed_html)[0]
-        self.fixed_table = fix_table(self.table)
 
-        self.date_df = self.fixed_table.applymap(cf.find_jdate)
-        self.jmonth_df = self.date_df.applymap(lambda x : x // 100)
 
-        self.output = outputs_dct.copy()
 
-        self.output[rd.isBlank] = self.fixed_table.empty
-        self.output[rd.firmType] = self.find_firmtype()
-        self.output[rd.hasModification] = True
 
-        self.sum_row = None
-        self.sale_cols = None
-        self.cur_per_cells = None
-        self.cur_per_cols = None
-        self.modification_cols = None
-        self.since_start_cols = None
-        self.prev_month = cf.find_n_month_before(self.jmonth)
-        self.prev_month_cols = None
-        self.modified_cols = None
-        self.cur_jdate_cols = None
 
-    def find_firmtype(self) :
-        for elem in self.tree.xpath("//table[@id]") :
-            for el in ft.firmTypesList :
-                if el in elem.attrib["id"] :
-                    return el
-            if cf.any_of_list_isin(type_realstate , elem.attrib['id']) :
-                return ft.RealEstate
-        for elem in self.tree.xpath("//div") :
-            if elem.text :
-                if cf.any_of_list_isin(type_prod_srch , cf.wos(elem.text)) :
-                    return ft.Production
-                if cf.any_of_list_isin(type_serv_srch , cf.wos(elem.text)) :
-                    return ft.Service
-                if cf.any_of_list_isin(type_leasing , elem.text) :
-                    return ft.Leasing
-        return ft.unknown
+
+
+
+
 
     def find_current_period_cols(self) :
         cur_per_ch = self.fixed_table.applymap(lambda x : cf.any_of_list_isin(
@@ -225,7 +230,7 @@ class FirmsMonthlySale :
         sale_qs = self.fixed_table[sale_q_cur_per]
         self.output[rd.saleQ] = 0
         for el in sale_qs :
-            if re.fullmatch(r'\d*' , el) :
+            if re.fullmatch(rs'\d*' , el) :
                 self.output[rd.saleQ] += float(el)
         return self.output[rd.saleQ]
 
@@ -342,7 +347,7 @@ class FirmsMonthlySale :
         self.service_modi()
 
     def process_and_make_output(self) :
-        if not self.output[rd.firmType] in [ft.Production , ft.Service] :
+        if not self.output[rd.firmType] in [ft.p , ft.s] :
             return self.output
 
         self.find_current_period_cols()
@@ -371,24 +376,21 @@ class FirmsMonthlySale :
             self.service()
 
         self.output[rd.succeed] = False
-        if re.fullmatch(r"-?\d+\.\d*" , str(self.output[rd.revenue])) :
+        if re.fullmatch(rs"-?\d+\.\d*" , str(self.output[rd.revenue])) :
             self.output[rd.succeed] = True
 
         return self.output
 
-def fix_table(indf) :
-    indf = indf.dropna(how = "all")
-    indf = indf.dropna(how = "all" , axis = 1)
-    indf = indf.T.reset_index().T.reset_index()
-    indf = indf.applymap(cf.wos)
-    indf = indf.applymap(lambda x : np.nan if len(x) >= 100 else x)
-    indf = indf.reset_index(drop = True)
-    return indf
 
-def target(tracingno , jdate) :
-    out1 = outputs_dct.copy()
+def fix_table(df) :
+    df = df.applymap(cf.wos)
+    df = df.applymap(lambda x : np.nan if len(x) >= 100 else x)
+    df = df.reset_index(drop = True)
+    return df
+
+def trg(trace_no , jdate) :
     try :
-        rep_obj = FirmsMonthlySale(tracingno , jdate)
+        rep_obj = MonthlyActivityReport(trace_no , jdate)
         output = rep_obj.process_and_make_output()
         # print(tracingno)
         # print(output.values())
@@ -397,70 +399,17 @@ def target(tracingno , jdate) :
         # noinspection PyTypeChecker
         out1[rd.errMsg] = em.ValueError
         out1[rd.succeed] = False
-        print(tracingno)
+        print(trace_no)
         print(e)
         return list(out1.values())
 
-def main() :
-    pass
-    ##
-    df = pd.read_parquet(pre_prq)
-    print(df)
-    ##
-    df[outputs] = None
-    ##
-    for col in df.columns :
-        df[col] = df[col].astype(str)
-    ##
-    df = cf.update_with_last_data(df , cur_prq)
-    print(df)
-    ##
-    df[rd.TracingNo] = df[rd.TracingNo].astype(int)
-    df[rd.htmlDownloaded] = df[rd.TracingNo].apply(lambda x : (
-            dirs.htmls / f"{x}.html").exists())
-    ##
-    cond = df[rd.htmlDownloaded].eq(True)
-    print(cond[cond])
-    ##
-    cond &= df[rd.succeed].ne('True')
-    print(cond[cond])
-    ##
-    cond &= df[rd.isBlank].ne('True')
-    print(cond[cond])
-    ##
-    flt = df[cond]
-    print(flt)
-    ##
-    cores_n = cpu_count()
-    print(f'Num of cores : {cores_n}')
-    clusters = cf.return_clusters_indices(flt)
-    pool = Pool(cores_n)
-    ##
-    for i in range(0 , len(clusters) - 1) :
-        start_i = clusters[i]
-        end_i = clusters[i + 1]
-        print(f"{start_i} to {end_i}")
-
-        corr_is = flt.iloc[start_i :end_i].index
-
-        tracnos = df.loc[corr_is , rd.TracingNo].astype(str)
-        jdates = df.loc[corr_is , rd.jDate].astype(int)
-
-        out = pool.starmap(target , zip(tracnos , jdates))
-
-        for j , out_el in enumerate(outputs) :
-            df.loc[corr_is , out_el] = [w[j] for w in out]  # break
-    ##
-    for col in df.columns :
-        df[col] = df[col].astype(str)
-    ##
     df.to_parquet(cur_prq , index = False)
     print(df)
     ##
     cond2 = df[rd.htmlDownloaded].eq('True')
     cond2 &= df[rd.succeed].eq('False')
     # cond2 &= ~ df['FirmType'].isin([m.firmtypes['b'], m.firmtypes['i'],
-    #                                 m.firmtypes['r'], m.firmtypes['l']])
+    #                                 m.firmtypes['rs'], m.firmtypes['l']])
     cond2 &= df[rd.isBlank].ne('True')
     print(cond2[cond2])
     ##
@@ -486,10 +435,3 @@ def main() :
     ##
     df.to_parquet(cur_prq , index = False)
     print(df)
-
-##
-if __name__ == '__main__' :
-    main()
-    print(f'{script_name}.py Done!')
-else :
-    pass  ##

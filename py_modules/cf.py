@@ -9,7 +9,6 @@ from pathlib import PurePath
 import openpyxl as pyxl
 import pandas as pd
 import requests
-from Code import ns as ns
 from lxml import etree
 from persiantools import characters
 from persiantools import digits
@@ -17,7 +16,17 @@ from requests.exceptions import ConnectionError
 from unidecode import unidecode
 
 
-parser = etree.HTMLParser()
+def find_jmonth_fr_titl(df) :
+    pat = '(\d{4}/\d{2}/\d{2})'
+    cl = c.jm
+    df[cl] = df[cc.Title].str.extract(pat)
+    df[cl] = df[cl].str.replace('\D' , '')
+    df[cl] = df[cl].str[:6]
+    df[cl] = df[cl].astype(int)
+    df[cl] = df[cl].astype('string')
+    df[cl] = df[cl].str[:4] + '-' + df[cl].str[4 :6]
+    return df
+
 
 dirs = ns.Dirs()
 vif = ns.VeryImportantFiles()
@@ -40,43 +49,15 @@ def convert_pubdatetime_to_int(pubdate) :
     pubdate = pubdate.replace(":" , "")
     pubdate = pubdate.replace(" " , "")
     pubdate = unidecode(pubdate)
-    if re.match(r"\d{14}" , pubdate) :
+    if re.match(rs"\d{14}" , pubdate) :
         return int(pubdate)
     else :
         return -1
 
-def wos(inp) :
-    inp1 = str(inp)
-    inp1 = inp1.replace(' ' , '')
-    inp1 = inp1.replace('\u200c' , '')
-    inp1 = inp1.replace('\u202b' , '')
-    inp1 = inp1.replace('\n' , '')
-    inp1 = inp1.replace('\r\n' , '')
-    inp1 = inp1.replace('\t' , '')
-    inp1 = inp1.replace(',' , '')
-    inp1 = characters.ar_to_fa(inp1)
-    inp1 = digits.ar_to_fa(inp1)
-    inp1 = digits.fa_to_en(inp1)
 
-    return inp1
 
-def make_output_dict(outputskeys , default_value = None) :
-    outputs_dict = {}
-    for el in outputskeys :
-        outputs_dict[el] = default_value
-    return outputs_dict
 
-# Removes hidden rows and cols from html code to pandas can read it correctly
-def fix_html(html) :
-    tree1 = etree.parse(StringIO(html) , parser)
-    for element in tree1.xpath("//*[@hidden]") :
-        element.set("rowspan" , "0")
-        element.set("colspan" , "0")
-    for element in tree1.xpath('//*[contains(@style, "display:none")]') :
-        element.set("rowspan" , "0")
-        element.set("colspan" , "0")
-    fixedhtml = etree.tostring(tree1 , method = "html" , encoding = "unicode")
-    return fixedhtml
+
 
 def find_n_month_before(current_month , howmany = 1) :
     if howmany == 1 :
@@ -90,12 +71,6 @@ def find_n_month_before(current_month , howmany = 1) :
     return find_n_month_before(find_n_month_before(current_month , 1) ,
                                howmany - 1)
 
-def any_of_list_isin(srchlist: list , inp) :
-    inp = str(inp)
-    for el1 in srchlist :
-        if el1 in inp :
-            return True
-    return False
 
 def find_all_locs_eq_val(dfobj: pd.DataFrame , value) :
     return dfobj[dfobj.eq(value)].stack().index.values.tolist()
@@ -110,11 +85,7 @@ def read_accvalue_from_str(string) :
     else :
         return float(string1)
 
-def update_with_last_data(indf , lastprqpn) :
-    if lastprqpn.exists() :
-        lastdf = pd.read_parquet(lastprqpn)
-        indf.update(lastdf)
-    return indf
+
 
 def copytree(src , dst , symlinks = False , ignore = None) :
     for item in os.listdir(src) :
@@ -127,7 +98,7 @@ def copytree(src , dst , symlinks = False , ignore = None) :
 
 def load_whole_sample() :
     """return latest whole sample"""
-    with open(vif.lastData , 'r') as f :
+    with open(vif.lastData , 'rs') as f :
         xln = f.read()
 
     xl_pn = dirs.out_data / xln

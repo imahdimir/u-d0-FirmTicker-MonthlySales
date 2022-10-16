@@ -9,11 +9,12 @@ script_name = 'f'
 
 dirs = ns.Dirs()
 rd = ns.RawDataColumns()
-ft = ns.FirmTypes()
+ft = ns.FirmType()
 cte = ns.Constants()
 
 cur_prq = dirs.raw / f"{script_name}.parquet"
 pre_prq = dirs.raw / f"{lst_script}.parquet"
+
 
 def main() :
     pass
@@ -139,6 +140,7 @@ def main() :
     df = df.applymap(str)
     df.to_parquet(cur_prq , index = False)
     print(df)
+
 
 ##
 if __name__ == "__main__" :
