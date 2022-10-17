@@ -7,18 +7,18 @@ from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
 
-import pandas as pd
 import githubdata as gd
-
-from lxml import etree
-from mirutil.utils import ret_clusters_indices as rci
-from mirutil.utils import contains_any_of_list as caol
-from mirutil.string_funcs import normalize_fa_str_completely as nfsc
-from multiprocess import Pool
+import pandas as pd
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
-from mirutil.df_utils import save_as_prq_wo_index as sprq
+from lxml import etree
 from mirutil.df_utils import drop_dup_and_sub_dfs as ddasd
+from mirutil.df_utils import save_as_prq_wo_index as sprq
+from mirutil.string_funcs import normalize_fa_str_completely as nfsc
+from mirutil.utils import contains_any_of_list as caol
+from mirutil.utils import ret_clusters_indices as rci
+from multiprocess import Pool
 from pyoccur import pyoccur
+
 from py_modules import b_get_htmls as prev_module
 
 
@@ -28,7 +28,7 @@ import ns
 from py_modules.b_get_htmls import ProjDirs as PDb
 from py_modules.b_get_htmls import ColName as CNb
 from py_modules.a_add_new_letters import gu
-from py_modules.a_add_new_letters import cc , dac
+from py_modules.a_add_new_letters import cc
 
 
 ft = ns.FirmType()
@@ -109,7 +109,7 @@ cn = ColName()
 class MonthlyActivityReport :
 
     def __init__(self , fp: Path) :
-        self.fp = fp
+        self.fp = Path(fp)
 
     def read_html(self) :
         with open(self.fp , 'r') as f :
@@ -166,9 +166,7 @@ class MonthlyActivityReport :
 
     def read_tables(self) :
         try :
-            self.dfs = pd.read_html(self.html)
-            self.make_headers_and_reset_index()
-            self.drop_empty_dup_and_sub_dfs()
+            self.dfs = pd.read_html(self.html , header = None)
         except ValueError as e :
             print(e)
             return 'no_table'
@@ -181,32 +179,34 @@ class MonthlyActivityReport :
         for i in range(len(self.dfs)) :
             self.dfs[i] = make_lengthy_cells_none(self.dfs[i])
 
-        self.drop_empty_dup_and_sub_dfs()
-
     def make_unnamed_cells_none(self) :
         for i in range(len(self.dfs)) :
             self.dfs[i] = make_unnamed_cell_none(self.dfs[i])
 
-        self.drop_empty_dup_and_sub_dfs()
 
     def make_kadr_tozihat_none(self) :
         for i in range(len(self.dfs)) :
             self.dfs[i] = make_kadr_tozihat_none(self.dfs[i])
 
-        self.drop_empty_dup_and_sub_dfs()
+    def make_not_having_str_digits_cells_none(self) :
+        for i in range(len(self.dfs)) :
+            self.dfs[i] = make_not_having_str_digits_cells_none(self.dfs[i])
+
+    def drop_single_valued_rows_and_cols(self) :
+        for i in range(len(self.dfs)) :
+            self.dfs[i] = drop_single_valued_rows_and_cols(self.dfs[i])
+
 
     def drop_all_nan_rows_and_cols(self) :
         for i in range(len(self.dfs)) :
             self.dfs[i] = drop_all_nan_rows_and_cols(self.dfs[i])
 
-        self.drop_empty_dup_and_sub_dfs()
-
-
     def drop_rows_with_consc_nums(self) :
         for i in range(len(self.dfs)) :
             self.dfs[i] = drop_rows_with_with_consecutive_nums(self.dfs[i])
-        self.drop_empty_dup_and_sub_dfs()
 
+    def drop_single_line_dfs(self) :
+        self.dfs = [x for x in self.dfs if len(x) > 1]
 
     def _drop_empty_dfs(self) :
         self.dfs = [x for x in self.dfs if not x.empty]
@@ -242,6 +242,16 @@ def make_lengthy_cells_none(df) :
     return df.applymap(lambda x : None if len(str(x)) >= 50 else x)
 
 
+def drop_single_valued_rows_and_cols(df) :
+    s = df.nunique(axis = 0)
+    df = df.drop(columns = s[s <= 1].index)
+
+    s = df.nunique(axis = 1)
+    df = df.drop(index = s[s <= 1].index)
+
+    return df
+
+
 def drop_all_nan_rows_and_cols(df) :
     df = df.dropna(how = "all")
     return df.dropna(how = "all" , axis = 1)
@@ -253,6 +263,10 @@ def rm_hidden_elements_of_html(tree) :
         el.set("colspan" , "0")
 
     for el in tree.xpath('//*[contains(@style, "display:none")]') :
+        el.set("rowspan" , "0")
+        el.set("colspan" , "0")
+
+    for el in tree.xpath('//*[@class="non-visible-first"]') :
         el.set("rowspan" , "0")
         el.set("colspan" , "0")
 
@@ -275,6 +289,18 @@ def make_kadr_tozihat_none(df) :
     return df.applymap(lambda x : None if str(x).startswith(st) else x)
 
 
+def make_not_having_str_digits_cells_none(df) :
+    pat = r'[\w\d]+'
+    for col in df.columns :
+        ms = df[col].astype(str).str.contains(pat)
+        df.loc[~ ms , col] = None
+    return df
+
+
+def fix_specific_cells_for_insurances(df) :
+    pats = {r'1\.'}
+
+
 def update_with_last_run_data(df , fp) :
     if fp.exists() :
         lastdf = pd.read_parquet(fp)
@@ -291,29 +317,61 @@ class RTrg :
 def trg(fp: Path) -> RTrg :
     # print(fp)
 
-    ma = MonthlyActivityReport(fp)
+    m = MonthlyActivityReport(fp)
 
     _fus = {
-            ma.read_html                  : None ,
-            ma.parse_tree_fr_html         : None ,
-            ma.rm_hidden_els              : None ,
-            ma.find_firmtype              : None ,
-            ma.tree_2_to_html             : None ,
-            ma.read_tables                : None ,
-            ma.make_lengthy_cells_none    : None ,
-            ma.make_unnamed_cells_none    : None ,
-            ma.make_kadr_tozihat_none     : None ,
-            ma.drop_all_nan_rows_and_cols : None ,
-            ma.drop_rows_with_consc_nums  : None ,
-            ma.save_tables                : None ,
+            0   : m.read_html ,
+            1   : m.parse_tree_fr_html ,
+            2   : m.rm_hidden_els ,
+            3   : m.find_firmtype ,
+            4   : m.tree_2_to_html ,
+
+            41  : m.read_tables ,
+
+            5   : m.make_headers_and_reset_index ,
+            51  : m.drop_empty_dup_and_sub_dfs ,
+
+            53  : m.drop_all_nan_rows_and_cols ,
+            54  : m.drop_empty_dup_and_sub_dfs ,
+
+            6   : m.make_lengthy_cells_none ,
+            7   : m.drop_all_nan_rows_and_cols ,
+            71  : m.drop_empty_dup_and_sub_dfs ,
+
+            8   : m.make_unnamed_cells_none ,
+            81  : m.drop_all_nan_rows_and_cols ,
+            82  : m.drop_empty_dup_and_sub_dfs ,
+
+            9   : m.make_kadr_tozihat_none ,
+            91  : m.drop_all_nan_rows_and_cols ,
+            92  : m.drop_empty_dup_and_sub_dfs ,
+
+            10  : m.make_not_having_str_digits_cells_none ,
+            101 : m.drop_all_nan_rows_and_cols ,
+            102 : m.drop_empty_dup_and_sub_dfs ,
+
+            11  : m.drop_rows_with_consc_nums ,
+            111 : m.drop_all_nan_rows_and_cols ,
+            112 : m.drop_empty_dup_and_sub_dfs ,
+
+            12  : m.drop_single_valued_rows_and_cols ,
+            121 : m.drop_all_nan_rows_and_cols ,
+            122 : m.drop_empty_dup_and_sub_dfs ,
+
+            131 : m.drop_all_nan_rows_and_cols ,
+            132 : m.drop_empty_dup_and_sub_dfs ,
+
+            14  : m.drop_single_line_dfs ,
+
+            15  : m.save_tables ,
             }
 
-    for fu , _ in _fus.items() :
+    for _ , fu in _fus.items() :
         o = fu()
         if o :
             return RTrg(o , None)
 
-    return RTrg(err = None , ft = ma.ft)
+    return RTrg(err = None , ft = m.ft)
 
 
 def main() :
@@ -342,6 +400,33 @@ def main() :
     df[cn.fp] = df[cn.fp].apply(lambda x : x.with_suffix('.html'))
     df[cn.he] = df[cn.fp].apply(lambda x : x.exists())
     print(len(df[df[cn.he]]))
+
+    ##
+    fps = dyr.tbls.glob('*.xlsx')
+    fps = list(fps)
+
+    fps = [x for x in fps if '-' in x.stem]
+    ##
+    _ = [x.unlink() for x in fps]
+    fps = [x.stem.split('-')[0] for x in fps]
+
+    ##
+    msk = df[cc.TracingNo].isin(fps)
+    print(len(msk[msk]))
+
+    df.loc[msk , cn.ft] = None
+
+    ##
+    fps = dyr.tbls.glob('*.xlsx')
+    fps = list(fps)
+    fps = [x.stem for x in fps]
+
+    ##
+    msk = ~ df[cc.TracingNo].isin(fps)
+    print(len(msk[msk]))
+
+    df.loc[msk , cn.ft] = None
+
     ##
 
     di = dyr.tbls
@@ -392,7 +477,6 @@ def main() :
     gdt.commit_and_push(msg)
 
     ##
-
     puffd(dyr.tbls , '.xlsx' , gu.trg4)
 
     ##
@@ -477,5 +561,47 @@ if False :
 
     ##
     dfs = ma.dfs
+
+    ##
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/Tables/696319-0.xlsx'
+    df = pd.read_excel(fp)
+
+    ##
+    x = df.nunique(axis = 0)
+    x[x == 3]
+    df.drop(columns = x[x == 3].index)
+
+    ##
+    fps = dyr.tbls.glob('*.xlsx')
+    fps = list(fps)
+
+    ##
+    fps1 = [x for x in fps if '-' in x.stem]
+
+    ##
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/Tables/436292-1.xlsx'
+    df = pd.read_excel(fp)
+
+    ##
+    df1 = drop_all_nan_rows_and_cols(df)
+
+    ##
+    import re
+
+
+    x = 'سلام'
+    l = re.match(r'[\w\d]+' , x)
+
+    ##
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/739521.html'
+    trg(fp)
+
+    ##
+    with open(fp , 'r') as f :
+        rh = f.read()
+    df1 = pd.read_html(rh , header = 0)[1]
+
+    ##
+    df1.columns
 
     ##
