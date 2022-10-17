@@ -6,6 +6,7 @@ import importlib
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
+from functools import partial
 
 import githubdata as gd
 import pandas as pd
@@ -34,7 +35,8 @@ ft = ns.FirmType()
 
 
 class ProjDirs(PDb) :
-    tbls = Path('Tables')
+    tblpd = Path('tbl-pd')
+    tblhtp = Path('tbl-htp')
 
 
 dyr = ProjDirs()
@@ -43,6 +45,7 @@ dyr = ProjDirs()
 class ColName(CNb) :
     he = 'HtmlExists'
     err = 'err'
+    errh = 'errhtp'
 
 
 cn = ColName()
@@ -59,164 +62,40 @@ class MonthlyActivityReport :
             self._raw_html = f.read()
 
 
-    def parse_tree_fr_html(self) :
-        _parser = etree.HTMLParser()
-        self.tree_0 = etree.parse(StringIO(self._raw_html) , _parser)
-
-
-    def rm_hidden_els(self) :
-        self.tree_1 = rm_hidden_elements_of_html(self.tree_0)
-
-
-    def tree_2_to_html(self) :
-        _fu = etree.tostring
-
-        _t = self.tree_1
-        _e = 'unicode'
-        _m = 'html'
-
-        self.html = _fu(_t , pretty_print = True , encoding = _e , method = _m)
-
-
-    def read_tables_by_pd(self) :
-        try :
-            self.dfs = pd.read_html(self.html)
-        except ValueError as e :
-            print(e)
-            return 'no_table'
-
-
-    def read_tables_by_html_table_parser(self):
+    def read_tables_by_html_table_parser(self) :
         p = HTMLTableParser()
-        p.feed(self.html)
+        p.feed(self._raw_html)
         self.dfs = [pd.DataFrame(x) for x in p.tables]
+        self.df = pd.concat(self.dfs)
 
 
-    def _apply_fu_on_self_dfs(self , fu) :
-        self.dfs = [fu(df) for df in self.dfs]
-
-
-    def make_headers_and_reset_index(self) :
-        _fu = make_headers_row_and_reset_index
-        self._apply_fu_on_self_dfs(_fu)
-
-
-    def make_lengthy_cells_none(self) :
-        _fu = make_lengthy_cells_none
-        self._apply_fu_on_self_dfs(_fu)
-
-
-    def make_unnamed_cells_none(self) :
-        _fu = make_unnamed_cell_none
-        self._apply_fu_on_self_dfs(_fu)
+    def _apply_on_df(self , fu) :
+        self.df = fu(self.df)
 
 
     def make_kadr_tozihat_none(self) :
         _fu = make_kadr_tozihat_none
-        self._apply_fu_on_self_dfs(_fu)
+        self._apply_on_df(_fu)
 
 
     def make_not_having_str_digits_cells_none(self) :
         _fu = make_not_having_str_digits_cells_none
-        self._apply_fu_on_self_dfs(_fu)
-
-
-    def drop_single_valued_rows_and_cols(self) :
-        _fu = drop_single_valued_rows_and_cols
-        self._apply_fu_on_self_dfs(_fu)
+        self._apply_on_df(_fu)
 
 
     def drop_all_nan_rows_and_cols(self) :
         _fu = drop_all_nan_rows_and_cols
-        self._apply_fu_on_self_dfs(_fu)
+        self._apply_on_df(_fu)
 
 
-    def drop_rows_with_consc_nums(self) :
-        _fu = drop_rows_with_with_consecutive_nums
-        self._apply_fu_on_self_dfs(_fu)
-
-
-    def drop_single_line_dfs(self) :
-        self.dfs = [x for x in self.dfs if len(x) > 1]
-
-
-    def _drop_empty_dfs(self) :
-        self.dfs = [x for x in self.dfs if not x.empty]
-
-
-    def _drop_dup_dfs(self) :
-        self.dfs = pyoccur.remove_dup(self.dfs)
-
-
-    def drop_empty_dup_and_sub_dfs(self) :
-        self._drop_empty_dfs()
-        self._drop_dup_dfs()
-        if len(self.dfs) == 0 :
-            return 'no_dfs'
-        elif len(self.dfs) >= 2 :
-            self.dfs = ddasd(self.dfs)
-
-
-    def save_tables(self) :
-        if len(self.dfs) == 1 :
-            fp = dyr.tbls / (self.fp.stem + '.xlsx')
-            self.dfs[0].to_excel(fp , index = False)
-
-        else :
-            for i in range(len(self.dfs)) :
-                fp = dyr.tbls / (self.fp.stem + f'-{i}.xlsx')
-                self.dfs[i].to_excel(fp , index = False)
-
-
-def make_headers_row_and_reset_index(df) :
-    df = df.T.reset_index()
-    return df.T
-
-
-def make_lengthy_cells_none(df) :
-    return df.applymap(lambda x : None if len(str(x)) >= 50 else x)
-
-
-def drop_single_valued_rows_and_cols(df) :
-    s = df.nunique(axis = 0)
-    df = df.drop(columns = s[s <= 1].index)
-
-    s = df.nunique(axis = 1)
-    df = df.drop(index = s[s <= 1].index)
-
-    return df
+    def save_table(self) :
+        fp = dyr.tblhtp / (self.fp.stem + '.xlsx')
+        self.df.to_excel(fp , index = False)
 
 
 def drop_all_nan_rows_and_cols(df) :
     df = df.dropna(how = "all")
     return df.dropna(how = "all" , axis = 1)
-
-
-def rm_hidden_elements_of_html(tree) :
-    for el in tree.xpath("//*[@hidden]") :
-        el.set("rowspan" , "0")
-        el.set("colspan" , "0")
-
-    for el in tree.xpath('//*[contains(@style, "display:none")]') :
-        el.set("rowspan" , "0")
-        el.set("colspan" , "0")
-
-    for el in tree.xpath('//*[@class="non-visible-first"]') :
-        el.set("rowspan" , "0")
-        el.set("colspan" , "0")
-
-    return tree
-
-
-def drop_rows_with_with_consecutive_nums(df) :
-    nc = len(df.columns)
-    sr = pd.Series(range(nc) , dtype = 'int8')
-    ms = df.eq(sr).all(axis = 1)
-    return df[~ ms]
-
-
-def make_unnamed_cell_none(df) :
-    return df.applymap(lambda x : None if str(x).startswith('Unnamed') else x)
 
 
 def make_kadr_tozihat_none(df) :
@@ -239,48 +118,20 @@ def update_with_last_run_data(df , fp) :
     return df
 
 
-def trg(fp: Path) -> (str , None) :
+def trg_htp(fp: Path) -> (str , None) :
 
     m = MonthlyActivityReport(fp)
 
     _fus = {
-            0   : m.read_html ,
-            1   : m.parse_tree_fr_html ,
-            2   : m.rm_hidden_els ,
-            4   : m.tree_2_to_html ,
+            0 : m.read_html ,
 
-            41  : m.read_tables_by_pd ,
+            1 : m.read_tables_by_html_table_parser ,
 
-            5   : m.make_headers_and_reset_index ,
-            51  : m.drop_empty_dup_and_sub_dfs ,
-
-            6   : m.make_lengthy_cells_none ,
-            71  : m.drop_empty_dup_and_sub_dfs ,
-
-            8   : m.make_unnamed_cells_none ,
-            82  : m.drop_empty_dup_and_sub_dfs ,
-
-            9   : m.make_kadr_tozihat_none ,
-            92  : m.drop_empty_dup_and_sub_dfs ,
-
-            10  : m.make_not_having_str_digits_cells_none ,
-            102 : m.drop_empty_dup_and_sub_dfs ,
-
-            103 : m.drop_all_nan_rows_and_cols ,
-            104 : m.drop_empty_dup_and_sub_dfs ,
-
-            11  : m.drop_rows_with_consc_nums ,
-            111 : m.drop_all_nan_rows_and_cols ,
-            112 : m.drop_empty_dup_and_sub_dfs ,
-
-            12  : m.drop_single_valued_rows_and_cols ,
-            121 : m.drop_all_nan_rows_and_cols ,
-            122 : m.drop_empty_dup_and_sub_dfs ,
-
-            131 : m.drop_all_nan_rows_and_cols ,
-            132 : m.drop_empty_dup_and_sub_dfs ,
-
-            15  : m.save_tables ,
+            2 : m.drop_all_nan_rows_and_cols ,
+            3 : m.make_kadr_tozihat_none ,
+            4 : m.make_not_having_str_digits_cells_none ,
+            6 : m.drop_all_nan_rows_and_cols ,
+            7 : m.save_table ,
             }
 
     for _ , fu in _fus.items() :
@@ -304,7 +155,8 @@ def main() :
     ##
     df = db.copy()
 
-    df[cn.err] = None
+    df[cn.errh] = None
+
     df = update_with_last_run_data(df , dfp)
     del db
 
@@ -315,16 +167,7 @@ def main() :
     print(len(df[df[cn.he]]))
 
     ##
-    fps = dyr.tbls.glob('*.xlsx')
-    fps = list(fps)
-
-    fps = [x for x in fps if '-' in x.stem]
-    ##
-    _ = [x.unlink() for x in fps]
-    fps = [x.stem.split('-')[0] for x in fps]
-
-    ##
-    fps = dyr.tbls.glob('*.xlsx')
+    fps = dyr.tblhtp.glob('*.xlsx')
     fps = list(fps)
 
     fps = [x.stem for x in fps]
@@ -336,7 +179,7 @@ def main() :
     _df = df[msk]
     print(len(_df))
     ##
-    di = dyr.tbls
+    di = dyr.tblhtp
     if not di.exists() :
         di.mkdir()
 
@@ -355,18 +198,14 @@ def main() :
 
             _fps = df.loc[inds , cn.fp]
 
-            _o = pool.map(trg , _fps)
+            _o = pool.map(trg_htp , _fps)
 
-            df.loc[inds , cn.err] = _o
+            df.loc[inds , cn.errh] = _o
 
         except KeyboardInterrupt :
             break
 
         # break
-
-    ##
-    msk = df[cn.err].notna()
-    print(len(df[msk]))
 
     ##
     c2d = {
@@ -382,7 +221,7 @@ def main() :
     gdt.commit_and_push(msg)
 
     ##
-    puffd(dyr.tbls , '.xlsx' , gu.trg4)
+    puffd(dyr.tblpd , '.xlsx' , gu.trg4)
 
     ##
 
@@ -477,7 +316,7 @@ if False :
     df.drop(columns = x[x == 3].index)
 
     ##
-    fps = dyr.tbls.glob('*.xlsx')
+    fps = dyr.tblpd.glob('*.xlsx')
     fps = list(fps)
     _ = [x.unlink() for x in fps]
 
@@ -514,7 +353,7 @@ if False :
     df1.columns
 
     ##
-    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/918679.html'
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/232760.html'
     with open(fp , 'r') as f :
         rh = f.read()
 
@@ -526,8 +365,9 @@ if False :
     p = HTMLTableParser()
     p.feed(rh)
     pprint(p.tables)
+    l1 = p.tables
 
     ##
-    df = pd.DataFrame(p.tables[])
+    df = pd.DataFrame(p.tables[0])
 
     ##
