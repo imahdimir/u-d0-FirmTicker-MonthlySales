@@ -107,10 +107,22 @@ class m :
     self.modified_cols = None
     self.cur_jdate_cols = None
 
+    from mirutil.string_funcs import normalize_fa_str_completely as nfsc
+    from mirutil.utils import contains_any_of_list as caol
+    def wos(st: str) -> str :
+        os = nfsc(st)
 
+        _2rep = {
+                '\n'   : None ,
+                '\t'   : None ,
+                '\r\n' : None ,
+                ','    : None ,
+                ' '    : None
+                }
+        for k in _2rep.keys() :
+            os = os.replace(k , '')
 
-
-
+        return os
 
 
 

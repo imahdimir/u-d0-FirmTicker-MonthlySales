@@ -13,8 +13,7 @@ from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puff
 from lxml import etree
 from mirutil.df_utils import drop_dup_and_sub_dfs as ddasd
 from mirutil.df_utils import save_as_prq_wo_index as sprq
-from mirutil.string_funcs import normalize_fa_str_completely as nfsc
-from mirutil.utils import contains_any_of_list as caol
+
 from mirutil.utils import ret_clusters_indices as rci
 from multiprocess import Pool
 from pyoccur import pyoccur
@@ -34,68 +33,6 @@ from py_modules.a_add_new_letters import cc
 ft = ns.FirmType()
 
 
-def wos(st: str) -> str :
-    os = nfsc(st)
-
-    _2rep = {
-            '\n'   : None ,
-            '\t'   : None ,
-            '\r\n' : None ,
-            ','    : None ,
-            ' '    : None
-            }
-    for k in _2rep.keys() :
-        os = os.replace(k , '')
-
-    return os
-
-
-@dataclass
-class TypeFinder :
-    types_dct = {
-            ft.p : None ,
-            ft.s : None ,
-            ft.b : None ,
-            ft.i : None ,
-            ft.l : None ,
-            ft.r : None ,
-            }
-    type_list = list(types_dct.keys())
-
-    typ_r = ['Building']
-
-    tp = {
-            'تولید و فروش'                : None ,
-            'محصولات'                     : None ,
-            "فرم درآمدهای عملیاتی ماهانه" : None ,
-            }
-    tps = [wos(x) for x in tp.keys()]
-
-    ts = {
-            'خدمات و فروش' : None
-            }
-    tss = [wos(x) for x in ts]
-
-    tl = {
-            'هزینه تامین منابع مالی عملیات لیزینگ محقق شده' : None
-            }
-    tls = [wos(x) for x in tl]
-
-    tb = {
-            "وضعیت تسهیلات اعطایی" : None ,
-            }
-    tbs = [wos(x) for x in tb]
-
-    tr = {
-            'پروژه های واگذار شده'      : None ,
-            'آمار وضعیت تکمیل پروژه ها' : None ,
-            }
-    trs = [wos(x) for x in tr]
-
-
-tf = TypeFinder()
-
-
 class ProjDirs(PDb) :
     tbls = Path('Tables')
 
@@ -106,7 +43,6 @@ dyr = ProjDirs()
 class ColName(CNb) :
     he = 'HtmlExists'
     err = 'err'
-    ft = 'FirmType'
 
 
 cn = ColName()
@@ -117,112 +53,100 @@ class MonthlyActivityReport :
     def __init__(self , fp: Path) :
         self.fp = Path(fp)
 
+
     def read_html(self) :
         with open(self.fp , 'r') as f :
             self._raw_html = f.read()
+
 
     def parse_tree_fr_html(self) :
         _parser = etree.HTMLParser()
         self.tree_0 = etree.parse(StringIO(self._raw_html) , _parser)
 
+
     def rm_hidden_els(self) :
         self.tree_1 = rm_hidden_elements_of_html(self.tree_0)
 
-    def find_firmtype(self) :
-        for elm in self.tree_1.xpath("//table[@id]") :
-            for el in tf.type_list :
-                if el in elm.attrib["id"] :
-                    self.ft = el
-                    return
-
-            if caol(elm.attrib['id'] , tf.typ_r) :
-                self.ft = ft.r
-                return
-
-        for el in self.tree_1.xpath("//div") :
-
-            if el.text :
-
-                if caol(wos(el.text) , tf.tps) :
-                    self.ft = ft.p
-                    return
-
-                elif caol(wos(el.text) , tf.tss) :
-                    self.ft = ft.s
-                    return
-
-                elif caol(el.text , tf.tls) :
-                    self.ft = ft.l
-                    return
-
-                elif caol(el.text , tf.tbs) :
-                    self.ft = ft.b
-                    return
-
-                elif caol(el.text , tf.trs) :
-                    self.ft = ft.r
-                    return
-
-        return 'no_firmtype'
 
     def tree_2_to_html(self) :
-        fu = etree.tostring
+        _fu = etree.tostring
 
         _t = self.tree_1
         _e = 'unicode'
         _m = 'html'
 
-        self.html = fu(_t , pretty_print = True , encoding = _e , method = _m)
+        self.html = _fu(_t , pretty_print = True , encoding = _e , method = _m)
 
-    def read_tables(self) :
+
+    def read_tables_by_pd(self) :
         try :
             self.dfs = pd.read_html(self.html)
         except ValueError as e :
             print(e)
             return 'no_table'
 
+
+    def read_tables_by_html_table_parser(self):
+        p = HTMLTableParser()
+        p.feed(self.html)
+        self.dfs = [pd.DataFrame(x) for x in p.tables]
+
+
+    def _apply_fu_on_self_dfs(self , fu) :
+        self.dfs = [fu(df) for df in self.dfs]
+
+
     def make_headers_and_reset_index(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = make_headers_row_and_reset_index(self.dfs[i])
+        _fu = make_headers_row_and_reset_index
+        self._apply_fu_on_self_dfs(_fu)
+
 
     def make_lengthy_cells_none(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = make_lengthy_cells_none(self.dfs[i])
+        _fu = make_lengthy_cells_none
+        self._apply_fu_on_self_dfs(_fu)
+
 
     def make_unnamed_cells_none(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = make_unnamed_cell_none(self.dfs[i])
+        _fu = make_unnamed_cell_none
+        self._apply_fu_on_self_dfs(_fu)
 
 
     def make_kadr_tozihat_none(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = make_kadr_tozihat_none(self.dfs[i])
+        _fu = make_kadr_tozihat_none
+        self._apply_fu_on_self_dfs(_fu)
+
 
     def make_not_having_str_digits_cells_none(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = make_not_having_str_digits_cells_none(self.dfs[i])
+        _fu = make_not_having_str_digits_cells_none
+        self._apply_fu_on_self_dfs(_fu)
+
 
     def drop_single_valued_rows_and_cols(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = drop_single_valued_rows_and_cols(self.dfs[i])
+        _fu = drop_single_valued_rows_and_cols
+        self._apply_fu_on_self_dfs(_fu)
 
 
     def drop_all_nan_rows_and_cols(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = drop_all_nan_rows_and_cols(self.dfs[i])
+        _fu = drop_all_nan_rows_and_cols
+        self._apply_fu_on_self_dfs(_fu)
+
 
     def drop_rows_with_consc_nums(self) :
-        for i in range(len(self.dfs)) :
-            self.dfs[i] = drop_rows_with_with_consecutive_nums(self.dfs[i])
+        _fu = drop_rows_with_with_consecutive_nums
+        self._apply_fu_on_self_dfs(_fu)
+
 
     def drop_single_line_dfs(self) :
         self.dfs = [x for x in self.dfs if len(x) > 1]
 
+
     def _drop_empty_dfs(self) :
         self.dfs = [x for x in self.dfs if not x.empty]
 
+
     def _drop_dup_dfs(self) :
         self.dfs = pyoccur.remove_dup(self.dfs)
+
 
     def drop_empty_dup_and_sub_dfs(self) :
         self._drop_empty_dfs()
@@ -231,6 +155,7 @@ class MonthlyActivityReport :
             return 'no_dfs'
         elif len(self.dfs) >= 2 :
             self.dfs = ddasd(self.dfs)
+
 
     def save_tables(self) :
         if len(self.dfs) == 1 :
@@ -314,14 +239,7 @@ def update_with_last_run_data(df , fp) :
     return df
 
 
-@dataclass
-class RTrg :
-    err: (str , None)
-    ft: (str , None)
-
-
-def trg(fp: Path) -> RTrg :
-    # print(fp)
+def trg(fp: Path) -> (str , None) :
 
     m = MonthlyActivityReport(fp)
 
@@ -329,32 +247,27 @@ def trg(fp: Path) -> RTrg :
             0   : m.read_html ,
             1   : m.parse_tree_fr_html ,
             2   : m.rm_hidden_els ,
-            3   : m.find_firmtype ,
             4   : m.tree_2_to_html ,
 
-            41  : m.read_tables ,
+            41  : m.read_tables_by_pd ,
 
             5   : m.make_headers_and_reset_index ,
             51  : m.drop_empty_dup_and_sub_dfs ,
 
-            53  : m.drop_all_nan_rows_and_cols ,
-            54  : m.drop_empty_dup_and_sub_dfs ,
-
             6   : m.make_lengthy_cells_none ,
-            7   : m.drop_all_nan_rows_and_cols ,
             71  : m.drop_empty_dup_and_sub_dfs ,
 
             8   : m.make_unnamed_cells_none ,
-            81  : m.drop_all_nan_rows_and_cols ,
             82  : m.drop_empty_dup_and_sub_dfs ,
 
             9   : m.make_kadr_tozihat_none ,
-            91  : m.drop_all_nan_rows_and_cols ,
             92  : m.drop_empty_dup_and_sub_dfs ,
 
             10  : m.make_not_having_str_digits_cells_none ,
-            101 : m.drop_all_nan_rows_and_cols ,
             102 : m.drop_empty_dup_and_sub_dfs ,
+
+            103 : m.drop_all_nan_rows_and_cols ,
+            104 : m.drop_empty_dup_and_sub_dfs ,
 
             11  : m.drop_rows_with_consc_nums ,
             111 : m.drop_all_nan_rows_and_cols ,
@@ -367,17 +280,13 @@ def trg(fp: Path) -> RTrg :
             131 : m.drop_all_nan_rows_and_cols ,
             132 : m.drop_empty_dup_and_sub_dfs ,
 
-            14  : m.drop_single_line_dfs ,
-
             15  : m.save_tables ,
             }
 
     for _ , fu in _fus.items() :
         o = fu()
         if o :
-            return RTrg(o , None)
-
-    return RTrg(err = None , ft = m.ft)
+            return o
 
 
 def main() :
@@ -396,8 +305,6 @@ def main() :
     df = db.copy()
 
     df[cn.err] = None
-    df[cn.ft] = None
-    ##
     df = update_with_last_run_data(df , dfp)
     del db
 
@@ -412,39 +319,27 @@ def main() :
     fps = list(fps)
 
     fps = [x for x in fps if '-' in x.stem]
-
     ##
     _ = [x.unlink() for x in fps]
     fps = [x.stem.split('-')[0] for x in fps]
 
     ##
-    msk = df[cc.TracingNo].isin(fps)
-    print(len(msk[msk]))
-
-    df.loc[msk , cn.ft] = None
-
-    ##
     fps = dyr.tbls.glob('*.xlsx')
     fps = list(fps)
+
     fps = [x.stem for x in fps]
 
-    ##
     msk = ~ df[cc.TracingNo].isin(fps)
-    print(len(msk[msk]))
-
-    df.loc[msk , cn.ft] = None
-
     ##
+    msk &= df[cn.he]
 
+    _df = df[msk]
+    print(len(_df))
+    ##
     di = dyr.tbls
     if not di.exists() :
         di.mkdir()
 
-    ##
-    msk = df[cn.he]
-    msk &= df[cn.ft].isna()
-
-    _df = df[msk]
     ##
     n_jobs = 30
     pool = Pool(n_jobs)
@@ -460,10 +355,9 @@ def main() :
 
             _fps = df.loc[inds , cn.fp]
 
-            _ou = pool.map(trg , _fps)
+            _o = pool.map(trg , _fps)
 
-            df.loc[inds , cn.err] = [x.err for x in _ou]
-            df.loc[inds , cn.ft] = [x.ft for x in _ou]
+            df.loc[inds , cn.err] = _o
 
         except KeyboardInterrupt :
             break
@@ -563,7 +457,7 @@ if False :
     ma.rm_hidden_els()
     ma.find_firmtype()
     ma.tree_2_to_html()
-    ma.read_tables()
+    ma.read_tables_by_pd()
 
     ##
     ma.make_headers_and_reset_index()
@@ -605,7 +499,7 @@ if False :
     l = re.match(r'[\w\d]+' , x)
 
     ##
-    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/739521.html'
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/342744.html'
     trg(fp)
 
     ##
@@ -614,9 +508,26 @@ if False :
 
     with open(fp , 'r') as f :
         rh = f.read()
-    df1 = pd.read_html(rh , header = 0)[1]
+    ls = pd.read_html(rh)[7]
 
     ##
     df1.columns
+
+    ##
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/sales-htmls/918679.html'
+    with open(fp , 'r') as f :
+        rh = f.read()
+
+    from pprint import pprint
+
+    from html_table_parser.parser import HTMLTableParser
+
+
+    p = HTMLTableParser()
+    p.feed(rh)
+    pprint(p.tables)
+
+    ##
+    df = pd.DataFrame(p.tables[])
 
     ##
