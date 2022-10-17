@@ -86,6 +86,12 @@ class TypeFinder :
             }
     tbs = [wos(x) for x in tb]
 
+    tr = {
+            'پروژه های واگذار شده'      : None ,
+            'آمار وضعیت تکمیل پروژه ها' : None ,
+            }
+    trs = [wos(x) for x in tr]
+
 
 tf = TypeFinder()
 
@@ -153,6 +159,10 @@ class MonthlyActivityReport :
                     self.ft = ft.b
                     return
 
+                elif caol(el.text , tf.trs) :
+                    self.ft = ft.r
+                    return
+
         return 'no_firmtype'
 
     def tree_2_to_html(self) :
@@ -166,7 +176,7 @@ class MonthlyActivityReport :
 
     def read_tables(self) :
         try :
-            self.dfs = pd.read_html(self.html , header = None)
+            self.dfs = pd.read_html(self.html)
         except ValueError as e :
             print(e)
             return 'no_table'
@@ -297,10 +307,6 @@ def make_not_having_str_digits_cells_none(df) :
     return df
 
 
-def fix_specific_cells_for_insurances(df) :
-    pats = {r'1\.'}
-
-
 def update_with_last_run_data(df , fp) :
     if fp.exists() :
         lastdf = pd.read_parquet(fp)
@@ -406,6 +412,7 @@ def main() :
     fps = list(fps)
 
     fps = [x for x in fps if '-' in x.stem]
+
     ##
     _ = [x.unlink() for x in fps]
     fps = [x.stem.split('-')[0] for x in fps]
@@ -445,17 +452,21 @@ def main() :
     cls = rci(_df)
     ##
     for se in cls :
-        si , ei = se
-        print(se)
+        try :
+            si , ei = se
+            print(se)
 
-        inds = _df.index[si : ei]
+            inds = _df.index[si : ei]
 
-        _fps = df.loc[inds , cn.fp]
+            _fps = df.loc[inds , cn.fp]
 
-        _ou = pool.map(trg , _fps)
+            _ou = pool.map(trg , _fps)
 
-        df.loc[inds , cn.err] = [x.err for x in _ou]
-        df.loc[inds , cn.ft] = [x.ft for x in _ou]
+            df.loc[inds , cn.err] = [x.err for x in _ou]
+            df.loc[inds , cn.ft] = [x.ft for x in _ou]
+
+        except KeyboardInterrupt :
+            break
 
         # break
 
@@ -574,6 +585,7 @@ if False :
     ##
     fps = dyr.tbls.glob('*.xlsx')
     fps = list(fps)
+    _ = [x.unlink() for x in fps]
 
     ##
     fps1 = [x for x in fps if '-' in x.stem]
@@ -597,6 +609,9 @@ if False :
     trg(fp)
 
     ##
+    import pandas as pd
+
+
     with open(fp , 'r') as f :
         rh = f.read()
     df1 = pd.read_html(rh , header = 0)[1]
