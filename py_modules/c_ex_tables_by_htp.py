@@ -27,32 +27,25 @@ from py_modules.a_add_new_letters import cc
 
 ft = ns.FirmType()
 
-
 class ProjDirs(PDb) :
     tbls = Path('tbls')
 
-
 dyr = ProjDirs()
-
 
 class ColName(CNb) :
     he = 'HtmlExists'
     err = 'err'
 
-
 cn = ColName()
-
 
 class MonthlyActivityReport :
 
     def __init__(self , fp: Path) :
         self.fp = Path(fp)
 
-
     def read_html(self) :
         with open(self.fp , 'r') as f :
             self._raw_html = f.read()
-
 
     def read_tables_by_html_table_parser(self) :
         p = HTMLTableParser()
@@ -60,30 +53,24 @@ class MonthlyActivityReport :
         self.dfs = [pd.DataFrame(x) for x in p.tables]
         self.df = pd.concat(self.dfs)
 
-
     def _apply_on_df(self , fu) :
         self.df = fu(self.df)
-
 
     def make_not_having_alphabet_digits_cells_none(self) :
         _fu = make_not_having_alphabet_digits_cells_none
         self._apply_on_df(_fu)
 
-
     def drop_all_nan_rows_and_cols(self) :
         _fu = drop_all_nan_rows_and_cols
         self._apply_on_df(_fu)
-
 
     def save_table(self) :
         fp = dyr.tbls / (self.fp.stem + '.xlsx')
         self.df.to_excel(fp , index = False)
 
-
 def drop_all_nan_rows_and_cols(df) :
     df = df.dropna(how = "all")
     return df.dropna(how = "all" , axis = 1)
-
 
 def make_not_having_alphabet_digits_cells_none(df) :
     pat = r'[\w\d]+'
@@ -92,13 +79,11 @@ def make_not_having_alphabet_digits_cells_none(df) :
         df.loc[~ ms , col] = None
     return df
 
-
 def update_with_last_run_data(df , fp) :
     if fp.exists() :
         lastdf = pd.read_parquet(fp)
         df.update(lastdf)
     return df
-
 
 def trg_htp(fp: Path) -> (str , None) :
 
@@ -116,7 +101,6 @@ def trg_htp(fp: Path) -> (str , None) :
         o = fu()
         if o :
             return o
-
 
 def main() :
     pass
@@ -205,12 +189,9 @@ def main() :
 
     ##
 
-
     ##
 
-
     ##
-
 
 ##
 if __name__ == "__main__" :
