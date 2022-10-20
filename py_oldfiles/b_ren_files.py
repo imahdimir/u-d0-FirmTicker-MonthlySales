@@ -16,7 +16,7 @@ from py_oldfiles import a_dl_files
 importlib.reload(a_dl_files)
 
 from py_modules.a_add_new_letters import gu
-from py_oldfiles.a_dl_files import ProjDirs as PDoa
+from py_oldfiles.a_dl_files import Dirr as PDoa
 from py_oldfiles.a_dl_files import ColName as CNoa
 
 
@@ -24,17 +24,13 @@ from py_oldfiles.a_dl_files import ColName as CNoa
 class ProjDirs(PDoa) :
     hasd = Path('has-dash')
 
-
 dyr = ProjDirs()
-
 
 @dataclass
 class ColName(CNoa) :
     hasd = 'HasDash'
 
-
 cn = ColName()
-
 
 def main() :
     pass
@@ -98,18 +94,13 @@ def main() :
 
     ##
 
+    ##
 
     ##
 
-
     ##
 
-
     ##
-
-
-    ##
-
 
 ##
 if __name__ == "__main__" :

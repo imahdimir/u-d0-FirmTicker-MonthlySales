@@ -7,30 +7,34 @@ from pathlib import Path
 
 import githubdata as gd
 import pandas as pd
-from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
-from mirutil.df_utils import save_as_prq_wo_index as sprq
+from giteasy.repo import Repo
+from mirutil.df import save_as_prq_wo_index as sprq
+from mirutil.files import read_txt_file
+from mirutil.html import etree_to_html
+from mirutil.html import parse_html_as_etree
+from mirutil.html import read_tables_in_html_by_html_table_parser as rthp
+from mirutil.html import rm_hidden_elements_of_etree
 from mirutil.utils import ret_clusters_indices as rci
-from multiprocess import Pool
-from html_table_parser import HTMLTableParser
+from multiprocess.pool import Pool
 
-from py_modules import b_get_htmls as prev_module
+from py_modules import a_add_new_letters as _1st_mod
+from py_modules.b_get_htmls import ColName as CNb
+from py_modules.b_get_htmls import Dirr as PDb
 
 
-importlib.reload(prev_module)
+importlib.reload(_1st_mod)
 
 import ns
-from py_modules.b_get_htmls import ProjDirs as PDb
-from py_modules.b_get_htmls import ColName as CNb
-from py_modules.a_add_new_letters import gu
-from py_modules.a_add_new_letters import cc
 
 
+gu = ns.GDU()
+cc = ns.CodalCol()
 ft = ns.FirmType()
 
-class ProjDirs(PDb) :
-    tbls = Path('tbls')
+class Dirr(PDb) :
+    tbls = Repo(gu.trg4).local_path
 
-dyr = ProjDirs()
+dirr = Dirr()
 
 class ColName(CNb) :
     he = 'HtmlExists'
@@ -44,13 +48,15 @@ class MonthlyActivityReport :
         self.fp = Path(fp)
 
     def read_html(self) :
-        with open(self.fp , 'r') as f :
-            self._raw_html = f.read()
+        self._raw_html = read_txt_file(self.fp)
+
+    def rm_hidden_elements_of_html(self) :
+        tr = parse_html_as_etree(self._raw_html)
+        tr = rm_hidden_elements_of_etree(tr)
+        self.html = etree_to_html(tr)
 
     def read_tables_by_html_table_parser(self) :
-        p = HTMLTableParser()
-        p.feed(self._raw_html)
-        self.dfs = [pd.DataFrame(x) for x in p.tables]
+        self.dfs = rthp(self.html)
         self.df = pd.concat(self.dfs)
 
     def _apply_on_df(self , fu) :
@@ -65,7 +71,7 @@ class MonthlyActivityReport :
         self._apply_on_df(_fu)
 
     def save_table(self) :
-        fp = dyr.tbls / (self.fp.stem + '.xlsx')
+        fp = dirr.tbls / (self.fp.stem + '.xlsx')
         self.df.to_excel(fp , index = False)
 
 def drop_all_nan_rows_and_cols(df) :
@@ -90,11 +96,12 @@ def trg_htp(fp: Path) -> (str , None) :
     m = MonthlyActivityReport(fp)
 
     _fus = {
-            0 : m.read_html ,
-            1 : m.read_tables_by_html_table_parser ,
-            4 : m.make_not_having_alphabet_digits_cells_none ,
-            6 : m.drop_all_nan_rows_and_cols ,
-            7 : m.save_table ,
+            0  : m.read_html ,
+            10 : m.rm_hidden_elements_of_html ,
+            1  : m.read_tables_by_html_table_parser ,
+            4  : m.make_not_having_alphabet_digits_cells_none ,
+            6  : m.drop_all_nan_rows_and_cols ,
+            7  : m.save_table ,
             }
 
     for _ , fu in _fus.items() :
@@ -123,13 +130,13 @@ def main() :
     del db
 
     ##
-    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dyr.sh / x)
+    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / x)
     df[cn.fp] = df[cn.fp].apply(lambda x : x.with_suffix('.html'))
     df[cn.he] = df[cn.fp].apply(lambda x : x.exists())
     print(len(df[df[cn.he]]))
 
     ##
-    fps = dyr.tbls.glob('*.xlsx')
+    fps = dirr.tbls.glob('*.xlsx')
     fps = list(fps)
 
     fps = [x.stem for x in fps]
@@ -141,7 +148,7 @@ def main() :
     _df = df[msk]
     print(len(_df))
     ##
-    di = dyr.tbls
+    di = dirr.tbls
     if not di.exists() :
         di.mkdir()
 
@@ -183,13 +190,6 @@ def main() :
     gdt.commit_and_push(msg)
 
     ##
-    puffd(dyr.tblpd , '.xlsx' , gu.trg4)
-
-    ##
-
-    ##
-
-    ##
 
     ##
 
@@ -204,6 +204,12 @@ if False :
     pass
 
     ##
-    fps = dyr.tbls.glob('*.xlsx')
+    fps = dirr.tbls.glob('*.xlsx')
     fps = list(fps)
     _ = [x.unlink() for x in fps]
+
+    ##
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-htmls/741620.html'
+    trg_htp(fp)
+
+    ##

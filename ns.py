@@ -6,7 +6,7 @@ class GDU :
     trg1 = "https://github.com/imahdimir/rd-Codal-monthly-sales-low-size-htmls"
     trg2 = "https://github.com/imahdimir/rd-Codal-monthly-sales-link-htmls"
     trg3 = "https://github.com/imahdimir/rd0-Codal-monthly-sales-dled-files"
-    trg4 = "https://github.com/imahdimir/rd-Codal-monthly-sales-htmls-tables"
+    trg4 = "https://github.com/imahdimir/rd-Codal-monthly-sales-tables"
 
 class CodalCol :
     TracingNo = "TracingNo"

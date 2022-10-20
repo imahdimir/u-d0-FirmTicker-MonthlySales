@@ -16,16 +16,7 @@ from requests.exceptions import ConnectionError
 from unidecode import unidecode
 
 
-def find_jmonth_fr_titl(df) :
-    pat = '(\d{4}/\d{2}/\d{2})'
-    cl = c.jm
-    df[cl] = df[cc.Title].str.extract(pat)
-    df[cl] = df[cl].str.replace('\D' , '')
-    df[cl] = df[cl].str[:6]
-    df[cl] = df[cl].astype(int)
-    df[cl] = df[cl].astype('string')
-    df[cl] = df[cl].str[:4] + '-' + df[cl].str[4 :6]
-    return df
+
 
 
 dirs = ns.Dirs()
@@ -72,8 +63,7 @@ def find_n_month_before(current_month , howmany = 1) :
                                howmany - 1)
 
 
-def find_all_locs_eq_val(dfobj: pd.DataFrame , value) :
-    return dfobj[dfobj.eq(value)].stack().index.values.tolist()
+
 
 def read_accvalue_from_str(string) :
     string1 = str(string)

@@ -27,13 +27,12 @@ from py_modules.a_add_new_letters import gu
 from py_modules.b_get_htmls import Const as Constb
 from py_modules.b_get_htmls import ColName as ColNameb
 from py_modules.a_add_new_letters import cc
-from py_modules.b_get_htmls import ProjDirs as PDb
+from py_modules.b_get_htmls import Dirr as PDb
 
 
 nest_asyncio.apply()
 
 Parser = etree.HTMLParser()
-
 
 @dataclass
 class ColName(ColNameb) :
@@ -45,9 +44,7 @@ class ColName(ColNameb) :
     rcnt = 'rContent'
     suf = 'suf'
 
-
 cn = ColName()
-
 
 @dataclass
 class Const(Constb) :
@@ -55,17 +52,13 @@ class Const(Constb) :
 
     codaldl = cb.codalbase + '/Reports/'
 
-
 cte = Const()
 
-
 @dataclass
-class ProjDirs(PDb) :
+class Dirr(PDb) :
     dlf = Path('downloaded-files')
 
-
-dyr = ProjDirs()
-
+dyr = Dirr()
 
 def ex_onclick_attr_fr_html(html_fp) :
     with open(html_fp , "r" , encoding = "utf-8") as f :
@@ -77,7 +70,6 @@ def ex_onclick_attr_fr_html(html_fp) :
     onclick_val = [x.attrib["onclick"] for x in onclick_nodes]
     return find_dl_link_rm_dups(onclick_val)
 
-
 def find_dl_link_rm_dups(onclick_vals) :
     """removes duplicated lnks"""
     lnks = list(set(onclick_vals))
@@ -85,10 +77,8 @@ def find_dl_link_rm_dups(onclick_vals) :
     lnks = [find_bet_2chars_in_str(x , "('" , "')") for x in lnks]
     return lnks
 
-
 def find_bet_2chars_in_str(thestr , start_char , end_char) :
     return (thestr.split(start_char))[1].split(end_char)[0]
-
 
 def add_f_no(dfgr) :
     if len(dfgr) == 1 :
@@ -96,7 +86,6 @@ def add_f_no(dfgr) :
     else :
         dfgr[cn.no] = list(range(len(dfgr)))
     return dfgr
-
 
 def make_fn(df) :
     tr = cc.TracingNo
@@ -108,12 +97,10 @@ def make_fn(df) :
     df.loc[~ ms , cn.fn] = df.loc[~ ms , tr] + '-' + num
     return df
 
-
 def save_file_content(cont , fp) :
     with open(fp , "wb") as f :
         f.write(cont)
     print(f"saved {fp}")
-
 
 def make_fp(df) :
     mk = df[cn.suf].notna()
@@ -126,7 +113,6 @@ def make_fp(df) :
 
     return df
 
-
 def save_files(df) :
     mk = df[cn.rs].eq(200)
 
@@ -137,7 +123,6 @@ def save_files(df) :
         save_file_content(ro[cn.rcnt] , ro[cn.fp])
 
     return df
-
 
 def main() :
     pass
@@ -232,15 +217,11 @@ def main() :
 
     shutil.rmtree(dyr.dlf)
 
+    ##
 
     ##
 
-
     ##
-
-
-    ##
-
 
 ##
 if __name__ == "__main__" :

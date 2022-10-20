@@ -6,7 +6,7 @@ import importlib
 from pathlib import Path
 
 import githubdata as gd
-from mirutil.df_utils import save_as_prq_wo_index as sprq
+from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.ns import update_ns_module
 
 
@@ -20,7 +20,6 @@ gu = ns.GDU()
 cc = ns.CodalCol()
 clc = ns.CodalLetterCode()
 dac = ns.DAllCodalLetters()
-
 
 def main() :
     pass
@@ -67,7 +66,6 @@ def main() :
     gdt.rmdir()
 
     ##
-
 
 ##
 if __name__ == "__main__" :

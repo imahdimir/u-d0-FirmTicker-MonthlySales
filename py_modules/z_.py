@@ -85,7 +85,7 @@ class m :
     self.jdate = int(jdate)
     self.jmonth = jdate // 100
 
-    self.fixed_table = fix_table(self.df)
+    self.fixed_table = fix_table(self.dft)
 
     self.date_df = self.fixed_table.applymap(cf.find_jdate)
     self.jmonth_df = self.date_df.applymap(lambda x : x // 100)
@@ -134,12 +134,12 @@ class m :
         cur_per_ch = self.fixed_table.applymap(lambda x : cf.any_of_list_isin(
                 current_period_srch ,
                 x))
-        self.cur_per_cells = cf.find_all_locs_eq_val(cur_per_ch , True)
+        self.cur_per_cells = cf.find_all_df_locs_eq_val(cur_per_ch , True)
         self.cur_per_cols = [x[1] for x in self.cur_per_cells]
 
     def find_sum_row(self) :
         sum_row_check = self.fixed_table.isin(sum_row_srch)
-        sum_row_locs = cf.find_all_locs_eq_val(sum_row_check , True)
+        sum_row_locs = cf.find_all_df_locs_eq_val(sum_row_check , True)
         if len(sum_row_locs) == 0 :
             sum_row_locs = [(self.fixed_table.shape[0] - 1 , 0)]
         self.sum_row = sum_row_locs[0][0]
@@ -148,25 +148,25 @@ class m :
         sale_check = self.fixed_table.applymap(lambda x : cf.any_of_list_isin(
                 sale_mil_srch ,
                 x))
-        sale_locs = cf.find_all_locs_eq_val(sale_check , True)
+        sale_locs = cf.find_all_df_locs_eq_val(sale_check , True)
         self.sale_cols = [x[1] for x in sale_locs]
         return self.sale_cols
 
     def find_current_jdate(self) :
-        cur_m = cf.find_all_locs_eq_val(self.date_df , self.jdate)
+        cur_m = cf.find_all_df_locs_eq_val(self.date_df , self.jdate)
         self.cur_jdate_cols = [x[1] for x in cur_m]
 
     def check_current_period_jdate(self) :
         yrm = self.date_df.applymap(lambda x : x // 100)
         jyrm = self.jdate // 100
-        date_locs = cf.find_all_locs_eq_val(yrm , jyrm)
+        date_locs = cf.find_all_df_locs_eq_val(yrm , jyrm)
         date_month_intersect = list(set(self.cur_per_cells) & set(date_locs))
         if len(date_month_intersect) == 0 :
             self.output[rd.errMsg] = em.dateConflict
 
     def find_modif_cols(self) :
         modi_check = self.fixed_table.applymap(lambda x : str(x) in modif_srch)
-        modi_locs = cf.find_all_locs_eq_val(modi_check , True)
+        modi_locs = cf.find_all_df_locs_eq_val(modi_check , True)
         if len(modi_locs) == 0 :
             self.output[rd.hasModification] = False
             return None
@@ -176,12 +176,12 @@ class m :
         since_start_ch = self.fixed_table.applymap(lambda x : cf.any_of_list_isin(
                 since_start_financial_year_srch ,
                 str(x)))
-        since_start_locs = cf.find_all_locs_eq_val(since_start_ch , True)
+        since_start_locs = cf.find_all_df_locs_eq_val(since_start_ch , True)
         if len(since_start_locs) > 0 :
             self.since_start_cols = [x[1] for x in since_start_locs]
 
     def find_prev_m_cols(self) :
-        prev_m_ch = cf.find_all_locs_eq_val(self.jmonth_df , self.prev_month)
+        prev_m_ch = cf.find_all_df_locs_eq_val(self.jmonth_df , self.prev_month)
         if len(prev_m_ch) > 0 :
             self.prev_month_cols = [x[1] for x in prev_m_ch]
         return self.prev_month_cols
@@ -190,7 +190,7 @@ class m :
         modified_ch = self.fixed_table.applymap(lambda x : cf.any_of_list_isin(
                 since_modified_srch ,
                 x))
-        modified_locs = cf.find_all_locs_eq_val(modified_ch , True)
+        modified_locs = cf.find_all_df_locs_eq_val(modified_ch , True)
         if len(modified_locs) == 0 :
             return None
         self.modified_cols = [x[1] for x in modified_locs]
@@ -232,7 +232,7 @@ class m :
 
     def find_sale_quant(self) :
         sale_q_ch = self.fixed_table.applymap(lambda x : str(x) in sale_quant_srch)
-        sale_q_locs = cf.find_all_locs_eq_val(sale_q_ch , True)
+        sale_q_locs = cf.find_all_df_locs_eq_val(sale_q_ch , True)
         sale_q_cols = [x[1] for x in sale_q_locs]
         sale_q_cur_per = list(set(self.cur_per_cols) & set(sale_q_cols))
         if len(sale_q_cur_per) != 1 :
@@ -302,7 +302,7 @@ class m :
         since_start_ch = self.fixed_table.applymap(lambda x : cf.any_of_list_isin(
                 since_start_finyear_serv_srch ,
                 x))
-        since_start_locs = cf.find_all_locs_eq_val(since_start_ch , True)
+        since_start_locs = cf.find_all_df_locs_eq_val(since_start_ch , True)
         if len(since_start_locs) > 0 :
             self.since_start_cols = [x[1] for x in since_start_locs]
         return self.since_start_cols
@@ -311,7 +311,7 @@ class m :
         modified_ch = self.fixed_table.applymap(lambda x : cf.any_of_list_isin(
                 since_modified_srch ,
                 x))
-        modified_locs = cf.find_all_locs_eq_val(modified_ch , True)
+        modified_locs = cf.find_all_df_locs_eq_val(modified_ch , True)
         if len(modified_locs) == 0 :
             return None
         self.modified_cols = [x[1] for x in modified_locs]
@@ -416,7 +416,7 @@ def trg(trace_no , jdate) :
     ##
     cond2 = df[rd.htmlDownloaded].eq('True')
     cond2 &= df[rd.succeed].eq('False')
-    # cond2 &= ~ df['FirmType'].isin([m.firmtypes['b'], m.firmtypes['i'],
+    # cond2 &= ~ dft['FirmType'].isin([m.firmtypes['b'], m.firmtypes['i'],
     #                                 m.firmtypes['rs'], m.firmtypes['l']])
     cond2 &= df[rd.isBlank].ne('True')
     print(cond2[cond2])
