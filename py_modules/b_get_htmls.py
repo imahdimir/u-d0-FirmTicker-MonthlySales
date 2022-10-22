@@ -195,9 +195,6 @@ if False :
     pass
 
     ##
-    from mirutil.requests_htmll import download_chromium
-
-    download_chromium()
 
     ##
 
