@@ -3,10 +3,8 @@
     """
 
 import asyncio
-import importlib
 import os
 import shutil
-from dataclasses import dataclass
 from pathlib import Path
 
 import githubdata as gd
@@ -14,17 +12,10 @@ import pandas as pd
 from giteasy.githubb import get_all_fps_in_repo as getf
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from giteasy.repo import Repo
-from pprint import pprint
-
 from mirutil.async_req import get_a_rendered_html_and_save_async
 from mirutil.async_req import get_rendered_htmls_and_save_async
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.utils import ret_clusters_indices
-
-from py_modules import a_add_new_letters as _1st_mod
-
-
-importlib.reload(_1st_mod)
 
 import ns
 
@@ -78,15 +69,10 @@ def main() :
     gdt = gd.GithubData(gu.tmp)
     gdt.overwriting_clone()
 
-    ##
     dafp = gdt.local_path / 'a.prq'
-    da = pd.read_parquet(dafp)
+    df = pd.read_parquet(dafp)
 
     ##
-    df = da.copy()
-
-    ##
-
     st0 = ret_html_stms_of_github_repo(gu.trg0)
     st1 = ret_html_stms_of_github_repo(gu.trg1)
     st2 = ret_html_stms_of_github_repo(gu.trg2)
@@ -98,39 +84,40 @@ def main() :
     ##
     msk = df[cc.Url].notna()
     print(len(msk[msk]))
-    ##
+
     msk &= ~ df[cn.hdl]
     len(msk[msk])
 
     ##
-
     df.loc[msk , cn.furl] = cte.codalbase + df[cc.Url]
     df1 = df[msk]
 
     ##
     if not dirr.sh.exists() :
         dirr.sh.mkdir()
-    ##
 
+    ##
     if not df1.empty :
         ur = df1.iloc[-1][cn.furl]
         stm = df1.iloc[-1][cc.TracingNo]
         fp = dirr.sh / f'{stm}.html'
+        print(fp)
         fu = get_a_rendered_html_and_save_async
         asyncio.run(fu(ur , fp))
 
     ##
     cls = ret_clusters_indices(df1 , 20)
+
     ##
     for se in cls :
         try :
-            si = se[0]
-            ei = se[1]
+            si , ei = se
             print(se)
 
             inds = df1.index[si : ei]
 
             urls = df1.loc[inds , cn.furl]
+
             _fu = lambda x : dirr.sh / f'{x}.html'
             _fps = df1.loc[inds , cc.TracingNo].apply(_fu)
 
@@ -143,7 +130,6 @@ def main() :
         # break
 
     ##
-
     if not dirr.lsh.exists() :
         dirr.lsh.mkdir()
 
@@ -156,7 +142,6 @@ def main() :
                 print(f'{fp.name} moved to {nfp}')
 
     ##
-
     if not dirr.lh.exists() :
         dirr.lh.mkdir()
 
@@ -176,7 +161,6 @@ def main() :
     puffd(dirr.lh , '.html' , gu.trg2)
 
     ##
-
     c2k = {
             cc.TracingNo    : None ,
             dac.CodalTicker : None ,
@@ -195,14 +179,10 @@ def main() :
     gdt.commit_and_push(msg)
 
     ##
-
     shutil.rmtree(dirr.lsh)
 
     ##
-
     shutil.rmtree(dirr.lh)
-
-    ##
 
 ##
 if __name__ == "__main__" :

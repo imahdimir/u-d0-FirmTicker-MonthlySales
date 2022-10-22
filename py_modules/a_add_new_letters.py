@@ -2,7 +2,6 @@
 
     """
 
-import importlib
 from pathlib import Path
 
 import githubdata as gd
@@ -13,8 +12,6 @@ from mirutil.ns import update_ns_module
 update_ns_module()
 import ns
 
-
-importlib.reload(ns)
 
 gu = ns.GDU()
 cc = ns.CodalCol()
@@ -64,8 +61,6 @@ def main() :
 
     gds.rmdir()
     gdt.rmdir()
-
-    ##
 
 ##
 if __name__ == "__main__" :

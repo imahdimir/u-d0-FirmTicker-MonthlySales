@@ -2,7 +2,6 @@
 
     """
 
-import importlib
 from pathlib import Path
 
 import githubdata as gd
@@ -16,15 +15,11 @@ from mirutil.html import read_tables_in_html_by_html_table_parser as rthp
 from mirutil.html import rm_hidden_elements_of_etree
 from mirutil.utils import ret_clusters_indices as rci
 from multiprocess.pool import Pool
-
-from py_modules import a_add_new_letters as _1st_mod
-from py_modules.b_get_htmls import ColName as CNb
-from py_modules.b_get_htmls import Dirr as PDb
-
-
-importlib.reload(_1st_mod)
+from mirutil.df import df_apply_parallel as dfap
 
 import ns
+from py_modules.b_get_htmls import ColName as CNb
+from py_modules.b_get_htmls import Dirr as PDb
 
 
 gu = ns.GDU()
@@ -120,14 +115,12 @@ def main() :
     dbfp = gdt.local_path / 'b.prq'
     dfp = gdt.local_path / 'c.prq'
 
-    db = pd.read_parquet(dbfp)
-    ##
-    df = db.copy()
+    df = pd.read_parquet(dbfp)
 
+    ##
     df[cn.err] = None
 
     df = update_with_last_run_data(df , dfp)
-    del db
 
     ##
     df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / x)
@@ -153,28 +146,13 @@ def main() :
         di.mkdir()
 
     ##
-    n_jobs = 30
-    pool = Pool(n_jobs)
-
-    cls = rci(_df)
-    ##
-    for se in cls :
-        try :
-            si , ei = se
-            print(se)
-
-            inds = _df.index[si : ei]
-
-            _fps = df.loc[inds , cn.fp]
-
-            _o = pool.map(trg_htp , _fps)
-
-            df.loc[inds , cn.err] = _o
-
-        except KeyboardInterrupt :
-            break
-
-        # break
+    df = dfap(df ,
+              trg_htp ,
+              [cn.fp] ,
+              out_cols = [cn.err] ,
+              msk = msk ,
+              test = False ,
+              n_jobs = 30)
 
     ##
     c2d = {
@@ -185,13 +163,10 @@ def main() :
     df = df.drop(columns = c2d.keys())
     ##
     sprq(df , dfp)
+
     ##
     msg = f'{dfp.name} updated'
     gdt.commit_and_push(msg)
-
-    ##
-
-    ##
 
 ##
 if __name__ == "__main__" :
@@ -199,7 +174,6 @@ if __name__ == "__main__" :
     print(f'{Path(__file__).name} Done!')
 
 ##
-
 if False :
     pass
 
