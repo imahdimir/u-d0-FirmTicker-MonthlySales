@@ -13,8 +13,8 @@ from giteasy.githubb import get_all_fps_in_repo as getf
 from giteasy.githubb import \
     persistently_upload_files_from_dir_2_repo_mp as puffd
 from giteasy.repo import Repo
-from mirutil.req_render_async import get_a_rendered_html_and_save_async
-from mirutil.req_render_async import get_rendered_htmls_and_save_async
+from mirutil.requests_htmll import get_a_rendered_html_and_save_async
+from mirutil.requests_htmll import get_rendered_htmls_and_save_async
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.utils import ret_clusters_indices
 
@@ -195,14 +195,9 @@ if False :
     pass
 
     ##
-    from requests_html import HTMLSession
+    from mirutil.requests_htmll import download_chromium
 
-
-    url = 'https://google.com'
-
-    s = HTMLSession()
-    r = s.get(url)
-    r.html.render()
+    download_chromium()
 
     ##
 
