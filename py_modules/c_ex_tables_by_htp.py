@@ -7,15 +7,13 @@ from pathlib import Path
 import githubdata as gd
 import pandas as pd
 from giteasy.repo import Repo
+from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.files import read_txt_file
 from mirutil.html import etree_to_html
 from mirutil.html import parse_html_as_etree
 from mirutil.html import read_tables_in_html_by_html_table_parser as rthp
 from mirutil.html import rm_hidden_elements_of_etree
-from mirutil.utils import ret_clusters_indices as rci
-from multiprocess.pool import Pool
-from mirutil.df import df_apply_parallel as dfap
 
 import ns
 from py_modules.b_get_htmls import ColName as CNb
@@ -183,7 +181,7 @@ if False :
     _ = [x.unlink() for x in fps]
 
     ##
-    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-htmls/741620.html'
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-htmls/337220.html'
     trg_htp(fp)
 
     ##

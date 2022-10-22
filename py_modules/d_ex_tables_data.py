@@ -15,6 +15,7 @@ from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.jdate import ex_1st_jmonth_fr_fa_str as ejffs
 from mirutil.jdate import find_jmonth_fr_df_col as fjfdc
 from varname import nameof as nof
+from mirutil.str import normalize_fa_str_completely as nfsc
 
 import ns
 from py_modules.c_ex_tables_by_htp import ColName as CNc
@@ -69,10 +70,10 @@ def is_cur_jmonth(st) :
     return False
 
 def find_jmonth_fr_xl_df(df: pd.DataFrame) :
+    df = df.applymap(nfsc)
     msk = df.applymap(is_cur_jmonth)
 
     lcs = faelv(msk , True)
-    return lcs
     nw = rnwoi(lcs)
     if nw is None :
         return None , (None , None)
@@ -193,18 +194,10 @@ if False :
     find_jmonth_fr_xl_df(dft)
 
     ##
-    def ret_north_west_of_indices(mi: pd.MultiIndex) :
-        df = mi.to_frame()
-        if df.empty :
-            return
-        df = df.sort_values(by = [0 , 1] , ascending = False)
-        r = df.iloc[[0]]
-        return r.index
+    fol = '/Users/mahdi/Dropbox/1-git-dirs/rd-Codal-monthly-sales-htmls'
+    df1['hfp'] = Path(fol) / (df1[cc.TracingNo] + '.html')
 
     ##
-    dft1 = lcs.to_frame()
-    dft1 = dft1.sort_values(by = [0 , 1] , ascending = False)
-    r = dft1.iloc[[0]]
-    r.index[0]
+    _ = df1['hfp'].apply(lambda x : x.unlink())
 
     ##

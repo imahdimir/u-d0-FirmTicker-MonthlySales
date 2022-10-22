@@ -12,8 +12,8 @@ import pandas as pd
 from giteasy.githubb import get_all_fps_in_repo as getf
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from giteasy.repo import Repo
-from mirutil.async_req import get_a_rendered_html_and_save_async
-from mirutil.async_req import get_rendered_htmls_and_save_async
+from mirutil.req_render_async import get_a_rendered_html_and_save_async
+from mirutil.req_render_async import get_rendered_htmls_and_save_async
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.utils import ret_clusters_indices
 
@@ -69,8 +69,9 @@ def main() :
     gdt = gd.GithubData(gu.tmp)
     gdt.overwriting_clone()
 
-    dafp = gdt.local_path / 'a.prq'
-    df = pd.read_parquet(dafp)
+    dp_fp = gdt.local_path / 'a.prq'
+    df_fp = gdt.local_path / 'b.prq'
+    df = pd.read_parquet(dp_fp)
 
     ##
     st0 = ret_html_stms_of_github_repo(gu.trg0)
@@ -101,12 +102,12 @@ def main() :
         ur = df1.iloc[-1][cn.furl]
         stm = df1.iloc[-1][cc.TracingNo]
         fp = dirr.sh / f'{stm}.html'
-        print(fp)
         fu = get_a_rendered_html_and_save_async
         asyncio.run(fu(ur , fp))
+        print(fp)
 
     ##
-    cls = ret_clusters_indices(df1 , 20)
+    cls = ret_clusters_indices(df1 , 5)
 
     ##
     for se in cls :
@@ -127,7 +128,7 @@ def main() :
         except KeyboardInterrupt :
             break
 
-        # break
+        break
 
     ##
     if not dirr.lsh.exists() :
@@ -171,11 +172,10 @@ def main() :
     df = df[list(c2k.keys())]
 
     ##
-    dbfp = gdt.local_path / 'b.prq'
-    sprq(df , dbfp)
+    sprq(df , df_fp)
     ##
 
-    msg = f'{dbfp.name} updated'
+    msg = f'{df_fp.name} updated'
     gdt.commit_and_push(msg)
 
     ##
@@ -188,3 +188,18 @@ def main() :
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
+
+##
+if False :
+    pass
+
+    ##
+    import requests
+
+
+    r = requests.get('https://google.com')
+    r.status_code
+
+    ##
+
+    ##
