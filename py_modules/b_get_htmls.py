@@ -24,44 +24,53 @@ gu = ns.GDU()
 cc = ns.CodalCol()
 dac = ns.DAllCodalLetters()
 
-class Dirr :
+
+class Dirr:
     sh = Repo(gu.trg0).local_path
     lh = Repo(gu.trg2).local_path
     lsh = Repo(gu.trg1).local_path
     tmp = Repo(gu.tmp).local_path
 
+
 dirr = Dirr()
 
-class ColName :
+
+class ColName:
     hdl = 'IsHtmlDownloaded'
     furl = 'FullUrl'
     fp = 'FilePath'
     ms = 'RepType'
 
+
 cn = ColName()
 
-class Const :
+
+class Const:
     codalbase = 'https://codal.ir'
     sar = 'سرمایه ثبت شده:'
     nsar = 'سرمایه ثبت نشده:'
 
+
 cte = Const()
 
-def check_html_being_the_monthly_sales_report(fp) :
-    with open(fp , 'r' , encoding = 'utf-8') as f :
+
+def check_html_being_the_monthly_sales_report(fp):
+    with open(fp, 'r', encoding='utf-8') as f:
         txt = f.read()
-    if (cte.sar in txt) and (cte.nsar in txt) :
+    if (cte.sar in txt) and (cte.nsar in txt):
         return True
     return False
 
-def ret_html_stms_of_github_repo(repo_name) :
+
+def ret_html_stms_of_github_repo(repo_name):
     """ returns a list of htmls in the GitHub repo """
     fps = getf(repo_name)
     fps = [Path(x.path) for x in fps]
     stms = [x.stem for x in fps if x.suffix == '.html']
     return stms
 
-def main() :
+
+def main():
     pass
 
     ##
@@ -74,12 +83,20 @@ def main() :
     df = pd.read_parquet(dp_fp)
 
     ##
+    df[cn.fp] = df[cc.TracingNo].apply(lambda x: dirr.sh / f'{x}.html')
+    df[cn.furl] = cte.codalbase + df[cc.Url]
+
+    ##
     st0 = ret_html_stms_of_github_repo(gu.trg0)
     st1 = ret_html_stms_of_github_repo(gu.trg1)
     st2 = ret_html_stms_of_github_repo(gu.trg2)
 
     ##
-    st = st0 + st1 + st2
+    fps = dirr.sh.glob('*.html')
+    st3 = [x.stem for x in fps]
+
+    ##
+    st = st0 + st1 + st2 + st3
     df[cn.hdl] = df[cc.TracingNo].isin(st)
 
     ##
@@ -90,92 +107,91 @@ def main() :
     len(msk[msk])
 
     ##
-    df.loc[msk , cn.furl] = cte.codalbase + df[cc.Url]
     df1 = df[msk]
 
     ##
-    if not dirr.sh.exists() :
+    if not dirr.sh.exists():
         dirr.sh.mkdir()
 
     ##
     dcini()
 
     ##
-    if not df1.empty :
+    if not df1.empty:
         ur = df1.iloc[-1][cn.furl]
         stm = df1.iloc[-1][cc.TracingNo]
         fp = dirr.sh / f'{stm}.html'
         fu = get_a_rendered_html_and_save_async
-        asyncio.run(fu(ur , fp))
+        asyncio.run(fu(ur, fp))
         print(fp)
 
     ##
-    cls = ret_clusters_indices(df1 , 5)
+    cls = ret_clusters_indices(df1, 5)
 
     ##
-    for se in cls :
-        try :
-            si , ei = se
+    for se in cls:
+        try:
+            si, ei = se
             print(se)
 
-            inds = df1.index[si : ei]
+            inds = df1.index[si: ei]
 
-            urls = df1.loc[inds , cn.furl]
+            urls = df1.loc[inds, cn.furl]
 
-            _fu = lambda x : dirr.sh / f'{x}.html'
-            _fps = df1.loc[inds , cc.TracingNo].apply(_fu)
+            _fu = lambda x: dirr.sh / f'{x}.html'
+            _fps = df1.loc[inds, cc.TracingNo].apply(_fu)
 
             _fu1 = get_rendered_htmls_and_save_async
-            asyncio.run(_fu1(urls , _fps))
+            asyncio.run(_fu1(urls, _fps))
 
-        except KeyboardInterrupt :
+        except KeyboardInterrupt:
             break
 
         break
 
     ##
-    if not dirr.lsh.exists() :
+    if not dirr.lsh.exists():
         dirr.lsh.mkdir()
 
     fps = dirr.sh.glob('*.html')
-    for fp in fps :
-        if fp.exists() :
-            if os.path.getsize(fp) < 4 * 10 ** 3 :  # under 4KB
+    for fp in fps:
+        if fp.exists():
+            if os.path.getsize(fp) < 4 * 10 ** 3:  # under 4KB
                 nfp = dirr.lsh / fp.name
-                shutil.move(fp , nfp)
+                shutil.move(fp, nfp)
                 print(f'{fp.name} moved to {nfp}')
 
     ##
-    if not dirr.lh.exists() :
+    if not dirr.lh.exists():
         dirr.lh.mkdir()
 
     fps = dirr.sh.glob('*.html')
-    for fp in fps :
+    for fp in fps:
         fu = check_html_being_the_monthly_sales_report
-        if not fu(fp) :
+        if not fu(fp):
             nfp = dirr.lh / fp.name
-            shutil.move(fp , nfp)
+            shutil.move(fp, nfp)
             print(f'{fp.name} moved to {nfp}')
 
     ##
-    puffd(dirr.sh , '.html' , gu.trg0)
+    puffd(dirr.sh, '.html', gu.trg0)
     ##
-    puffd(dirr.lsh , '.html' , gu.trg1)
+    puffd(dirr.lsh, '.html', gu.trg1)
     ##
-    puffd(dirr.lh , '.html' , gu.trg2)
+    puffd(dirr.lh, '.html', gu.trg2)
 
     ##
     c2k = {
-            cc.TracingNo    : None ,
-            dac.CodalTicker : None ,
-            cc.CompanyName  : None ,
-            cc.Title        : None ,
-            }
+        cc.TracingNo: None,
+        dac.CodalTicker: None,
+        cc.CompanyName: None,
+        cc.Title: None,
+    }
 
     df = df[list(c2k.keys())]
 
     ##
-    sprq(df , df_fp)
+    sprq(df, df_fp)
     ##
 
     msg = f'{df_fp.name} updated'
@@ -187,14 +203,15 @@ def main() :
     ##
     shutil.rmtree(dirr.lh)
 
+
 ##
-if __name__ == "__main__" :
+if __name__ == "__main__":
     main()
     print(f'{Path(__file__).name} Done!')
 
 ##
 # noinspection PyUnreachableCode
-if False :
+if False:
     pass
 
     ##
