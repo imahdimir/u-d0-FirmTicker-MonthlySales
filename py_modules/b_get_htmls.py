@@ -10,13 +10,13 @@ from pathlib import Path
 import githubdata as gd
 import pandas as pd
 from giteasy.githubb import get_all_fps_in_repo as getf
-from giteasy.githubb import \
-    persistently_upload_files_from_dir_2_repo_mp as puffd
+from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from giteasy.repo import Repo
 from mirutil.requests_htmll import get_a_rendered_html_and_save_async
 from mirutil.requests_htmll import get_rendered_htmls_and_save_async
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.utils import ret_clusters_indices
+from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
 
 import ns
 
@@ -96,6 +96,9 @@ def main() :
     ##
     if not dirr.sh.exists() :
         dirr.sh.mkdir()
+
+    ##
+    dcini()
 
     ##
     if not df1.empty :
