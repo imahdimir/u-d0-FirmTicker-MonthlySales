@@ -15,8 +15,9 @@ from giteasy.repo import Repo
 from mirutil.requests_htmll import get_a_rendered_html_and_save_async
 from mirutil.requests_htmll import get_rendered_htmls_and_save_async
 from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.utils import ret_clusters_indices
+from mirutil.utils import ret_clusters_indices as rci
 from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
+from pyppeteer.errors import BrowserError
 
 import ns
 
@@ -117,16 +118,20 @@ def main():
     dcini()
 
     ##
-    if not df1.empty:
-        ur = df1.iloc[-1][cn.furl]
-        stm = df1.iloc[-1][cc.TracingNo]
-        fp = dirr.sh / f'{stm}.html'
-        fu = get_a_rendered_html_and_save_async
-        asyncio.run(fu(ur, fp))
-        print(fp)
+    if False:
+        pass
+
+        ##
+        if not df1.empty:
+            ur = df1.iloc[-1][cn.furl]
+            stm = df1.iloc[-1][cc.TracingNo]
+            fp = dirr.sh / f'{stm}.html'
+            fu = get_a_rendered_html_and_save_async
+            asyncio.run(fu(ur, fp, render_timeout = 20))
+            print(fp)
 
     ##
-    cls = ret_clusters_indices(df1, 5)
+    cls = rci(df1, 10)
 
     ##
     for se in cls:
@@ -137,17 +142,17 @@ def main():
             inds = df1.index[si: ei]
 
             urls = df1.loc[inds, cn.furl]
-
-            _fu = lambda x: dirr.sh / f'{x}.html'
-            _fps = df1.loc[inds, cc.TracingNo].apply(_fu)
+            fps = df1.loc[inds, cn.fp]
 
             _fu1 = get_rendered_htmls_and_save_async
-            asyncio.run(_fu1(urls, _fps))
+            asyncio.run(_fu1(urls , fps , get_timeout = 10, render_timeout = 30))
 
         except KeyboardInterrupt:
             break
+        except BrowserError as e:
+            print(e)
 
-        break
+        # break
 
     ##
     if not dirr.lsh.exists():
@@ -193,14 +198,11 @@ def main():
     ##
     sprq(df, df_fp)
     ##
-
     msg = f'{df_fp.name} updated'
     gdt.commit_and_push(msg)
 
     ##
     shutil.rmtree(dirr.lsh)
-
-    ##
     shutil.rmtree(dirr.lh)
 
 
@@ -215,7 +217,45 @@ if False:
     pass
 
     ##
+    urls = df1.iloc[:30][cn.furl]
+    fps = df1.iloc[:30][cn.fp]
 
     ##
+    ls = list(zip(urls, fps))
+
+    ##
+    cls = rci(ls, 7)
+
+
+    ##
+    for se in cls:
+        inps = ls[se[0]: se[1]]
+        print(inps)
+        break
+
+    ##
+
+    ##
+    from requests_html import HTMLSession
+    from mirutil.const import Const
+
+    cte = Const()
+
+    def download_chromium_if_not_installed() :
+        """download chromium if not installed"""
+        url = 'https://google.com'
+
+        s = HTMLSession()
+        r = s.get(url , headers = cte.headers , timeout = 10)
+        s.close()
+
+        r.html.render(timeout = 30)
+
+    ##
+    download_chromium_if_not_installed()
+
+
+    ##
+
 
     ##
