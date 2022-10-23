@@ -12,17 +12,13 @@ import pandas as pd
 from giteasy.githubb import get_all_fps_in_repo as getf
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from giteasy.repo import Repo
-from mirutil.requests_htmll import get_a_rendered_html_and_save_async as garhasa
+from mirutil.requests_htmll import get_a_rendered_html_and_save_async
 from mirutil.requests_htmll import get_rendered_htmls_and_save_async
-from mirutil.requests_htmll import get_a_rendered_html_and_save as garhas
 from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.utils import ret_clusters_indices as rci
+from mirutil.utils import ret_clusters_indices
 from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
-from pyppeteer.errors import BrowserError
-from mirutil.df import df_apply_parallel as dfap
 
 import ns
-
 
 gu = ns.GDU()
 cc = ns.CodalCol()
@@ -65,10 +61,6 @@ def ret_html_stms_of_github_repo(repo_name) :
     stms = [x.stem for x in fps if x.suffix == '.html']
     return stms
 
-def targ(url , fp) :
-    asyncio.run(garhasa(url , str(fp) , get_timeout = 30 , render_timeout = 60))
-    print(fp)
-
 def main() :
     pass
 
@@ -82,20 +74,12 @@ def main() :
     df = pd.read_parquet(dp_fp)
 
     ##
-    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
-    df[cn.furl] = cte.codalbase + df[cc.Url]
-
-    ##
     st0 = ret_html_stms_of_github_repo(gu.trg0)
     st1 = ret_html_stms_of_github_repo(gu.trg1)
     st2 = ret_html_stms_of_github_repo(gu.trg2)
 
     ##
-    fps = dirr.sh.glob('*.html')
-    st3 = [x.stem for x in fps]
-
-    ##
-    st = st0 + st1 + st2 + st3
+    st = st0 + st1 + st2
     df[cn.hdl] = df[cc.TracingNo].isin(st)
 
     ##
@@ -106,6 +90,10 @@ def main() :
     len(msk[msk])
 
     ##
+    df.loc[msk , cn.furl] = cte.codalbase + df[cc.Url]
+    df1 = df[msk]
+
+    ##
     if not dirr.sh.exists() :
         dirr.sh.mkdir()
 
@@ -113,23 +101,37 @@ def main() :
     dcini()
 
     ##
-    if False :
-        pass
-        ##
-        df1 = df[msk]
-        if not df1.empty :
-            ur = df1.iloc[-1][cn.furl]
-            fp = df1.iloc[-1][cn.fp]
-            targ(ur , fp)
+    if not df1.empty :
+        ur = df1.iloc[-1][cn.furl]
+        stm = df1.iloc[-1][cc.TracingNo]
+        fp = dirr.sh / f'{stm}.html'
+        fu = get_a_rendered_html_and_save_async
+        asyncio.run(fu(ur , fp))
+        print(fp)
 
     ##
-    dfap(df ,
-         targ ,
-         [cn.furl , cn.fp] ,
-         msk = msk ,
-         test = True ,
-         n_jobs = 30 ,
-         console_run = False)
+    cls = ret_clusters_indices(df1 , 5)
+
+    ##
+    for se in cls :
+        try :
+            si , ei = se
+            print(se)
+
+            inds = df1.index[si : ei]
+
+            urls = df1.loc[inds , cn.furl]
+
+            _fu = lambda x : dirr.sh / f'{x}.html'
+            _fps = df1.loc[inds , cc.TracingNo].apply(_fu)
+
+            _fu1 = get_rendered_htmls_and_save_async
+            asyncio.run(_fu1(urls , _fps))
+
+        except KeyboardInterrupt :
+            break
+
+        break
 
     ##
     if not dirr.lsh.exists() :
@@ -155,57 +157,6 @@ def main() :
             shutil.move(fp , nfp)
             print(f'{fp.name} moved to {nfp}')
 
-##
-if __name__ == "__main__" :
-    main()
-    print(f'{Path(__file__).name} Done!')
-
-##
-# noinspection PyUnreachableCode
-if False :
-    pass
-
-    ##
-    urls = df1.iloc[:30][cn.furl]
-    fps = df1.iloc[:30][cn.fp]
-
-    ##
-    ls = list(zip(urls , fps))
-
-    ##
-    cls = rci(ls , 7)
-
-    ##
-    for se in cls :
-        inps = ls[se[0] : se[1]]
-        print(inps)
-        break
-
-    ##
-
-    ##
-    from requests_html import HTMLSession
-    from mirutil.const import Const
-
-
-    cte = Const()
-
-    def download_chromium_if_not_installed() :
-        """download chromium if not installed"""
-        url = 'https://google.com'
-
-        s = HTMLSession()
-        r = s.get(url , headers = cte.headers , timeout = 10)
-        s.close()
-
-        r.html.render(timeout = 30)
-
-    ##
-    download_chromium_if_not_installed()
-
-    ##
-    df[cn.fp].to_list()
-
     ##
     puffd(dirr.sh , '.html' , gu.trg0)
     ##
@@ -213,7 +164,7 @@ if False :
     ##
     puffd(dirr.lh , '.html' , gu.trg2)
 
-    #
+    ##
     c2k = {
             cc.TracingNo    : None ,
             dac.CodalTicker : None ,
@@ -226,9 +177,28 @@ if False :
     ##
     sprq(df , df_fp)
     ##
+
     msg = f'{df_fp.name} updated'
     gdt.commit_and_push(msg)
 
     ##
     shutil.rmtree(dirr.lsh)
+
+    ##
     shutil.rmtree(dirr.lh)
+
+##
+if __name__ == "__main__" :
+    main()
+    print(f'{Path(__file__).name} Done!')
+
+##
+# noinspection PyUnreachableCode
+if False :
+    pass
+
+    ##
+
+    ##
+
+    ##
