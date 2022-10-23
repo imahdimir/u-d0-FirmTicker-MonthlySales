@@ -64,7 +64,7 @@ def is_cur_jmonth(st) :
         return False
 
     for pat in cmp.cp :
-        if re.match(pat , st) :
+        if re.fullmatch(pat , st) :
             return True
 
     return False

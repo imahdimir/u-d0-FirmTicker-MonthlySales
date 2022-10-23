@@ -106,7 +106,9 @@ def main() :
     dcini()
 
     ##
-    cls = rci(df , 20)
+    _df = df[msk]
+
+    cls = rci(_df , 50)
 
     ##
     for se in cls :
@@ -114,7 +116,7 @@ def main() :
             si , ei = se
             print(se)
 
-            inds = df.index[si : ei]
+            inds = _df.index[si : ei]
 
             urls = df.loc[inds , cn.furl]
             fps = df.loc[inds , cn.fp]
@@ -198,7 +200,41 @@ if False :
     pass
 
     ##
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service as ChromeService
+    from webdriver_manager.chrome import ChromeDriverManager
+
 
     ##
+    ch_opts = Options()
+
+    ch_opts.add_argument("--disable-extensions")
+    ch_opts.add_argument("--disable-gpu")
+    ch_opts.page_load_strategy = 'eager'
+    ch_opts.headless = True
+
+    ##
+    driver = webdriver.Chrome(service = ChromeService(ChromeDriverManager().install()) ,
+                              options = ch_opts)
+
+    ##
+    driver.get(
+            'https://www.codal.ir/Reports/Decision.aspx?LetterSerial=Ze4IPmSoVWS7Hj%2bq3QQQaQQQsEWg%3d%3d&rt=2&let=6&ct=5&ft=6')
+    driver.page_source
+
+    ##
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service as ChromiumService
+    from webdriver_manager.chrome import ChromeDriverManager
+    from webdriver_manager.core.utils import ChromeType
+
+
+    driver = webdriver.Chrome(service = ChromiumService(ChromeDriverManager(
+            chrome_type = ChromeType.CHROMIUM).install()))
+
+    ##
+    driver.get(
+            'https://www.codal.ir/Reports/Decision.aspx?LetterSerial=Ze4IPmSoVWS7Hj%2bq3QQQaQQQsEWg%3d%3d&rt=2&let=6&ct=5&ft=6')
+    driver.page_source
 
     ##

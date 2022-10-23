@@ -84,7 +84,7 @@ def update_with_last_run_data(df , fp) :
         df.update(lastdf)
     return df
 
-def trg_htp(fp: Path) -> (str , None) :
+def trg(fp: Path) -> (str , None) :
 
     m = MonthlyActivityReport(fp)
 
@@ -110,15 +110,14 @@ def main() :
     gdt = gd.GithubData(gu.tmp)
     gdt.overwriting_clone()
 
-    dbfp = gdt.local_path / 'b.prq'
-    dfp = gdt.local_path / 'c.prq'
+    dp_fp = gdt.local_path / 'b.prq'
+    df_fp = gdt.local_path / 'c.prq'
 
-    df = pd.read_parquet(dbfp)
-
+    df = pd.read_parquet(dp_fp)
     ##
     df[cn.err] = None
 
-    df = update_with_last_run_data(df , dfp)
+    df = update_with_last_run_data(df , df_fp)
 
     ##
     df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / x)
@@ -145,7 +144,7 @@ def main() :
 
     ##
     df = dfap(df ,
-              trg_htp ,
+              trg ,
               [cn.fp] ,
               out_cols = [cn.err] ,
               msk = msk ,
@@ -160,10 +159,10 @@ def main() :
 
     df = df.drop(columns = c2d.keys())
     ##
-    sprq(df , dfp)
+    sprq(df , df_fp)
 
     ##
-    msg = f'{dfp.name} updated'
+    msg = f'{df_fp.name} updated'
     gdt.commit_and_push(msg)
 
 ##
