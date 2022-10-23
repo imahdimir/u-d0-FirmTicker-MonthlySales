@@ -18,6 +18,8 @@ from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.utils import ret_clusters_indices as rci
 from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
 from requests.exceptions import ReadTimeout
+from mirutil.async_req import get_reqs_async as gra
+from mirutil.async_req import get_reqs_and_save_async as grasa
 
 import ns
 
@@ -31,6 +33,7 @@ class Dirr :
     lh = Repo(gu.trg2).local_path
     lsh = Repo(gu.trg1).local_path
     tmp = Repo(gu.tmp).local_path
+    new = Path('new')
 
 dirr = Dirr()
 
@@ -75,7 +78,7 @@ def main() :
     df = pd.read_parquet(dp_fp)
 
     ##
-    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
+    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.new / f'{x}.html')
     df[cn.furl] = cte.codalbase + df[cc.Url]
 
     ##
@@ -108,7 +111,7 @@ def main() :
     ##
     _df = df[msk]
 
-    cls = rci(_df , 50)
+    cls = rci(_df , 10)
 
     ##
     for se in cls :
@@ -121,19 +124,12 @@ def main() :
             urls = df.loc[inds , cn.furl]
             fps = df.loc[inds , cn.fp]
 
-            fu1 = get_rendered_htmls_and_save_async
-            asyncio.run(fu1(urls ,
-                            fps ,
-                            get_timeout = 15 ,
-                            render_timeout = 60))
+            o = asyncio.run(grasa(urls , fps , write_mode = 'wb'))
 
         except KeyboardInterrupt :
             break
 
-        except ReadTimeout :
-            pass
-
-        # break
+        break
 
     ##
     if not dirr.lsh.exists() :
@@ -236,5 +232,7 @@ if False :
     driver.get(
             'https://www.codal.ir/Reports/Decision.aspx?LetterSerial=Ze4IPmSoVWS7Hj%2bq3QQQaQQQsEWg%3d%3d&rt=2&let=6&ct=5&ft=6')
     driver.page_source
+
+    ##
 
     ##
