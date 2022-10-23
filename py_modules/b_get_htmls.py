@@ -15,10 +15,12 @@ from giteasy.repo import Repo
 from mirutil.requests_htmll import get_a_rendered_html_and_save_async
 from mirutil.requests_htmll import get_rendered_htmls_and_save_async
 from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.utils import ret_clusters_indices
+from mirutil.utils import ret_clusters_indices as rci
 from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
+from requests.exceptions import ReadTimeout
 
 import ns
+
 
 gu = ns.GDU()
 cc = ns.CodalCol()
@@ -65,7 +67,6 @@ def main() :
     pass
 
     ##
-
     gdt = gd.GithubData(gu.tmp)
     gdt.overwriting_clone()
 
@@ -74,12 +75,20 @@ def main() :
     df = pd.read_parquet(dp_fp)
 
     ##
+    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
+    df[cn.furl] = cte.codalbase + df[cc.Url]
+
+    ##
     st0 = ret_html_stms_of_github_repo(gu.trg0)
     st1 = ret_html_stms_of_github_repo(gu.trg1)
     st2 = ret_html_stms_of_github_repo(gu.trg2)
 
     ##
-    st = st0 + st1 + st2
+    fps = dirr.sh.glob('*.html')
+    st3 = [x.stem for x in fps]
+
+    ##
+    st = st0 + st1 + st2 + st3
     df[cn.hdl] = df[cc.TracingNo].isin(st)
 
     ##
@@ -90,10 +99,6 @@ def main() :
     len(msk[msk])
 
     ##
-    df.loc[msk , cn.furl] = cte.codalbase + df[cc.Url]
-    df1 = df[msk]
-
-    ##
     if not dirr.sh.exists() :
         dirr.sh.mkdir()
 
@@ -101,16 +106,7 @@ def main() :
     dcini()
 
     ##
-    if not df1.empty :
-        ur = df1.iloc[-1][cn.furl]
-        stm = df1.iloc[-1][cc.TracingNo]
-        fp = dirr.sh / f'{stm}.html'
-        fu = get_a_rendered_html_and_save_async
-        asyncio.run(fu(ur , fp))
-        print(fp)
-
-    ##
-    cls = ret_clusters_indices(df1 , 5)
+    cls = rci(df , 20)
 
     ##
     for se in cls :
@@ -118,20 +114,24 @@ def main() :
             si , ei = se
             print(se)
 
-            inds = df1.index[si : ei]
+            inds = df.index[si : ei]
 
-            urls = df1.loc[inds , cn.furl]
+            urls = df.loc[inds , cn.furl]
+            fps = df.loc[inds , cn.fp]
 
-            _fu = lambda x : dirr.sh / f'{x}.html'
-            _fps = df1.loc[inds , cc.TracingNo].apply(_fu)
-
-            _fu1 = get_rendered_htmls_and_save_async
-            asyncio.run(_fu1(urls , _fps))
+            fu1 = get_rendered_htmls_and_save_async
+            asyncio.run(fu1(urls ,
+                            fps ,
+                            get_timeout = 15 ,
+                            render_timeout = 60))
 
         except KeyboardInterrupt :
             break
 
-        break
+        except ReadTimeout :
+            pass
+
+        # break
 
     ##
     if not dirr.lsh.exists() :
