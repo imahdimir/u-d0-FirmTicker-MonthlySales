@@ -17,51 +17,32 @@ from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
 from mirutil.requests_htmll import get_rendered_htmls_and_save_async as grhasa
 from mirutil.utils import ret_clusters_indices as rci
 from requests.exceptions import ReadTimeout
+from mirutil.async_req import get_reqs_and_save_async as grasa
 
 import ns
+from py_modules.b_get_htmls import Const as Const_b
+from py_modules.b_get_htmls import Dirr as Dirr_b
+from py_modules.b_get_htmls import ColName as ColName_b
 
 
 gu = ns.GDU()
 cc = ns.CodalCol()
 dac = ns.DAllCodalLetters()
 
-class Dirr :
-    sh = Repo(gu.trg0).local_path
-    lh = Repo(gu.trg2).local_path
-    lsh = Repo(gu.trg1).local_path
-    tmp = Repo(gu.tmp).local_path
-    new = Path('new')
+class Dirr(Dirr_b) :
+    rhtml = Repo(gu.trg5).local_path
 
 dirr = Dirr()
 
-class ColName :
-    hdl = 'IsHtmlDownloaded'
-    furl = 'FullUrl'
-    fp = 'FilePath'
-    ms = 'RepType'
+class ColName(ColName_b) :
+    pass
 
 cn = ColName()
 
-class Const :
-    codalbase = 'https://codal.ir'
-    sar = 'سرمایه ثبت شده:'
-    nsar = 'سرمایه ثبت نشده:'
+class Const(Const_b) :
+    pass
 
 cte = Const()
-
-def check_html_being_the_monthly_sales_report(fp) :
-    with open(fp , 'r' , encoding = 'utf-8') as f :
-        txt = f.read()
-    if (cte.sar in txt) and (cte.nsar in txt) :
-        return True
-    return False
-
-def ret_html_stms_of_github_repo(repo_name) :
-    """ returns a list of htmls in the GitHub repo """
-    fps = getf(repo_name)
-    fps = [Path(x.path) for x in fps]
-    stms = [x.stem for x in fps if x.suffix == '.html']
-    return stms
 
 def main() :
     pass
@@ -70,46 +51,41 @@ def main() :
     gdt = gd.GithubData(gu.tmp)
     gdt.overwriting_clone()
 
-    dp_fp = gdt.local_path / 'a.prq'
-    df_fp = gdt.local_path / 'b.prq'
+    dp_fp = gdt.local_path / 'b.prq'
+    df_fp = gdt.local_path / 'c.prq'
     df = pd.read_parquet(dp_fp)
 
     ##
-    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
-    df[cn.furl] = cte.codalbase + df[cc.Url]
+    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.rhtml / f'{x}.html')
 
     ##
-    st0 = ret_html_stms_of_github_repo(gu.trg0)
-    st1 = ret_html_stms_of_github_repo(gu.trg1)
-    st2 = ret_html_stms_of_github_repo(gu.trg2)
+    # st0 = ret_html_stms_of_github_repo(gu.trg0)
+    # st1 = ret_html_stms_of_github_repo(gu.trg1)
+    # st2 = ret_html_stms_of_github_repo(gu.trg2)
+    #
+    # ##
+    # fps = dirr.rhtml.glob('*.html')
+    # st3 = [x.stem for x in fps]
+    #
+    # ##
+    # st = st0 + st1 + st2 + st3
+    # df[cn.hdl] = df[cc.TracingNo].isin(st)
 
     ##
-    fps = dirr.sh.glob('*.html')
-    st3 = [x.stem for x in fps]
-
-    ##
-    st = st0 + st1 + st2 + st3
-    df[cn.hdl] = df[cc.TracingNo].isin(st)
-
-    ##
-    msk = df[cc.Url].notna()
+    msk = df[cn.furl].notna()
     print(len(msk[msk]))
 
+    ##
     msk &= ~ df[cn.hdl]
     len(msk[msk])
 
     ##
-    if not dirr.sh.exists() :
-        dirr.sh.mkdir()
-
-    ##
-    dcini()
+    if not dirr.rhtml.exists() :
+        dirr.rhtml.mkdir()
 
     ##
     _df = df[msk]
-
-    cls = rci(_df , 20)
-
+    cls = rci(_df , 50)
     ##
     for se in cls :
         try :
@@ -121,18 +97,12 @@ def main() :
             urls = df.loc[inds , cn.furl]
             fps = df.loc[inds , cn.fp]
 
-            o = asyncio.run(grhasa(urls ,
-                                   fps ,
-                                   get_timeout = 15 ,
-                                   render_timeout = 60))
-
-        except ReadTimeout as e :
-            print(e)
+            o = asyncio.run(grasa(urls , fps))
 
         except KeyboardInterrupt :
             break
 
-        # break
+        break
 
     ##
     if not dirr.lsh.exists() :
@@ -171,7 +141,6 @@ def main() :
             dac.CodalTicker : None ,
             cc.CompanyName  : None ,
             cc.Title        : None ,
-            cn.furl         : None ,
             }
 
     df = df[list(c2k.keys())]
@@ -198,6 +167,14 @@ if False :
     pass
 
     ##
-    fp = ''
+    r1 = o[0]
+    r1h = r1.cont
+
+    ##
+    from pprint import pprint
+
+
+    r1t = r1h.decode('utf-8')
+    pprint(r1t)
 
     ##
