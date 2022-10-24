@@ -23,6 +23,7 @@ import ns
 from py_modules.b_get_htmls import Const as Const_b
 from py_modules.b_get_htmls import Dirr as Dirr_b
 from py_modules.b_get_htmls import ColName as ColName_b
+from py_modules.b_get_htmls import ret_html_stms_of_github_repo
 
 
 gu = ns.GDU()
@@ -63,7 +64,7 @@ def main() :
     df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.rhtml / f'{x}.html')
 
     ##
-    # st0 = ret_html_stms_of_github_repo(gu.trg0)
+    st0 = ret_html_stms_of_github_repo(gu.trg5)
     # st1 = ret_html_stms_of_github_repo(gu.trg1)
     # st2 = ret_html_stms_of_github_repo(gu.trg2)
     #
@@ -72,7 +73,7 @@ def main() :
     st3 = [x.stem for x in fps]
 
     ##
-    st = st3
+    st = st3 + st0
     df[cn.hdl] = df[cc.TracingNo].isin(st)
 
     ##
