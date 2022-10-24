@@ -56,6 +56,10 @@ def main() :
     df = pd.read_parquet(dp_fp)
 
     ##
+    if not dirr.rhtml.exists() :
+        dirr.rhtml.mkdir()
+
+    ##
     df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.rhtml / f'{x}.html')
 
     ##
@@ -80,12 +84,9 @@ def main() :
     len(msk[msk])
 
     ##
-    if not dirr.rhtml.exists() :
-        dirr.rhtml.mkdir()
-
-    ##
     _df = df[msk]
-    cls = rci(_df , 50)
+    cls = rci(_df , 20)
+
     ##
     for se in cls :
         try :
@@ -102,7 +103,7 @@ def main() :
         except KeyboardInterrupt :
             break
 
-        break
+        # break
 
     ##
     if not dirr.lsh.exists() :
