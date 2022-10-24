@@ -85,7 +85,7 @@ def main() :
 
     ##
     _df = df[msk]
-    cls = rci(_df , 50)
+    cls = rci(_df , 20)
 
     ##
     for se in cls :
