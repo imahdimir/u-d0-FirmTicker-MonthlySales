@@ -63,13 +63,13 @@ def main() :
     # st1 = ret_html_stms_of_github_repo(gu.trg1)
     # st2 = ret_html_stms_of_github_repo(gu.trg2)
     #
-    # ##
-    # fps = dirr.rhtml.glob('*.html')
-    # st3 = [x.stem for x in fps]
-    #
-    # ##
-    # st = st0 + st1 + st2 + st3
-    # df[cn.hdl] = df[cc.TracingNo].isin(st)
+    ##
+    fps = dirr.rhtml.glob('*.html')
+    st3 = [x.stem for x in fps]
+
+    ##
+    st = st3
+    df[cn.hdl] = df[cc.TracingNo].isin(st)
 
     ##
     msk = df[cn.furl].notna()
@@ -97,7 +97,7 @@ def main() :
             urls = df.loc[inds , cn.furl]
             fps = df.loc[inds , cn.fp]
 
-            o = asyncio.run(grasa(urls , fps))
+            o = asyncio.run(grasa(urls , fps , verify_ssl = False))
 
         except KeyboardInterrupt :
             break
