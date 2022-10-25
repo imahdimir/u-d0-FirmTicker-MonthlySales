@@ -2,58 +2,101 @@
 
     """
 
-import asyncio
-import os
-import shutil
+import re
+from dataclasses import dataclass
 from pathlib import Path
 
 import githubdata as gd
 import pandas as pd
-from giteasy.githubb import get_all_fps_in_repo as getf
-from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
-from giteasy.repo import Repo
-from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
-from mirutil.requests_htmll import get_rendered_htmls_and_save_async as grhasa
-from mirutil.utils import ret_clusters_indices as rci
-from requests.exceptions import ReadTimeout
-from mirutil.async_req import get_reqs_and_save_async as grasa
-from mirutil.async_req import get_reqs_async as gra
-from mirutil.df import update_with_last_run_data as uwlrd
-from mirutil.files import read_txt_file as rtf
-from mirutil.html import parse_html_as_etree as phae
 from mirutil.df import df_apply_parallel as dfap
-from pprint import pprint
+from mirutil.df import find_all_df_locs_eq_val as faelv
+from mirutil.df import ret_north_west_of_indices as rnwoi
+from mirutil.df import save_as_prq_wo_index as sprq
+from mirutil.jdate import ex_1st_jmonth_fr_fa_str as ejffs
+from mirutil.jdate import find_jmonth_fr_df_col as fjfdc
+from varname import nameof as nof
+from mirutil.str import normalize_fa_str_completely as nfsc
+from mirutil.df import update_with_last_run_data as uwlrd
 
 import ns
-from py_modules.c_get_raw_htmls import ColName as ColName_c
-from py_modules.c_get_raw_htmls import Dirr as Dirr_c
+from py_modules.c_ex_tables_by_htp import ColName as PreColName
+from py_modules.c_ex_tables_by_htp import Dirr as PreDirr
 
 
 gu = ns.GDU()
+ft = ns.FirmType()
 
-class Dirr(Dirr_c) :
+class Dirr(PreDirr) :
     pass
 
 dirr = Dirr()
 
-class ColName(ColName_c) :
-    htjm = 'HtmlJMonth'
+class ColName(PreColName) :
+    tjm = 'TitleJMonth'
+    xjm = 'XlJMonth'
+    nwr = 'NorthWestRow'
+    nwc = 'NorthWestCol'
+    done = 'done'
 
 c = ColName()
 
-def find_jmonth(html_fp) :
-    _id = 'ctl00_cphBody_ucProduct1_lblMonthEndToDateCaption'
+class Param :
+    pat = '1[34]\d{2}/\d{2}/\d{2}'
 
-    ht = rtf(html_fp)
-    tr = phae(ht)
-    els = tr.xpath("//bdo[@dir='ltr']")
-    for el in els :
-        pel = el.getparent()
-        if pel.attrib['id'] == _id :
-            return el.text
+p = Param()
+
+class CurMonthParam :
+    _1st_comp = {
+            'دوره یک ماهه منتهی به'                         : None ,
+            'ماه'                                           : None ,
+            'درآمد شناسایی شده طی دوره یک ماهه منتهی به'    : None ,
+            'درآمد تسهیلات اعطایی طی دوره یک ماهه منتهی به' : None ,
+            }
+    cp = [x + '\s*' + p.pat for x in _1st_comp.keys()]
+
+cmp = CurMonthParam()
+
+def is_cur_jmonth(st) :
+
+    if not isinstance(st , str) :
+        return False
+
+    for pat in cmp.cp :
+        if re.fullmatch(pat , st) :
+            return True
+
+    return False
+
+def find_jmonth_fr_xl_df(df: pd.DataFrame) :
+    df = df.applymap(nfsc)
+    msk = df.applymap(is_cur_jmonth)
+
+    lcs = faelv(msk , True)
+    nw = rnwoi(lcs)
+    if nw is None :
+        return None , (None , None)
+
+    cval = df.iat[nw[0] , nw[1]]
+
+    jm = ejffs(cval)
+    return jm , nw
+
+@dataclass
+class RTrg :
+    jm: (str , None) = None
+    nwr: (int , None) = None
+    nwc: (int , None) = None
+    done: bool = True
+
+rtrg = RTrg()
+
+def trg(fp) :
+    df = pd.read_excel(fp , engine = 'openpyxl')
+    jm , nw = find_jmonth_fr_xl_df(df)
+    return RTrg(jm = jm , nwr = nw[0] , nwc = nw[1])
 
 def main() :
+
     pass
 
     ##
@@ -67,44 +110,50 @@ def main() :
     df = pd.read_parquet(dp_fp)
 
     ##
-    c2d = {
-            c.err     : None ,
-            c.rstatus : None ,
-            }
-
-    df = df.drop(columns = c2d.keys())
-
-    ##
-    df[c.htjm] = None
+    df[c.done] = None
+    df[c.xjm] = None
+    df[c.nwr] = None
+    df[c.nwc] = None
 
     df = uwlrd(df , df_fp)
 
     ##
-    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.rhtml / f'{x}.html')
+    df = fjfdc(df , c.Title , c.tjm , sep = '/')
 
     ##
-    fps = dirr.rhtml.glob('*.html')
+    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
+
+    ##
+    fps = dirr.tbls.glob('*.xlsx')
 
     msk = df[c.fp].isin(fps)
-    pprint(len(msk[msk]))
+
+    print(len(msk[msk]))
 
     ##
-    df = dfap(df , find_jmonth , [c.fp] , [c.htjm] , msk = msk , test = False)
+    msk &= df[c.err].isna()
+    msk &= df[c.done].isna()
+
+    print(len(msk[msk]))
 
     ##
-    msk1 = msk.copy()
-    msk1 &= df[c.htjm].isna()
+    out_map = {
+            c.xjm  : nof(rtrg.jm) ,
+            c.nwr  : nof(rtrg.nwr) ,
+            c.nwc  : nof(rtrg.nwc) ,
+            c.done : nof(rtrg.done) ,
+            }
 
-    _df = df[msk1]
+    df = dfap(df , trg , [c.fp] , out_map , msk = msk , test = False)
 
     ##
 
     ##
     c2d = {
-            c.furl : None ,
-            c.fp   : None ,
-            c.hdl  : None ,
+            c.err : None ,
+            c.fp  : None ,
             }
+
     df = df.drop(columns = c2d.keys())
 
     ##
@@ -114,40 +163,41 @@ def main() :
     msg = f'{df_fp.name} updated'
     gdt.commit_and_push(msg)
 
+    ##
+
+    msk = df[c.done]
+    msk &= df[c.xjm].isna()
+    print(len(msk[msk]))
+
+    df1 = df[msk]
+
+    ##
+
+    ##
+
 ##
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
 
 ##
-# noinspection PyUnreachableCode
+
 if False :
     pass
 
     ##
-    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-raw-html/905034.html'
-    ht = rtf(fp)
+    fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-tables/337220.xlsx'
+
+    dft = pd.read_excel(fp)
 
     ##
-    pprint(ht)
+    find_jmonth_fr_xl_df(dft)
 
     ##
-    find_jmonth(fp)
+    fol = '/Users/mahdi/Dropbox/1-git-dirs/rd-Codal-monthly-sales-htmls'
+    df1['hfp'] = Path(fol) / (df1[c.TracingNo] + '.html')
 
     ##
-    ls = [1 , 2 , 3]
-    ls1 = zip(ls)
-
-    ##
-    def x2(x) :
-        return x ** 2
-
-    from multiprocess import Pool
-
-
-    ##
-    pool = Pool(3)
-
-    pool.map(x2 , *ls1)
+    _ = df1['hfp'].apply(lambda x : x.unlink())
 
     ##

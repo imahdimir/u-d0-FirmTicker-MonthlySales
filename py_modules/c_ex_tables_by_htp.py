@@ -14,26 +14,25 @@ from mirutil.html import etree_to_html
 from mirutil.html import parse_html_as_etree
 from mirutil.html import read_tables_in_html_by_html_table_parser as rthp
 from mirutil.html import rm_hidden_elements_of_etree
+from mirutil.df import update_with_last_run_data as uwlrd
 
 import ns
-from py_modules.b_get_htmls import ColName as CNb
-from py_modules.b_get_htmls import Dirr as PDb
+from py_modules.b_get_htmls import ColName as PreColName
+from py_modules.b_get_htmls import Dirr as PreDirr
 
 
 gu = ns.GDU()
-cc = ns.CodalCol()
 ft = ns.FirmType()
 
-class Dirr(PDb) :
+class Dirr(PreDirr) :
     tbls = Repo(gu.trg4).local_path
 
 dirr = Dirr()
 
-class ColName(CNb) :
-    he = 'HtmlExists'
+class ColName(PreColName) :
     err = 'err'
 
-cn = ColName()
+c = ColName()
 
 class MonthlyActivityReport :
 
@@ -50,6 +49,10 @@ class MonthlyActivityReport :
 
     def read_tables_by_html_table_parser(self) :
         self.dfs = rthp(self.html)
+
+        if len(self.dfs) == 0 :
+            return 'no_table'
+
         self.df = pd.concat(self.dfs)
 
     def _apply_on_df(self , fu) :
@@ -78,7 +81,7 @@ def make_not_having_alphabet_digits_cells_none(df) :
         df.loc[~ ms , col] = None
     return df
 
-def trg(fp: Path) -> (str , None) :
+def targ(fp: Path) -> (str , None) :
 
     m = MonthlyActivityReport(fp)
 
@@ -108,16 +111,33 @@ def main() :
     df_fp = gdt.local_path / 'c.prq'
 
     df = pd.read_parquet(dp_fp)
-    ##
-    df[cn.err] = None
-
-    df = update_with_last_run_data(df , df_fp)
 
     ##
-    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / x)
-    df[cn.fp] = df[cn.fp].apply(lambda x : x.with_suffix('.html'))
-    df[cn.he] = df[cn.fp].apply(lambda x : x.exists())
-    print(len(df[df[cn.he]]))
+    c2d = {
+            c.furl : None ,
+            }
+
+    df = df.drop(columns = c2d.keys())
+
+    ##
+    df[c.err] = None
+
+    df = uwlrd(df , df_fp)
+
+    ##
+    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
+
+    ##
+    fps = dirr.sh.glob('*.html')
+
+    msk = df[c.fp].isin(fps)
+
+    print(len(msk[msk]))
+
+    ##
+    di = dirr.tbls
+    if not di.exists() :
+        di.mkdir()
 
     ##
     fps = dirr.tbls.glob('*.xlsx')
@@ -125,33 +145,24 @@ def main() :
 
     fps = [x.stem for x in fps]
 
-    msk = ~ df[cc.TracingNo].isin(fps)
-    ##
-    msk &= df[cn.he]
+    msk &= ~ df[c.TracingNo].isin(fps)
 
-    _df = df[msk]
-    print(len(_df))
-    ##
-    di = dirr.tbls
-    if not di.exists() :
-        di.mkdir()
+    print(len(msk[msk]))
 
     ##
-    df = dfap(df ,
-              trg ,
-              [cn.fp] ,
-              out_cols = [cn.err] ,
-              msk = msk ,
-              test = False ,
-              n_jobs = 30)
+    df = dfap(df , targ , [c.fp] , [c.err] , msk = msk , test = False)
+
+    ##
+    msk1 = df[c.err].notna()
+    _df = df[msk1]
 
     ##
     c2d = {
-            cn.fp : None ,
-            cn.he : None
+            c.fp : None ,
             }
 
     df = df.drop(columns = c2d.keys())
+
     ##
     sprq(df , df_fp)
 

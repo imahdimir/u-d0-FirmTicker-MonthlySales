@@ -88,6 +88,7 @@ def main() :
     pass
 
     ##
+
     gdt = gd.GithubData(gu.tmp)
     gdt.overwriting_clone()
 
@@ -110,7 +111,12 @@ def main() :
     st3 = [x.stem for x in fps]
 
     ##
+    st = st1 + st2 + st3
+
+    ##
     st = st0 + st1 + st2 + st3
+
+    ##
     df[c.hdl] = df[c.TracingNo].isin(st)
 
     ##
