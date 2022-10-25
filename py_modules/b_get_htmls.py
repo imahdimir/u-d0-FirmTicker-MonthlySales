@@ -2,7 +2,6 @@
 
     """
 
-import asyncio
 import os
 import shutil
 from pathlib import Path
@@ -14,33 +13,31 @@ from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puff
 from giteasy.repo import Repo
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
-from mirutil.requests_htmll import get_rendered_htmls_and_save_async as grhasa
+from mirutil.requests_htmll import get_rendered_htmls_and_save_async_sync as grhasas
 from mirutil.utils import ret_clusters_indices as rci
 from requests.exceptions import ReadTimeout
 
 import ns
+from py_modules.a_add_new_letters import ColName as ColName_a
 
 
 gu = ns.GDU()
-cc = ns.CodalCol()
-dac = ns.DAllCodalLetters()
 
 class Dirr :
     sh = Repo(gu.trg0).local_path
     lh = Repo(gu.trg2).local_path
     lsh = Repo(gu.trg1).local_path
     tmp = Repo(gu.tmp).local_path
-    new = Path('new')
 
 dirr = Dirr()
 
-class ColName :
+class ColName(ColName_a) :
     hdl = 'IsHtmlDownloaded'
     furl = 'FullUrl'
     fp = 'FilePath'
     ms = 'RepType'
 
-cn = ColName()
+c = ColName()
 
 class Const :
     codalbase = 'https://codal.ir'
@@ -63,6 +60,30 @@ def ret_html_stms_of_github_repo(repo_name) :
     stms = [x.stem for x in fps if x.suffix == '.html']
     return stms
 
+def move_low_size_htmls(src_dir , dst_dir) :
+    if not dst_dir.exists() :
+        dst_dir.mkdir()
+
+    fps = src_dir.glob('*.html')
+    for fp in fps :
+        if fp.exists() :
+            if os.path.getsize(fp) < 4 * 10 ** 3 :  # under 4KB
+                nfp = dst_dir / fp.name
+                shutil.move(fp , nfp)
+                print(f'{fp.name} moved to {nfp}')
+
+def move_not_monthly_report_htmls(src_dir , dst_dir) :
+    if not dst_dir.exists() :
+        dst_dir.mkdir()
+
+    fps = src_dir.glob('*.html')
+    for fp in fps :
+        fu = check_html_being_the_monthly_sales_report
+        if not fu(fp) :
+            nfp = dst_dir / fp.name
+            shutil.move(fp , nfp)
+            print(f'{fp.name} moved to {nfp}')
+
 def main() :
     pass
 
@@ -72,11 +93,12 @@ def main() :
 
     dp_fp = gdt.local_path / 'a.prq'
     df_fp = gdt.local_path / 'b.prq'
+
     df = pd.read_parquet(dp_fp)
 
     ##
-    df[cn.fp] = df[cc.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
-    df[cn.furl] = cte.codalbase + df[cc.Url]
+    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
+    df[c.furl] = cte.codalbase + df[c.Url]
 
     ##
     st0 = ret_html_stms_of_github_repo(gu.trg0)
@@ -89,13 +111,13 @@ def main() :
 
     ##
     st = st0 + st1 + st2 + st3
-    df[cn.hdl] = df[cc.TracingNo].isin(st)
+    df[c.hdl] = df[c.TracingNo].isin(st)
 
     ##
-    msk = df[cc.Url].notna()
+    msk = df[c.Url].notna()
     print(len(msk[msk]))
 
-    msk &= ~ df[cn.hdl]
+    msk &= ~ df[c.hdl]
     len(msk[msk])
 
     ##
@@ -107,10 +129,10 @@ def main() :
 
     ##
     _df = df[msk]
-
     cls = rci(_df , 20)
 
     ##
+
     for se in cls :
         try :
             si , ei = se
@@ -118,13 +140,10 @@ def main() :
 
             inds = _df.index[si : ei]
 
-            urls = df.loc[inds , cn.furl]
-            fps = df.loc[inds , cn.fp]
+            urls = df.loc[inds , c.furl]
+            fps = df.loc[inds , c.fp]
 
-            o = asyncio.run(grhasa(urls ,
-                                   fps ,
-                                   get_timeout = 15 ,
-                                   render_timeout = 60))
+            o = grhasas(urls , fps , get_timeout = 15 , render_timeout = 60)
 
         except ReadTimeout as e :
             print(e)
@@ -135,49 +154,35 @@ def main() :
         # break
 
     ##
-    if not dirr.lsh.exists() :
-        dirr.lsh.mkdir()
-
-    fps = dirr.sh.glob('*.html')
-    for fp in fps :
-        if fp.exists() :
-            if os.path.getsize(fp) < 4 * 10 ** 3 :  # under 4KB
-                nfp = dirr.lsh / fp.name
-                shutil.move(fp , nfp)
-                print(f'{fp.name} moved to {nfp}')
+    move_low_size_htmls(dirr.sh , dirr.lsh)
 
     ##
-    if not dirr.lh.exists() :
-        dirr.lh.mkdir()
-
-    fps = dirr.sh.glob('*.html')
-    for fp in fps :
-        fu = check_html_being_the_monthly_sales_report
-        if not fu(fp) :
-            nfp = dirr.lh / fp.name
-            shutil.move(fp , nfp)
-            print(f'{fp.name} moved to {nfp}')
+    move_not_monthly_report_htmls(dirr.sh , dirr.lh)
 
     ##
+
     puffd(dirr.sh , '.html' , gu.trg0)
+
     ##
     puffd(dirr.lsh , '.html' , gu.trg1)
+
     ##
     puffd(dirr.lh , '.html' , gu.trg2)
 
     ##
     c2k = {
-            cc.TracingNo    : None ,
-            dac.CodalTicker : None ,
-            cc.CompanyName  : None ,
-            cc.Title        : None ,
-            cn.furl         : None ,
+            c.TracingNo   : None ,
+            c.CodalTicker : None ,
+            c.CompanyName : None ,
+            c.Title       : None ,
+            c.furl        : None ,
             }
 
     df = df[list(c2k.keys())]
 
     ##
     sprq(df , df_fp)
+
     ##
 
     msg = f'{df_fp.name} updated'

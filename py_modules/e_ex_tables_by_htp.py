@@ -78,12 +78,6 @@ def make_not_having_alphabet_digits_cells_none(df) :
         df.loc[~ ms , col] = None
     return df
 
-def update_with_last_run_data(df , fp) :
-    if fp.exists() :
-        lastdf = pd.read_parquet(fp)
-        df.update(lastdf)
-    return df
-
 def trg(fp: Path) -> (str , None) :
 
     m = MonthlyActivityReport(fp)

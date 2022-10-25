@@ -18,9 +18,9 @@ from varname import nameof as nof
 from mirutil.str import normalize_fa_str_completely as nfsc
 
 import ns
-from py_modules.d_ex_tables_by_htp import ColName as CNc
-from py_modules.d_ex_tables_by_htp import Dirr as PDc
-from py_modules.d_ex_tables_by_htp import update_with_last_run_data as uwlrd
+from py_modules.e_ex_tables_by_htp import ColName as CNc
+from py_modules.e_ex_tables_by_htp import Dirr as PDc
+from py_modules.e_ex_tables_by_htp import update_with_last_run_data as uwlrd
 
 
 gu = ns.GDU()

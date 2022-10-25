@@ -12,11 +12,16 @@ from mirutil.ns import update_ns_module
 update_ns_module()
 import ns
 
+from ns import DAllCodalLetters as dac
+
 
 gu = ns.GDU()
-cc = ns.CodalCol()
 clc = ns.CodalLetterCode()
-dac = ns.DAllCodalLetters()
+
+class ColName(dac) :
+    pass
+
+c = ColName()
 
 def main() :
     pass
@@ -24,37 +29,37 @@ def main() :
     ##
     gds = gd.GithubData(gu.src0)
     ds = gds.read_data()
-    ##
 
-    msk = ds[cc.LetterCode].eq(clc.MonthlySalesRep)
+    ##
+    msk = ds[c.LetterCode].eq(clc.MonthlySalesRep)
     print(len(msk[msk]))
     ##
-    da = ds[msk]
+    df = ds[msk]
 
     ##
-    da[cc.TracingNo] = da[cc.TracingNo].astype('string')
+    df[c.TracingNo] = df[c.TracingNo].astype('string')
     ##
     c2k = {
-            cc.TracingNo    : None ,
+            c.TracingNo     : None ,
             dac.CodalTicker : None ,
-            cc.CompanyName  : None ,
-            cc.Title        : None ,
-            cc.Url          : None ,
+            c.CompanyName   : None ,
+            c.Title         : None ,
+            c.Url           : None ,
             }
 
-    da = da[list(c2k.keys())]
+    df = df[list(c2k.keys())]
 
     ##
     gdt = gd.GithubData(gu.tmp)
     gdt.overwriting_clone()
-    ##
-
-    dafp = gdt.local_path / 'a.prq'
-    ##
-    sprq(da , dafp)
 
     ##
-    msg = f'added new rows to {dafp.name}'
+    df_fp = gdt.local_path / 'a.prq'
+    ##
+    sprq(df , df_fp)
+
+    ##
+    msg = f'added new rows to {df_fp.name}'
     gdt.commit_and_push(msg)
 
     ##

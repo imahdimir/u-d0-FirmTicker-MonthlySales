@@ -8,31 +8,8 @@ class GDU :
     trg3 = "https://github.com/imahdimir/rd0-Codal-monthly-sales-dled-files"
     trg4 = "https://github.com/imahdimir/rd-Codal-monthly-sales-tables"
     trg5 = "https://github.com/imahdimir/rd-Codal-monthly-sales-raw-html"
-
-class CodalCol :
-    TracingNo = "TracingNo"
-    SuperVision = "SuperVision"
-    Symbol = "Symbol"
-    CompanyName = "CompanyName"
-    UnderSupervision = "UnderSupervision"
-    Title = "Title"
-    LetterCode = "LetterCode"
-    SentDateTime = "SentDateTime"
-    PublishDateTime = "PublishDateTime"
-    HasHtml = "HasHtml"
-    Url = "Url"
-    HasExcel = "HasExcel"
-    HasPdf = "HasPdf"
-    HasXbrl = "HasXbrl"
-    HasAttachment = "HasAttachment"
-    AttachmentUrl = "AttachmentUrl"
-    PdfUrl = "PdfUrl"
-    ExcelUrl = "ExcelUrl"
-    XbrlUrl = "XbrlUrl"
-    TedanUrl = "TedanUrl"
-
-class CodalLetterCode :
-    MonthlySalesRep = "ن-۳۰"
+    trg6 = "https://github.com/imahdimir/rd-Codal-monthly-sales-low-size-raw-html"
+    trg7 = "https://github.com/imahdimir/rd-Codal-monthly-sales-link-raw-htmls"
 
 class Col :
     jd = "JDate"
@@ -62,6 +39,9 @@ class DAllCodalLetters :
     PdfUrl = "PdfUrl"
     HasXbrl = "HasXbrl"
     XbrlUrl = "XbrlUrl"
+
+class CodalLetterCode :
+    MonthlySalesRep = "ن-۳۰"
 
 class FirmType :
     p = "Production"
