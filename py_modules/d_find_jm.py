@@ -37,6 +37,8 @@ class ColName(PreColName) :
     nwr = 'NorthWestRow'
     nwc = 'NorthWestCol'
     done = 'done'
+    nojm = 'no_jmonth'
+    done_1 = 'done_1'
 
 c = ColName()
 
@@ -51,10 +53,21 @@ class CurMonthParam :
             'ماه'                                           : None ,
             'درآمد شناسایی شده طی دوره یک ماهه منتهی به'    : None ,
             'درآمد تسهیلات اعطایی طی دوره یک ماهه منتهی به' : None ,
+            'درآمد محقق شده طی دوره یک ماهه منتهی به'       : None ,
+            'درآمد شناساسی شده طی دوره یک ماهه منتهی به'    : None ,
             }
     cp = [x + '\s*' + p.pat for x in _1st_comp.keys()]
 
 cmp = CurMonthParam()
+
+class NoJMonthParam :
+    njm = {
+            'درآمد محقق شده طی ماه' : None
+            }
+
+    njms = list(njm.keys())
+
+njmp = NoJMonthParam()
 
 def is_cur_jmonth(st) :
 
@@ -81,22 +94,41 @@ def find_jmonth_fr_xl_df(df: pd.DataFrame) :
     jm = ejffs(cval)
     return jm , nw
 
+def has_no_jdate_in_xl(df) :
+    df = df.applymap(nfsc)
+    for col in df.columns :
+        ms = df[col].isin(njmp.njms)
+        if ms.any() :
+            return True
+    return False
+
 @dataclass
-class RTrg :
+class RTarg0 :
     jm: (str , None) = None
     nwr: (int , None) = None
     nwc: (int , None) = None
     done: bool = True
 
-rtrg = RTrg()
+rt0 = RTarg0()
 
-def trg(fp) :
+def targ_0(fp) :
     df = pd.read_excel(fp , engine = 'openpyxl')
     jm , nw = find_jmonth_fr_xl_df(df)
-    return RTrg(jm = jm , nwr = nw[0] , nwc = nw[1])
+    return RTarg0(jm = jm , nwr = nw[0] , nwc = nw[1])
+
+@dataclass
+class RTarg1 :
+    nojm: bool = False
+    done: bool = True
+
+rt1 = RTarg1()
+
+def targ_1(fp) :
+    df = pd.read_excel(fp , engine = 'openpyxl')
+    nojm = has_no_jdate_in_xl(df)
+    return RTarg1(nojm = nojm)
 
 def main() :
-
     pass
 
     ##
@@ -115,6 +147,7 @@ def main() :
     df[c.nwr] = None
     df[c.nwc] = None
 
+    ##
     df = uwlrd(df , df_fp)
 
     ##
@@ -125,26 +158,72 @@ def main() :
 
     ##
     fps = dirr.tbls.glob('*.xlsx')
+    fps = list(fps)
 
     msk = df[c.fp].isin(fps)
 
     print(len(msk[msk]))
 
     ##
-    msk &= df[c.err].isna()
-    msk &= df[c.done].isna()
+    msk &= df[c.xjm].isna()
 
     print(len(msk[msk]))
 
     ##
     out_map = {
-            c.xjm  : nof(rtrg.jm) ,
-            c.nwr  : nof(rtrg.nwr) ,
-            c.nwc  : nof(rtrg.nwc) ,
-            c.done : nof(rtrg.done) ,
+            c.xjm  : nof(rt0.jm) ,
+            c.nwr  : nof(rt0.nwr) ,
+            c.nwc  : nof(rt0.nwc) ,
+            c.done : nof(rt0.done) ,
             }
 
-    df = dfap(df , trg , [c.fp] , out_map , msk = msk , test = False)
+    df = dfap(df , targ_0 , [c.fp] , out_map , msk = msk , test = False)
+
+    ##
+    _df = df[msk]
+
+    ##
+    msk = df[c.fp].isin(fps)
+
+    print(len(msk[msk]))
+
+    ##
+    msk &= df[c.xjm].isna()
+
+    print(len(msk[msk]))
+
+    _df = df[msk]
+
+    ##
+    out_map = {
+            c.nojm   : nof(rt1.nojm) ,
+            c.done_1 : nof(rt1.done) ,
+            }
+
+    df = dfap(df , targ_1 , [c.fp] , out_map , msk = msk , test = False)
+
+    ##
+    _df = df[msk]
+
+    ##
+    msk = df[c.nojm].eq(False)
+    print(len(msk[msk]))
+
+    _df = df[msk]
+    assert len(_df) < 200
+
+    ##
+    msk = df[c.xjm].ne(df[c.tjm])
+    msk &= df[c.xjm].notna()
+    print(len(msk[msk]))
+
+    _df = df[msk]
+
+    ##
+    msk = df[c.xjm].notna()
+
+    df.loc[msk , c.jm] = df[c.xjm]
+    df.loc[~ msk , c.jm] = df[c.tjm]
 
     ##
 

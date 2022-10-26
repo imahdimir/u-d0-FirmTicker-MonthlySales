@@ -13,12 +13,13 @@ update_ns_module()
 import ns
 
 from ns import DAllCodalLetters as dac
+from ns import Col as GCol
 
 
 gu = ns.GDU()
 clc = ns.CodalLetterCode()
 
-class ColName(dac) :
+class ColName(dac , GCol) :
     pass
 
 c = ColName()
