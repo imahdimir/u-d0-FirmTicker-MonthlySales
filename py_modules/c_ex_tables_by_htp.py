@@ -9,12 +9,15 @@ import pandas as pd
 from giteasy.repo import Repo
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.files import read_txt_file
-from mirutil.html import etree_to_html
-from mirutil.html import parse_html_as_etree
+from mirutil.files import read_txt_file as rtf
+from mirutil.html import etree_to_html as eth
+from mirutil.html import parse_html_as_etree as phat
 from mirutil.html import read_tables_in_html_by_html_table_parser as rthp
 from mirutil.html import rm_hidden_elements_of_etree
 from mirutil.df import update_with_last_run_data as uwlrd
+from mirutil.df import drop_all_nan_rows_and_cols as danrc
+from mirutil.dirr import make_dir_if_not_exist as mdine
+from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 
 import ns
 from py_modules.b_get_htmls import ColName as PreColName
@@ -22,10 +25,9 @@ from py_modules.b_get_htmls import Dirr as PreDirr
 
 
 gu = ns.GDU()
-ft = ns.FirmType()
 
 class Dirr(PreDirr) :
-    tbls = Repo(gu.trg4).local_path
+    tbls = Repo(gu.trg3).local_path
 
 dirr = Dirr()
 
@@ -40,12 +42,12 @@ class MonthlyActivityReport :
         self.fp = Path(fp)
 
     def read_html(self) :
-        self._raw_html = read_txt_file(self.fp)
+        self._raw_html = rtf(self.fp)
 
     def rm_hidden_elements_of_html(self) :
-        tr = parse_html_as_etree(self._raw_html)
+        tr = phat(self._raw_html)
         tr = rm_hidden_elements_of_etree(tr)
-        self.html = etree_to_html(tr)
+        self.html = eth(tr)
 
     def read_tables_by_html_table_parser(self) :
         self.dfs = rthp(self.html)
@@ -63,16 +65,11 @@ class MonthlyActivityReport :
         self._apply_on_df(_fu)
 
     def drop_all_nan_rows_and_cols(self) :
-        _fu = drop_all_nan_rows_and_cols
-        self._apply_on_df(_fu)
+        self._apply_on_df(danrc)
 
     def save_table(self) :
         fp = dirr.tbls / (self.fp.stem + '.xlsx')
         self.df.to_excel(fp , index = False)
-
-def drop_all_nan_rows_and_cols(df) :
-    df = df.dropna(how = "all")
-    return df.dropna(how = "all" , axis = 1)
 
 def make_not_having_alphabet_digits_cells_none(df) :
     pat = r'[\w\d]+'
@@ -100,6 +97,7 @@ def targ(fp: Path) -> (str , None) :
             return o
 
 def main() :
+
     pass
 
     ##
@@ -111,13 +109,6 @@ def main() :
     df_fp = gdt.local_path / 'c.prq'
 
     df = pd.read_parquet(dp_fp)
-
-    ##
-    c2d = {
-            c.furl : None ,
-            }
-
-    df = df.drop(columns = c2d.keys())
 
     ##
     df[c.err] = None
@@ -135,9 +126,7 @@ def main() :
     print(len(msk[msk]))
 
     ##
-    di = dirr.tbls
-    if not di.exists() :
-        di.mkdir()
+    mdine(dirr.tbls)
 
     ##
     fps = dirr.tbls.glob('*.xlsx')
@@ -154,7 +143,12 @@ def main() :
 
     ##
     msk1 = df[c.err].notna()
+    print(len(msk1[msk1]))
+
     _df = df[msk1]
+
+    ##
+    puffd(dirr.tbls , '.xlsx' , gu.trg3)
 
     ##
     c2d = {
@@ -171,11 +165,16 @@ def main() :
     gdt.commit_and_push(msg)
 
 ##
+
+
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
 
 ##
+
+
+# noinspection PyUnreachableCode
 if False :
     pass
 

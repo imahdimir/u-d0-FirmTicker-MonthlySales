@@ -10,19 +10,6 @@ import pandas as pd
 import githubdata as gd
 
 
-from py_modules import c_ex_tables as prev_module
-
-importlib.reload(prev_module)
-
-import ns
-
-from py_modules.c_ex_tables import ColName as CNc
-
-
-
-
-ft = ns.FirmType()
-
 
 @dataclass
 class ColName(CNc) :
@@ -87,7 +74,6 @@ class m :
 
     self.fixed_table = fix_table(self.dft)
 
-    self.date_df = self.fixed_table.applymap(cf.find_jdate)
     self.jmonth_df = self.date_df.applymap(lambda x : x // 100)
 
     self.output = outputs_dct.copy()
@@ -152,17 +138,8 @@ class m :
         self.sale_cols = [x[1] for x in sale_locs]
         return self.sale_cols
 
-    def find_current_jdate(self) :
-        cur_m = cf.find_all_df_locs_eq_val(self.date_df , self.jdate)
-        self.cur_jdate_cols = [x[1] for x in cur_m]
 
-    def check_current_period_jdate(self) :
-        yrm = self.date_df.applymap(lambda x : x // 100)
-        jyrm = self.jdate // 100
-        date_locs = cf.find_all_df_locs_eq_val(yrm , jyrm)
-        date_month_intersect = list(set(self.cur_per_cells) & set(date_locs))
-        if len(date_month_intersect) == 0 :
-            self.output[rd.errMsg] = em.dateConflict
+
 
     def find_modif_cols(self) :
         modi_check = self.fixed_table.applymap(lambda x : str(x) in modif_srch)

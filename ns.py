@@ -5,11 +5,7 @@ class GDU :
     trg0 = "https://github.com/imahdimir/rd-Codal-monthly-sales-htmls"
     trg1 = "https://github.com/imahdimir/rd-Codal-monthly-sales-low-size-htmls"
     trg2 = "https://github.com/imahdimir/rd-Codal-monthly-sales-link-htmls"
-    trg3 = "https://github.com/imahdimir/rd0-Codal-monthly-sales-dled-files"
-    trg4 = "https://github.com/imahdimir/rd-Codal-monthly-sales-tables"
-    trg5 = "https://github.com/imahdimir/rd-Codal-monthly-sales-raw-html"
-    trg6 = "https://github.com/imahdimir/rd-Codal-monthly-sales-low-size-raw-html"
-    trg7 = "https://github.com/imahdimir/rd-Codal-monthly-sales-link-raw-htmls"
+    trg3 = "https://github.com/imahdimir/rd-Codal-monthly-sales-tables"
 
 class Col :
     jd = "JDate"
@@ -50,4 +46,5 @@ class FirmType :
     i = "Insurance"
     l = "Leasing"
     r = "RealEstate"
+    a = "Agriculture"
 

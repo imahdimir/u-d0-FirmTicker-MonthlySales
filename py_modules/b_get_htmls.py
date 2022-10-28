@@ -8,7 +8,6 @@ from pathlib import Path
 
 import githubdata as gd
 import pandas as pd
-from giteasy.githubb import get_all_fps_in_repo as getf
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from giteasy.repo import Repo
 from mirutil.df import save_as_prq_wo_index as sprq
@@ -16,9 +15,12 @@ from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
 from mirutil.requests_htmll import get_rendered_htmls_and_save_async_sync as grhasas
 from mirutil.utils import ret_clusters_indices as rci
 from requests.exceptions import ReadTimeout
+from mirutil.df import update_with_last_run_data as uwlrd
+from mirutil.files import read_txt_file as rtf
+from mirutil.dirr import make_dir_if_not_exist as mdine
 
 import ns
-from py_modules.a_add_new_letters import ColName as ColName_a
+from py_modules.a_add_new_letters import ColName as PreColName
 
 
 gu = ns.GDU()
@@ -27,15 +29,13 @@ class Dirr :
     sh = Repo(gu.trg0).local_path
     lh = Repo(gu.trg2).local_path
     lsh = Repo(gu.trg1).local_path
-    tmp = Repo(gu.tmp).local_path
 
 dirr = Dirr()
 
-class ColName(ColName_a) :
-    hdl = 'IsHtmlDownloaded'
+class ColName(PreColName) :
     furl = 'FullUrl'
     fp = 'FilePath'
-    ms = 'RepType'
+    htt = 'HTMLType'
 
 c = ColName()
 
@@ -46,19 +46,20 @@ class Const :
 
 cte = Const()
 
+class HTMLType :
+    sales = 'sales'
+    low_size = 'low_size'
+    att = 'attachment'
+
+htt = HTMLType()
+
 def check_html_being_the_monthly_sales_report(fp) :
-    with open(fp , 'r' , encoding = 'utf-8') as f :
-        txt = f.read()
+    txt = rtf(fp)
+
     if (cte.sar in txt) and (cte.nsar in txt) :
         return True
-    return False
 
-def ret_html_stms_of_github_repo(repo_name) :
-    """ returns a list of htmls in the GitHub repo """
-    fps = getf(repo_name)
-    fps = [Path(x.path) for x in fps]
-    stms = [x.stem for x in fps if x.suffix == '.html']
-    return stms
+    return False
 
 def move_low_size_htmls(src_dir , dst_dir) :
     if not dst_dir.exists() :
@@ -85,6 +86,7 @@ def move_not_monthly_report_htmls(src_dir , dst_dir) :
             print(f'{fp.name} moved to {nfp}')
 
 def main() :
+
     pass
 
     ##
@@ -98,37 +100,31 @@ def main() :
     df = pd.read_parquet(dp_fp)
 
     ##
+    df[c.htt] = None
+
+    df = uwlrd(df , df_fp)
+
+    ##
     df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
     df[c.furl] = cte.codalbase + df[c.Url]
 
     ##
-    st0 = ret_html_stms_of_github_repo(gu.trg0)
-    st1 = ret_html_stms_of_github_repo(gu.trg1)
-    st2 = ret_html_stms_of_github_repo(gu.trg2)
-
-    ##
     fps = dirr.sh.glob('*.html')
-    st3 = [x.stem for x in fps]
+    sts = [x.stem for x in fps]
 
     ##
-    st = st1 + st2 + st3
+    msk = ~ df[c.TracingNo].isin(sts)
 
-    ##
-    st = st0 + st1 + st2 + st3
-
-    ##
-    df[c.hdl] = df[c.TracingNo].isin(st)
-
-    ##
-    msk = df[c.Url].notna()
     print(len(msk[msk]))
 
-    msk &= ~ df[c.hdl]
-    len(msk[msk])
+    ##
+    msk &= df[c.htt].isna()
+    print(len(msk[msk]))
 
     ##
-    if not dirr.sh.exists() :
-        dirr.sh.mkdir()
+    mdine(dirr.sh)
+    mdine(dirr.lh)
+    mdine(dirr.lsh)
 
     ##
     dcini()
@@ -138,7 +134,6 @@ def main() :
     cls = rci(_df , 20)
 
     ##
-
     for se in cls :
         try :
             si , ei = se
@@ -166,7 +161,6 @@ def main() :
     move_not_monthly_report_htmls(dirr.sh , dirr.lh)
 
     ##
-
     puffd(dirr.sh , '.html' , gu.trg0)
 
     ##
@@ -176,21 +170,43 @@ def main() :
     puffd(dirr.lh , '.html' , gu.trg2)
 
     ##
-    c2k = {
-            c.TracingNo   : None ,
-            c.CodalTicker : None ,
-            c.CompanyName : None ,
-            c.Title       : None ,
-            c.furl        : None ,
+    def fill_html_type(df , dir_ , html_type) :
+        fps = dir_.glob('*.html')
+        sts = [x.stem for x in fps]
+
+        msk = df[c.TracingNo].isin(sts)
+        print(len(msk[msk]))
+
+        df.loc[msk , c.htt] = html_type
+
+        return df
+
+    df = fill_html_type(df , dirr.sh , htt.sales)
+    df = fill_html_type(df , dirr.lsh , htt.low_size)
+    df = fill_html_type(df , dirr.lh , htt.att)
+
+    ##
+    msk = df[c.htt].isna()
+    print(len(msk[msk]))
+
+    _df = df[msk]
+
+    ##
+    assert df[c.htt].notna().all()
+
+    ##
+    c2d = {
+            c.Url  : None ,
+            c.furl : None ,
+            c.fp   : None ,
             }
 
-    df = df[list(c2k.keys())]
+    df = df.drop(columns = c2d.keys())
 
     ##
     sprq(df , df_fp)
 
     ##
-
     msg = f'{df_fp.name} updated'
     gdt.commit_and_push(msg)
 
@@ -199,11 +215,15 @@ def main() :
     shutil.rmtree(dirr.lh)
 
 ##
+
+
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
 
 ##
+
+
 # noinspection PyUnreachableCode
 if False :
     pass
