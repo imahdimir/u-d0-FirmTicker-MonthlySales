@@ -17,7 +17,7 @@ import ns
 from py_modules._3_pat_1 import ColName
 from py_modules._3_pat_1 import Dirr
 from py_modules._3_pat_1 import ReadSalesModifications
-from py_modules.e_pat_2 import targ
+from py_modules._4_pat_2 import targ
 from py_modules.i_pat_6 import Xl as PreXl
 
 

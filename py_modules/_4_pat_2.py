@@ -24,13 +24,14 @@ gu = ns.GDU()
 dirr = Dirr()
 c = ColName()
 
+module_n = 4
+
 class IlocPattern :
     p0 = 'شرح'
     p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
     p2 = 'اصلاحات'
     p3 = p1 + '\s*-\s*' + 'اصلاح شده'
     p4 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
-    p6 = None
     p7 = 'نام محصول'
     p8 = 'واحد'
     p9 = 'تعداد تولید'
@@ -45,21 +46,22 @@ class IlocPattern :
             (0 , 3)  : p3 ,
             (0 , 4)  : p4 ,
             (0 , 5)  : p1 ,
-            (0 , 6)  : p6 ,
-            (0 , 7)  : p6 ,
-            (0 , 8)  : p6 ,
-            (0 , 9)  : p6 ,
-            (0 , 10) : p6 ,
-            (0 , 11) : p6 ,
-            (0 , 12) : p6 ,
-            (0 , 13) : p6 ,
-            (0 , 14) : p6 ,
-            (0 , 15) : p6 ,
-            (0 , 16) : p6 ,
-            (0 , 17) : p6 ,
-            (0 , 18) : p6 ,
-            (0 , 19) : p6 ,
-            (0 , 20) : p6 ,
+            (0 , 6)  : None ,
+            (0 , 7)  : None ,
+            (0 , 8)  : None ,
+            (0 , 9)  : None ,
+            (0 , 10) : None ,
+            (0 , 11) : None ,
+            (0 , 12) : None ,
+            (0 , 13) : None ,
+            (0 , 14) : None ,
+            (0 , 15) : None ,
+            (0 , 16) : None ,
+            (0 , 17) : None ,
+            (0 , 18) : None ,
+            (0 , 19) : None ,
+            (0 , 20) : None ,
+
             (1 , 0)  : p7 ,
             (1 , 1)  : p8 ,
             (1 , 2)  : p9 ,
@@ -99,15 +101,14 @@ def main() :
     pass
 
     ##
-
     gdt = gd.GithubData(gu.tmp)
 
     ##
     gdt.overwriting_clone()
 
     ##
-    dp_fp = gdt.local_path / 'd.prq'
-    df_fp = gdt.local_path / 'e.prq'
+    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
+    df_fp = gdt.local_path / f'{module_n}.prq'
 
     df = pd.read_parquet(dp_fp)
 
@@ -141,11 +142,9 @@ def main() :
     _df = df[msk]
 
     ##
-    msk = df[c.err].isna()
+    msk &= df[c.sales].notna()
 
-    print(len(msk[msk]))
-
-    _df = df[msk]
+    print(f'found ones count: {len(msk[msk])}')
 
     ##
     c2d = {
