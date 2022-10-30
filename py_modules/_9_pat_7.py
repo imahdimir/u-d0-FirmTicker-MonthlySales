@@ -115,24 +115,20 @@ class Xl(Xl_3) :
         self.modi_col = 5
         self.sum_col = 11
 
-    def ret_modif_sum(self) :
-        return
-
 targ = partial(targ , xl_class = Xl)
 
 def main() :
     pass
 
     ##
-
     gdt = gd.GithubData(gu.tmp)
 
     ##
     gdt.overwriting_clone()
 
     ##
-    dp_fp = gdt.local_path / 'i.prq'
-    df_fp = gdt.local_path / 'j.prq'
+    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
+    df_fp = gdt.local_path / f'{module_n}.prq'
 
     df = pd.read_parquet(dp_fp)
 
@@ -160,23 +156,15 @@ def main() :
     _df = df[msk]
 
     ##
-    outmap = {
-            c.err   : nameof(rtarg.err) ,
-            c.sales : nameof(rtarg.sale) ,
-            c.modi  : nameof(rtarg.modif) ,
-            }
-
     df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
 
     ##
     _df = df[msk]
 
     ##
-    msk = df[c.err].isna()
+    msk &= df[c.sales].notna()
 
-    print(len(msk[msk]))
-
-    _df = df[msk]
+    print(f'found ones count: {len(msk[msk])}')
 
     ##
     c2d = {
