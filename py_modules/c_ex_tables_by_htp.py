@@ -18,6 +18,7 @@ from mirutil.df import update_with_last_run_data as uwlrd
 from mirutil.df import drop_all_nan_rows_and_cols as danrc
 from mirutil.dirr import make_dir_if_not_exist as mdine
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
+from mirutil.str import normalize_fa_str_completely as nfsc
 
 import ns
 from py_modules.b_get_htmls import ColName as PreColName
@@ -67,6 +68,9 @@ class MonthlyActivityReport :
     def drop_all_nan_rows_and_cols(self) :
         self._apply_on_df(danrc)
 
+    def normalize_fa_str_completely(self) :
+        self.df = self.df.applymap(nfsc)
+
     def save_table(self) :
         fp = dirr.tbls / (self.fp.stem + '.xlsx')
         self.df.to_excel(fp , index = False)
@@ -88,7 +92,8 @@ def targ(fp: Path) -> (str , None) :
             1  : m.read_tables_by_html_table_parser ,
             4  : m.make_not_having_alphabet_digits_cells_none ,
             6  : m.drop_all_nan_rows_and_cols ,
-            7  : m.save_table ,
+            7  : m.normalize_fa_str_completely ,
+            8  : m.save_table ,
             }
 
     for _ , fu in _fus.items() :
@@ -97,7 +102,6 @@ def targ(fp: Path) -> (str , None) :
             return o
 
 def main() :
-
     pass
 
     ##
@@ -143,6 +147,7 @@ def main() :
 
     ##
     msk1 = df[c.err].notna()
+
     print(len(msk1[msk1]))
 
     _df = df[msk1]

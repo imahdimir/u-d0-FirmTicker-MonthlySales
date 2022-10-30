@@ -85,12 +85,3 @@ def copytree(src , dst , symlinks = False , ignore = None) :
             shutil.copytree(s , d , symlinks , ignore)
         else :
             shutil.copy2(s , d)
-
-def load_whole_sample() :
-    """return latest whole sample"""
-    with open(vif.lastData , 'rs') as f :
-        xln = f.read()
-
-    xl_pn = dirs.out_data / xln
-    df = pd.read_excel(xl_pn , engine = 'openpyxl')
-    return df

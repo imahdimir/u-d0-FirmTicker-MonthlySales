@@ -1,14 +1,3 @@
-"""
-
-    """
-
-import importlib
-from dataclasses import dataclass
-from pathlib import Path
-
-import pandas as pd
-import githubdata as gd
-
 
 
 @dataclass
@@ -30,21 +19,6 @@ cn = ColName()
 
 
 
-def main() :
-    pass
-
-    ##
-
-
-    ##
-
-##
-if __name__ == "__main__" :
-    main()
-    print(f'{Path(__file__).name} Done!')
-
-
-
 
 
 current_period = ['دوره یک ماهه منتهی به']
@@ -56,59 +30,6 @@ since_start_financial_year = ['از ابتدای سال مالی']
 since_modified = ['اصلاح شده']
 sale_quant = ['تعداد فروش' , 'مقدار/تعداد فروش']
 since_start_finyear_serv = ['تا پايان دوره مالي منتهي به']
-
-current_period_srch = [cf.wos(x) for x in current_period]
-sale_mil_srch = [cf.wos(x) for x in sale_mil_rial]
-sum_row_srch = [cf.wos(x) for x in sum_row]
-modif_srch = [cf.wos(x) for x in modif_keys]
-since_start_financial_year_srch = [cf.wos(x) for x in
-                                   since_start_financial_year]
-since_modified_srch = [cf.wos(x) for x in since_modified]
-sale_quant_srch = [cf.wos(x) for x in sale_quant]
-since_start_finyear_serv_srch = [cf.wos(x) for x in since_start_finyear_serv]
-
-
-class m :
-    self.jdate = int(jdate)
-    self.jmonth = jdate // 100
-
-    self.fixed_table = fix_table(self.dft)
-
-    self.jmonth_df = self.date_df.applymap(lambda x : x // 100)
-
-    self.output = outputs_dct.copy()
-
-    self.output[rd.isBlank] = self.fixed_table.empty
-    self.output[rd.firmType] = self.find_firmtype()
-    self.output[rd.hasModification] = True
-
-    self.sum_row = None
-    self.sale_cols = None
-    self.cur_per_cells = None
-    self.cur_per_cols = None
-    self.modification_cols = None
-    self.since_start_cols = None
-    self.prev_month = cf.find_n_month_before(self.jmonth)
-    self.prev_month_cols = None
-    self.modified_cols = None
-    self.cur_jdate_cols = None
-
-    from mirutil.string_funcs import normalize_fa_str_completely as nfsc
-    from mirutil.utils import contains_any_of_list as caol
-    def wos(st: str) -> str :
-        os = nfsc(st)
-
-        _2rep = {
-                '\n'   : None ,
-                '\t'   : None ,
-                '\r\n' : None ,
-                ','    : None ,
-                ' '    : None
-                }
-        for k in _2rep.keys() :
-            os = os.replace(k , '')
-
-        return os
 
 
 

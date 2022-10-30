@@ -47,4 +47,5 @@ class FirmType :
     l = "Leasing"
     r = "RealEstate"
     a = "Agriculture"
+    f = "Financing"
 
