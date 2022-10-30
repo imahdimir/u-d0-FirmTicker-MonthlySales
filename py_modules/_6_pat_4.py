@@ -11,7 +11,6 @@ import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
-from varname import nameof
 
 import ns
 from py_modules._3_pat_1 import ColName

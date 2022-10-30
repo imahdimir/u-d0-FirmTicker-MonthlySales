@@ -11,28 +11,20 @@ import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
-from varname import nameof
 
 import ns
-from py_modules._3_pat_1 import ReadSalesModifications
-from py_modules._4_pat_2 import targ
-from py_modules._6_pat_4 import ColName as PreColName
-from py_modules._6_pat_4 import Dirr as PreDirr
-from py_modules._6_pat_4 import Xl as PreXl
+from py_modules._3_pat_1 import ColName
+from py_modules._3_pat_1 import Dirr
+from py_modules._3_pat_1 import outmap
+from py_modules._3_pat_1 import targ
+from py_modules._3_pat_1 import Xl as Xl_3
 
 
 gu = ns.GDU()
-rtarg = ReadSalesModifications()
-
-class Dirr(PreDirr) :
-    pass
-
 dirr = Dirr()
-
-class ColName(PreColName) :
-    pass
-
 c = ColName()
+
+module_n = 7
 
 class IlocPattern :
     p0 = 'شرح خدمات یا فروش'
@@ -75,7 +67,7 @@ class IlocPattern :
 
 ilp = IlocPattern()
 
-class Xl(PreXl) :
+class Xl(Xl_3) :
 
     def __init__(self , fp: Path) :
         super().__init__(fp)
@@ -83,6 +75,7 @@ class Xl(PreXl) :
         self.sum_cell_val = 'جمع'
         self.sum_col = 6
         self.modi_col = 4
+        self.header_rows_n = 2
 
 targ = partial(targ , xl_class = Xl)
 
@@ -90,15 +83,14 @@ def main() :
     pass
 
     ##
-
     gdt = gd.GithubData(gu.tmp)
 
     ##
     gdt.overwriting_clone()
 
     ##
-    dp_fp = gdt.local_path / 'g.prq'
-    df_fp = gdt.local_path / 'h.prq'
+    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
+    df_fp = gdt.local_path / f'{module_n}.prq'
 
     df = pd.read_parquet(dp_fp)
 
@@ -126,23 +118,15 @@ def main() :
     _df = df[msk]
 
     ##
-    outmap = {
-            c.err   : nameof(rtarg.err) ,
-            c.sales : nameof(rtarg.sale) ,
-            c.modi  : nameof(rtarg.modif) ,
-            }
-
     df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
 
     ##
     _df = df[msk]
 
     ##
-    msk = df[c.err].isna()
+    msk &= df[c.sales].notna()
 
-    print(len(msk[msk]))
-
-    _df = df[msk]
+    print(f'found ones count: {len(msk[msk])}')
 
     ##
     c2d = {
