@@ -20,10 +20,12 @@ from mirutil.files import read_txt_file as rtf
 from mirutil.dirr import make_dir_if_not_exist as mdine
 
 import ns
-from py_modules.a_add_new_letters import ColName as PreColName
+from py_modules._0_add_new_letters import ColName as PreColName
 
 
 gu = ns.GDU()
+
+module_n = 1
 
 class Dirr :
     sh = Repo(gu.trg0).local_path
@@ -86,16 +88,16 @@ def move_not_monthly_report_htmls(src_dir , dst_dir) :
             print(f'{fp.name} moved to {nfp}')
 
 def main() :
-
     pass
 
     ##
-
     gdt = gd.GithubData(gu.tmp)
+
+    ##
     gdt.overwriting_clone()
 
-    dp_fp = gdt.local_path / 'a.prq'
-    df_fp = gdt.local_path / 'b.prq'
+    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
+    df_fp = gdt.local_path / f'{module_n}.prq'
 
     df = pd.read_parquet(dp_fp)
 
@@ -109,16 +111,13 @@ def main() :
     df[c.furl] = cte.codalbase + df[c.Url]
 
     ##
-    fps = dirr.sh.glob('*.html')
-    sts = [x.stem for x in fps]
-
-    ##
-    msk = ~ df[c.TracingNo].isin(sts)
+    msk = ~ df[c.fp].apply(lambda x : x.exists())
 
     print(len(msk[msk]))
 
     ##
     msk &= df[c.htt].isna()
+
     print(len(msk[msk]))
 
     ##

@@ -7,20 +7,22 @@ from pathlib import Path
 import githubdata as gd
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.jdate import find_jmonth_fr_df_col as fjfdc
-from mirutil.ns import update_ns_module
+from mirutil.ns import update_ns_module as unm
 
 
-update_ns_module()
+unm()
 import ns
 
-from ns import DAllCodalLetters as dac
-from ns import Col as GCol
+from ns import DAllCodalLetters
+from ns import Col
 
 
 gu = ns.GDU()
 clc = ns.CodalLetterCode()
 
-class ColName(dac , GCol) :
+module_n = 0
+
+class ColName(DAllCodalLetters , Col) :
     pass
 
 c = ColName()
@@ -48,7 +50,6 @@ def main() :
             c.TracingNo       : None ,
             c.CodalTicker     : None ,
             c.PublishDateTime : None ,
-            c.CompanyName     : None ,
             c.Title           : None ,
             c.Url             : None ,
             }
@@ -60,10 +61,12 @@ def main() :
 
     ##
     gdt = gd.GithubData(gu.tmp)
+
+    ##
     gdt.overwriting_clone()
 
     ##
-    df_fp = gdt.local_path / 'a.prq'
+    df_fp = gdt.local_path / f'{module_n}.prq'
 
     ##
     sprq(df , df_fp)

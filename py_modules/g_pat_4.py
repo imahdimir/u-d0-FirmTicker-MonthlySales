@@ -4,6 +4,7 @@
 
 import re
 from pathlib import Path
+from functools import partial
 
 import githubdata as gd
 import pandas as pd
@@ -111,6 +112,8 @@ class Xl(PreXl) :
         self.sum_cell_val = 'جمع درآمدهای عملیاتی'
         self.modi_col = 8
         self.sum_col = 16
+
+targ = partial(targ , xl_class = Xl)
 
 def main() :
     pass

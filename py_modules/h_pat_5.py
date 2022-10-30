@@ -4,6 +4,7 @@
 
 import re
 from pathlib import Path
+from functools import partial
 
 import githubdata as gd
 import pandas as pd
@@ -82,6 +83,8 @@ class Xl(PreXl) :
         self.sum_cell_val = 'جمع'
         self.sum_col = 6
         self.modi_col = 4
+
+targ = partial(targ , xl_class = Xl)
 
 def main() :
     pass

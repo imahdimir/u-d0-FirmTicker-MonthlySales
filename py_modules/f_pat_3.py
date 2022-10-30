@@ -5,6 +5,7 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from functools import partial
 
 import githubdata as gd
 import pandas as pd
@@ -112,6 +113,8 @@ class Xl(PreXl) :
     def __init__(self , fp: Path) :
         super().__init__(fp)
         self.ilp = ilp
+
+targ = partial(targ , xl_class = Xl)
 
 def main() :
     pass

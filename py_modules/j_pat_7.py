@@ -15,46 +15,40 @@ from varname import nameof
 
 import ns
 from py_modules.d_pat_1 import ReadSalesModifications
-from py_modules.h_pat_5 import ColName as PreColName
-from py_modules.h_pat_5 import Dirr as PreDirr
-from py_modules.h_pat_5 import Xl as PreXl
+from py_modules.d_pat_1 import ColName
+from py_modules.d_pat_1 import Dirr
+from py_modules.i_pat_6 import Xl as PreXl
 from py_modules.e_pat_2 import targ
 
 
 gu = ns.GDU()
+
 rtarg = ReadSalesModifications()
 
-class Dirr(PreDirr) :
-    pass
-
 dirr = Dirr()
-
-class ColName(PreColName) :
-    pass
-
 c = ColName()
 
 class IlocPattern :
     p0 = 'شرح'
-    _p1 = 'دوره یک ماهه منتهی به'
+    _p1 = 'از ابتدای سال مالی تا پایان مورخ'
     p1 = _p1 + '\s*' + '\d{4}/\d{2}/\d{2}'
-    _p2 = 'از ابتدای سال مالی تا تاریخ'
-    p2 = _p2 + '\s*' + '\d{4}/\d{2}/\d{2}'
-    p3 = 'وضعیت محصول-واحد'
-    p4 = 'نام محصول'
-    p5 = 'واحد'
-    p6 = 'تعداد تولید'
-    p7 = 'تعداد فروش'
-    p8 = re.escape('نرخ فروش (ریال)')
-    p9 = re.escape('مبلغ فروش (میلیون ریال)')
+    p2 = 'اصلاحات'
+    p3 = p1 + '\s*-\s*' + 'اصلاح شده'
+    _p4 = 'دوره یک ماهه منتهی به'
+    p4 = _p4 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p6 = re.escape('حق بیمه صادره (شامل قبولی اتکایی)')
+    p7 = 'خسارت پرداختی'
+    p9 = 'رشته بیمه ای'
+    p10 = re.escape('مبلغ (میلیون ریال)')
+    p11 = re.escape('سهم(درصد)')
 
     map = {
             (0 , 0)  : p0 ,
             (0 , 1)  : p1 ,
             (0 , 2)  : p2 ,
-            (0 , 3)  : p2 ,
-            (0 , 4)  : p3 ,
-            (0 , 5)  : None ,
+            (0 , 3)  : p3 ,
+            (0 , 4)  : p4 ,
+            (0 , 5)  : p1 ,
             (0 , 6)  : None ,
             (0 , 7)  : None ,
             (0 , 8)  : None ,
@@ -64,21 +58,50 @@ class IlocPattern :
             (0 , 12) : None ,
             (0 , 13) : None ,
             (0 , 14) : None ,
-            (1 , 0)  : p4 ,
-            (1 , 1)  : p5 ,
+            (0 , 15) : None ,
+            (0 , 16) : None ,
+            (0 , 17) : None ,
+            (0 , 18) : None ,
+
+            (1 , 0)  : p6 ,
+            (1 , 1)  : p7 ,
             (1 , 2)  : p6 ,
             (1 , 3)  : p7 ,
-            (1 , 4)  : p8 ,
-            (1 , 5)  : p9 ,
+            (1 , 4)  : p6 ,
+            (1 , 5)  : p7 ,
             (1 , 6)  : p6 ,
             (1 , 7)  : p7 ,
-            (1 , 8)  : p8 ,
-            (1 , 9)  : p9 ,
-            (1 , 10) : p6 ,
-            (1 , 11) : p7 ,
-            (1 , 12) : p8 ,
-            (1 , 13) : p9 ,
+            (1 , 8)  : p6 ,
+            (1 , 9)  : p7 ,
+            (1 , 10) : None ,
+            (1 , 11) : None ,
+            (1 , 12) : None ,
+            (1 , 13) : None ,
             (1 , 14) : None ,
+            (1 , 15) : None ,
+            (1 , 16) : None ,
+            (1 , 17) : None ,
+            (1 , 18) : None ,
+
+            (2 , 0)  : p9 ,
+            (2 , 1)  : p10 ,
+            (2 , 2)  : p11 ,
+            (2 , 3)  : p10 ,
+            (2 , 4)  : p11 ,
+            (2 , 5)  : p10 ,
+            (2 , 6)  : p10 ,
+            (2 , 7)  : p10 ,
+            (2 , 8)  : p11 ,
+            (2 , 9)  : p10 ,
+            (2 , 10) : p11 ,
+            (2 , 11) : p10 ,
+            (2 , 12) : p11 ,
+            (2 , 13) : p10 ,
+            (2 , 14) : p11 ,
+            (2 , 15) : p10 ,
+            (2 , 16) : p11 ,
+            (2 , 17) : p10 ,
+            (2 , 18) : p11 ,
             }
 
 ilp = IlocPattern()
@@ -89,7 +112,9 @@ class Xl(PreXl) :
         super().__init__(fp)
         self.ilp = ilp
         self.sum_cell_val = 'جمع'
-        self.sum_col = 5
+        self.header_rows_n = 3
+        self.modi_col = 5
+        self.sum_col = 11
 
     def ret_modif_sum(self) :
         return
@@ -107,8 +132,8 @@ def main() :
     gdt.overwriting_clone()
 
     ##
-    dp_fp = gdt.local_path / 'h.prq'
-    df_fp = gdt.local_path / 'i.prq'
+    dp_fp = gdt.local_path / 'i.prq'
+    df_fp = gdt.local_path / 'j.prq'
 
     df = pd.read_parquet(dp_fp)
 
@@ -183,10 +208,11 @@ if False :
     pass
 
     ##
-    trc = '930157'
+    trc = '930156'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
+    ##
     targ(Path(fp))
 
     ##

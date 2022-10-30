@@ -4,6 +4,7 @@
 
 import re
 from pathlib import Path
+from functools import partial
 
 import githubdata as gd
 import pandas as pd
@@ -13,23 +14,16 @@ from mirutil.df import update_with_last_run_data as uwlrd
 from varname import nameof
 
 import ns
-from py_modules.d_pat_1 import ColName as PreColName
-from py_modules.d_pat_1 import Dirr as PreDirr
+from py_modules.d_pat_1 import ColName
+from py_modules.d_pat_1 import Dirr
 from py_modules.d_pat_1 import ReadSalesModifications
 from py_modules.d_pat_1 import Xl as PreXl
+from py_modules.d_pat_1 import targ
+from py_modules.d_pat_1 import outmap
 
 
 gu = ns.GDU()
-rtarg = ReadSalesModifications()
-
-class Dirr(PreDirr) :
-    pass
-
 dirr = Dirr()
-
-class ColName(PreColName) :
-    modi = 'Modifications'
-
 c = ColName()
 
 class IlocPattern :
@@ -101,33 +95,7 @@ class Xl(PreXl) :
         self.sum_col = 16
         self.modi_col = 8
 
-    def ret_modif_sum(self) :
-        return self.df.iat[self.sum_row , self.modi_col]
-
-def targ(fp: Path) -> ReadSalesModifications :
-
-    xo = Xl(fp)
-
-    _fus = {
-            0 : xo.read ,
-            1 : xo.check_header_pat ,
-            2 : xo.check_is_blank ,
-            3 : xo.find_sum_row ,
-            4 : xo.find_1st_nan_row ,
-            5 : xo.find_1st_empty_row ,
-            6 : xo.find_1st_kadr_row ,
-            7 : xo.check_sum_row_is_ok ,
-            }
-
-    for _ , fu in _fus.items() :
-        o = fu()
-        if o :
-            return ReadSalesModifications(o)
-
-    sales_sum = xo.ret_sales_sum()
-    modif_sum = xo.ret_modif_sum()
-
-    return ReadSalesModifications(None , sales_sum , modif_sum)
+targ = partial(targ , xl_class = Xl)
 
 def main() :
     pass
@@ -169,12 +137,6 @@ def main() :
     print(len(msk[msk]))
 
     ##
-    outmap = {
-            c.err   : nameof(rtarg.err) ,
-            c.sales : nameof(rtarg.sale) ,
-            c.modi  : nameof(rtarg.modif) ,
-            }
-
     df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
 
     ##

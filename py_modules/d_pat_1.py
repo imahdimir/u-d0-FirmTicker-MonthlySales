@@ -18,18 +18,15 @@ from mirutil.str import any_of_patterns_matches as aopm
 
 import ns
 from py_modules.c_ex_tables_by_htp import ColName as PreColName
-from py_modules.c_ex_tables_by_htp import Dirr as PreDirr
+from py_modules.c_ex_tables_by_htp import Dirr
 
 
 gu = ns.GDU()
-
-class Dirr(PreDirr) :
-    pass
-
 dirr = Dirr()
 
 class ColName(PreColName) :
     sales = 'Sales'
+    modi = 'Modifications'
 
 c = ColName()
 
@@ -42,35 +39,34 @@ afs = rnsvoc(AfterSumRow).values()
 class IlocPattern :
     p0 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
     p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
-    p2 = None
-    p3 = 'نام محصول'
-    p4 = 'واحد'
-    p5 = 'تعداد تولید'
-    p6 = 'تعداد فروش'
-    p7 = re.escape('نرخ فروش (ریال)')
-    p8 = re.escape('مبلغ فروش (میلیون ریال)')
+    p2 = 'نام محصول'
+    p3 = 'واحد'
+    p4 = 'تعداد تولید'
+    p5 = 'تعداد فروش'
+    p6 = re.escape('نرخ فروش (ریال)')
+    p7 = re.escape('مبلغ فروش (میلیون ریال)')
 
     map = {
             (0 , 0) : p0 ,
             (0 , 1) : p1 ,
-            (0 , 2) : p2 ,
-            (0 , 3) : p2 ,
-            (0 , 4) : p2 ,
-            (0 , 5) : p2 ,
-            (0 , 6) : p2 ,
-            (0 , 7) : p2 ,
-            (0 , 8) : p2 ,
-            (0 , 9) : p2 ,
-            (1 , 0) : p3 ,
-            (1 , 1) : p4 ,
-            (1 , 2) : p5 ,
-            (1 , 3) : p6 ,
-            (1 , 4) : p7 ,
-            (1 , 5) : p8 ,
-            (1 , 6) : p5 ,
-            (1 , 7) : p6 ,
-            (1 , 8) : p7 ,
-            (1 , 9) : p8 ,
+            (0 , 2) : None ,
+            (0 , 3) : None ,
+            (0 , 4) : None ,
+            (0 , 5) : None ,
+            (0 , 6) : None ,
+            (0 , 7) : None ,
+            (0 , 8) : None ,
+            (0 , 9) : None ,
+            (1 , 0) : p2 ,
+            (1 , 1) : p3 ,
+            (1 , 2) : p4 ,
+            (1 , 3) : p5 ,
+            (1 , 4) : p6 ,
+            (1 , 5) : p7 ,
+            (1 , 6) : p4 ,
+            (1 , 7) : p5 ,
+            (1 , 8) : p6 ,
+            (1 , 9) : p7 ,
             }
 
 ilp = IlocPattern()
@@ -82,6 +78,8 @@ class Xl :
         self.ilp = ilp
         self.sum_cell_val = 'جمع'
         self.sum_col = 5
+        self.modi_col = None
+        self.header_rows_n = 2
 
     def read(self) :
         self.df = pd.read_excel(self.fp , engine = 'openpyxl')
@@ -97,7 +95,7 @@ class Xl :
                 return str(k) + str(e)
 
     def check_is_blank(self) :
-        if self.df.shape[0] == 2 :
+        if self.df.shape[0] == self.header_rows_n :
             return 'Blank'
 
     def find_sum_row(self) :
@@ -144,6 +142,10 @@ class Xl :
     def ret_sales_sum(self) :
         return self.df.iat[self.sum_row , self.sum_col]
 
+    def ret_modif_sum(self) :
+        if self.modi_col :
+            return self.df.iat[self.sum_row , self.modi_col]
+
 @dataclass
 class ReadSalesModifications :
     err: (str , None) = None
@@ -152,9 +154,9 @@ class ReadSalesModifications :
 
 rtarg = ReadSalesModifications()
 
-def targ(fp: Path) -> ReadSalesModifications :
+def targ(fp: Path , xl_class) -> ReadSalesModifications :
 
-    xo = Xl(fp)
+    xo = xl_class(fp)
 
     _fus = {
             0 : xo.read ,
@@ -172,7 +174,16 @@ def targ(fp: Path) -> ReadSalesModifications :
         if o :
             return ReadSalesModifications(o)
 
-    return ReadSalesModifications(None , xo.ret_sales_sum())
+    sales_sum = xo.ret_sales_sum()
+    modif_sum = xo.ret_modif_sum()
+
+    return ReadSalesModifications(None , sales_sum , modif_sum)
+
+outmap = {
+        c.err   : nameof(rtarg.err) ,
+        c.sales : nameof(rtarg.sale) ,
+        c.modi  : nameof(rtarg.modif)
+        }
 
 def main() :
     pass
@@ -215,11 +226,6 @@ def main() :
     print(len(msk[msk]))
 
     ##
-    outmap = {
-            c.err   : nameof(rtarg.err) ,
-            c.sales : nameof(rtarg.sale) ,
-            }
-
     df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
 
     ##

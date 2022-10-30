@@ -21,8 +21,8 @@ from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puff
 from mirutil.str import normalize_fa_str_completely as nfsc
 
 import ns
-from py_modules.b_get_htmls import ColName as PreColName
-from py_modules.b_get_htmls import Dirr as PreDirr
+from py_modules._1_get_htmls import ColName as PreColName
+from py_modules._1_get_htmls import Dirr as PreDirr
 
 
 gu = ns.GDU()
