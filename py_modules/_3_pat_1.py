@@ -5,6 +5,7 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from functools import partial
 
 import githubdata as gd
 import pandas as pd
@@ -182,6 +183,8 @@ def targ(fp: Path , xl_class) -> ReadSalesModifications :
 
     return ReadSalesModifications(None , sales_sum , modif_sum)
 
+targ = partial(targ , xl_class = Xl)
+
 outmap = {
         c.err   : nameof(rtarg.err) ,
         c.sales : nameof(rtarg.sale) ,
@@ -198,8 +201,8 @@ def main() :
     gdt.overwriting_clone()
 
     ##
-    dp_fp = gdt.local_path / 'c.prq'
-    df_fp = gdt.local_path / 'd.prq'
+    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
+    df_fp = gdt.local_path / f'{module_n}.prq'
 
     df = pd.read_parquet(dp_fp)
 
@@ -227,15 +230,18 @@ def main() :
 
     print(len(msk[msk]))
 
+    _df = df[msk]
+
     ##
     df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
 
     ##
-    msk = df[c.err].isna()
-
-    print(len(msk[msk]))
-
     _df = df[msk]
+
+    ##
+    msk &= df[c.sales].notna()
+
+    print(f'found ones count: {len(msk[msk])}')
 
     ##
     c2d = {
