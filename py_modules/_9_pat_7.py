@@ -16,17 +16,16 @@ from varname import nameof
 import ns
 from py_modules._3_pat_1 import ColName
 from py_modules._3_pat_1 import Dirr
-from py_modules._3_pat_1 import ReadSalesModifications
-from py_modules._4_pat_2 import targ
-from py_modules.i_pat_6 import Xl as PreXl
+from py_modules._3_pat_1 import outmap
+from py_modules._3_pat_1 import targ
+from py_modules._3_pat_1 import Xl as Xl_3
 
 
 gu = ns.GDU()
-
-rtarg = ReadSalesModifications()
-
 dirr = Dirr()
 c = ColName()
+
+module_n = 9
 
 class IlocPattern :
     p0 = 'شرح'
@@ -106,7 +105,7 @@ class IlocPattern :
 
 ilp = IlocPattern()
 
-class Xl(PreXl) :
+class Xl(Xl_3) :
 
     def __init__(self , fp: Path) :
         super().__init__(fp)
