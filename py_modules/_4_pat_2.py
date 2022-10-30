@@ -17,7 +17,7 @@ from py_modules._3_pat_1 import ColName
 from py_modules._3_pat_1 import Dirr
 from py_modules._3_pat_1 import outmap
 from py_modules._3_pat_1 import targ
-from py_modules._3_pat_1 import Xl as PreXl
+from py_modules._3_pat_1 import Xl as Xl_3
 
 
 gu = ns.GDU()
@@ -87,13 +87,15 @@ class IlocPattern :
 
 ilp = IlocPattern()
 
-class Xl(PreXl) :
+class Xl(Xl_3) :
 
     def __init__(self , fp: Path) :
         super().__init__(fp)
         self.ilp = ilp
         self.sum_col = 16
         self.modi_col = 8
+        self.sum_cell_val = 'جمع'
+        self.header_rows_n = 2
 
 targ = partial(targ , xl_class = Xl)
 
