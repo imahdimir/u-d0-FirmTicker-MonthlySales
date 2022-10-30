@@ -3,23 +3,21 @@
     """
 
 import re
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 
 import githubdata as gd
 import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
-from varname import nameof
 
 import ns
-from py_modules.d_pat_1 import ColName
-from py_modules.d_pat_1 import Dirr
-from py_modules.d_pat_1 import ReadSalesModifications
-from py_modules.d_pat_1 import Xl as PreXl
-from py_modules.d_pat_1 import targ
-from py_modules.d_pat_1 import outmap
+from py_modules._3_pat_1 import ColName
+from py_modules._3_pat_1 import Dirr
+from py_modules._3_pat_1 import outmap
+from py_modules._3_pat_1 import targ
+from py_modules._3_pat_1 import Xl as PreXl
 
 
 gu = ns.GDU()

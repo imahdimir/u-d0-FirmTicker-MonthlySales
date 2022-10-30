@@ -18,8 +18,6 @@ from mirutil.async_requests import get_reqs_async as areq
 from mirutil.codal import find_fn_and_suf_fr_codal_get_resp as ffs
 from mirutil.utils import ret_clusters_indices as retci
 
-from py_modules import _1_get_htmls
-
 
 importlib.reload(b_get_new_rendered_htmls)
 

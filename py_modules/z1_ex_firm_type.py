@@ -14,8 +14,8 @@ from mirutil.files import read_txt_file as rtf
 from mirutil.html import parse_html_as_etree as phaet
 
 import ns
-from py_modules.c_ex_tables_by_htp import ColName as PreColName
-from py_modules.c_ex_tables_by_htp import Dirr as PreDirr
+from py_modules._2_ex_tables_by_htp import ColName as PreColName
+from py_modules._2_ex_tables_by_htp import Dirr as PreDirr
 
 
 gu = ns.GDU()

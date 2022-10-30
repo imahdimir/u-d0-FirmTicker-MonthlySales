@@ -8,21 +8,23 @@ from pathlib import Path
 
 import githubdata as gd
 import pandas as pd
+from mirutil.classs import return_not_special_variables_of_class as rnsvoc
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import does_df_iloc_val_matches_ptrn as ddivmp
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
-from varname import nameof
-from mirutil.classs import return_not_special_variables_of_class as rnsvoc
 from mirutil.str import any_of_patterns_matches as aopm
+from varname import nameof
 
 import ns
-from py_modules.c_ex_tables_by_htp import ColName as PreColName
-from py_modules.c_ex_tables_by_htp import Dirr
+from py_modules._2_ex_tables_by_htp import ColName as PreColName
+from py_modules._2_ex_tables_by_htp import Dirr
 
 
 gu = ns.GDU()
 dirr = Dirr()
+
+module_n = 3
 
 class ColName(PreColName) :
     sales = 'Sales'
@@ -57,6 +59,7 @@ class IlocPattern :
             (0 , 7) : None ,
             (0 , 8) : None ,
             (0 , 9) : None ,
+
             (1 , 0) : p2 ,
             (1 , 1) : p3 ,
             (1 , 2) : p4 ,
@@ -189,7 +192,6 @@ def main() :
     pass
 
     ##
-
     gdt = gd.GithubData(gu.tmp)
 
     ##

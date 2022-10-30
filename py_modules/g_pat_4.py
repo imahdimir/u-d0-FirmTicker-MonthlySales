@@ -3,8 +3,8 @@
     """
 
 import re
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 
 import githubdata as gd
 import pandas as pd
@@ -14,11 +14,11 @@ from mirutil.df import update_with_last_run_data as uwlrd
 from varname import nameof
 
 import ns
-from py_modules.d_pat_1 import ReadSalesModifications
+from py_modules._3_pat_1 import ReadSalesModifications
+from py_modules.e_pat_2 import targ
 from py_modules.f_pat_3 import ColName as PreColName
 from py_modules.f_pat_3 import Dirr as PreDirr
 from py_modules.f_pat_3 import Xl as PreXl
-from py_modules.e_pat_2 import targ
 
 
 gu = ns.GDU()
