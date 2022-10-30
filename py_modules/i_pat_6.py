@@ -16,9 +16,9 @@ from varname import nameof
 import ns
 from py_modules._3_pat_1 import ReadSalesModifications
 from py_modules._4_pat_2 import targ
-from py_modules.h_pat_5 import ColName as PreColName
-from py_modules.h_pat_5 import Dirr as PreDirr
-from py_modules.h_pat_5 import Xl as PreXl
+from py_modules._7_pat_5 import ColName as PreColName
+from py_modules._7_pat_5 import Dirr as PreDirr
+from py_modules._7_pat_5 import Xl as PreXl
 
 
 gu = ns.GDU()

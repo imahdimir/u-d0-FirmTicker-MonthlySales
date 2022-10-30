@@ -154,11 +154,9 @@ def main() :
     _df = df[msk]
 
     ##
-    msk = df[c.err].isna()
+    msk &= df[c.sales].notna()
 
-    print(len(msk[msk]))
-
-    _df = df[msk]
+    print(f'found ones count: {len(msk[msk])}')
 
     ##
     c2d = {
