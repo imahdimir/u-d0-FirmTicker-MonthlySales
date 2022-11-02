@@ -19,11 +19,10 @@ from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import Xl as Xl_3
 
 
-gu = ns.GDU()
 dirr = Dirr()
 c = ColName()
 
-module_n = 10
+module_n = 9
 
 class IlocPattern :
     p0 = 'شرح'
@@ -60,6 +59,7 @@ class Xl(Xl_3) :
 targ = partial(targ , xl_class = Xl)
 
 def main() :
+    
     pass
 
     ##
