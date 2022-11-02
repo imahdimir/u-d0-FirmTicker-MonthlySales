@@ -4,7 +4,8 @@
 
 from pathlib import Path
 
-import githubdata as gd
+from giteasy import GitHubRepo
+from githubdata import GitHubDataRepo
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.jdate import find_jmonth_fr_df_col as fjfdc
 from mirutil.ns import update_ns_module as unm
@@ -27,12 +28,23 @@ class ColName(DAllCodalLetters , Col) :
 
 c = ColName()
 
+def overwrite_clone_temp_data_ret_ghr_obj() :
+    gdt = GitHubRepo(gu.tmp)
+    gdt.clone_overwrite()
+    return gdt
+
+def save_cur_module_temp_data_and_push(ghr: GitHubRepo , module_n: int , df) :
+    fp = ghr.local_path / f'{module_n}.prq'
+    sprq(df , fp)
+    msg = f'{fp.name} got updated.'
+    ghr.commit_and_push(msg)
+
 def main() :
     pass
 
     ##
-    gds = gd.GithubData(gu.src0)
-    ds = gds.read_data()
+    ghrs = GitHubDataRepo(gu.src0)
+    ds = ghrs.read_data()
 
     ##
     msk = ds[c.LetterCode].eq(clc.MonthlySalesRep)
@@ -60,24 +72,13 @@ def main() :
     df = fjfdc(df , c.Title , c.jm , sep = '/')
 
     ##
-    gdt = gd.GithubData(gu.tmp)
+    gdt = overwrite_clone_temp_data_ret_ghr_obj()
 
     ##
-    gdt.overwriting_clone()
+    save_cur_module_temp_data_and_push(gdt , module_n , df)
 
     ##
-    df_fp = gdt.local_path / f'{module_n}.prq'
-
-    ##
-    sprq(df , df_fp)
-
-    ##
-    msg = f'added new rows to {df_fp.name}'
-    gdt.commit_and_push(msg)
-
-    ##
-    gds.rmdir()
-    gdt.rmdir()
+    ghrs.rmdir()
 
 ##
 
@@ -85,3 +86,9 @@ def main() :
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
+
+    ##
+
+    ##
+
+    ##

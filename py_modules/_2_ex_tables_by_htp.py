@@ -4,14 +4,11 @@
 
 from pathlib import Path
 
-import githubdata as gd
 import pandas as pd
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
-from giteasy.repo import Repo
+from giteasy import GitHubRepo
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import drop_all_nan_rows_and_cols as danrc
-from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.df import update_with_last_run_data as uwlrd
 from mirutil.dirr import make_dir_if_not_exist as mdine
 from mirutil.files import read_txt_file as rtf
 from mirutil.html import etree_to_html as eth
@@ -21,15 +18,18 @@ from mirutil.html import rm_hidden_elements_of_etree
 from mirutil.str import normalize_fa_str_completely as nfsc
 
 import ns
+from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ColName as PreColName
 from py_modules._1_get_htmls import Dirr as PreDirr
+from py_modules._1_get_htmls import \
+    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
 
 
 gu = ns.GDU()
 module_n = 2
 
 class Dirr(PreDirr) :
-    tbls = Repo(gu.trg3).local_path
+    tbls = GitHubRepo(gu.trg3).local_path
 
 dirr = Dirr()
 
@@ -103,22 +103,12 @@ def targ(fp: Path) -> (str , None) :
             return o
 
 def main() :
+
     pass
 
     ##
-
-    gdt = gd.GithubData(gu.tmp)
-    gdt.overwriting_clone()
-
-    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
-    df_fp = gdt.local_path / f'{module_n}.prq'
-
-    df = pd.read_parquet(dp_fp)
-
-    ##
-    df[c.err] = None
-
-    df = uwlrd(df , df_fp)
+    nc = [c.err]
+    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
 
     ##
     df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
@@ -162,11 +152,7 @@ def main() :
     df = df.drop(columns = c2d.keys())
 
     ##
-    sprq(df , df_fp)
-
-    ##
-    msg = f'{df_fp.name} updated'
-    gdt.commit_and_push(msg)
+    save_cur_module_temp_data_and_push(gdt , module_n , df)
 
 ##
 

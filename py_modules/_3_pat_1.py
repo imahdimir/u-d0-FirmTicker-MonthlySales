@@ -4,20 +4,20 @@
 
 import re
 from dataclasses import dataclass
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 
-import githubdata as gd
 import pandas as pd
 from mirutil.classs import return_not_special_variables_of_class as rnsvoc
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import does_df_iloc_val_matches_ptrn as ddivmp
-from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.df import update_with_last_run_data as uwlrd
 from mirutil.str import any_of_patterns_matches as aopm
 from varname import nameof
 
 import ns
+from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
+from py_modules._1_get_htmls import \
+    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
 from py_modules._2_ex_tables_by_htp import ColName as PreColName
 from py_modules._2_ex_tables_by_htp import Dirr
 
@@ -30,6 +30,7 @@ module_n = 3
 class ColName(PreColName) :
     sales = 'Sales'
     modi = 'Modifications'
+    stitl = 'SalesTitle'
 
 c = ColName()
 
@@ -38,6 +39,12 @@ class AfterSumRow :
     _1 = '^' + 'کادر توضیحات' + '.+$'
 
 afs = rnsvoc(AfterSumRow).values()
+
+def find_headers_row_col_n(ilp) :
+    ik = ilp.map.keys()
+    row = max([x[0] for x in ik])
+    col = max([x[1] for x in ik])
+    return row , col
 
 class IlocPattern :
     p0 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
@@ -52,14 +59,6 @@ class IlocPattern :
     map = {
             (0 , 0) : p0 ,
             (0 , 1) : p1 ,
-            (0 , 2) : None ,
-            (0 , 3) : None ,
-            (0 , 4) : None ,
-            (0 , 5) : None ,
-            (0 , 6) : None ,
-            (0 , 7) : None ,
-            (0 , 8) : None ,
-            (0 , 9) : None ,
 
             (1 , 0) : p2 ,
             (1 , 1) : p3 ,
@@ -83,7 +82,7 @@ class Xl :
         self.sum_cell_val = 'جمع'
         self.sum_col = 5
         self.modi_col = None
-        self.header_rows_n = 2
+        self.stitl = 'مبلغ فروش (میلیون ریال)'
 
     def read(self) :
         self.df = pd.read_excel(self.fp , engine = 'openpyxl')
@@ -99,7 +98,8 @@ class Xl :
                 return str(k) + str(e)
 
     def check_is_blank(self) :
-        if self.df.shape[0] == self.header_rows_n :
+        self.hdr_rows_n , self.hdr_cols_n = find_headers_row_col_n(self.ilp)
+        if self.df.shape[0] == self.hdr_rows_n :
             return 'Blank'
 
     def find_sum_row(self) :
@@ -155,6 +155,7 @@ class ReadSalesModifications :
     err: (str , None) = None
     sale: (str , None) = None
     modif: (str , None) = None
+    sales_title: (str , None) = None
 
 rtarg = ReadSalesModifications()
 
@@ -181,81 +182,66 @@ def targ(fp: Path , xl_class) -> ReadSalesModifications :
     sales_sum = xo.ret_sales_sum()
     modif_sum = xo.ret_modif_sum()
 
-    return ReadSalesModifications(None , sales_sum , modif_sum)
+    return ReadSalesModifications(None , sales_sum , modif_sum , xo.stitl)
 
 targ = partial(targ , xl_class = Xl)
 
 outmap = {
         c.err   : nameof(rtarg.err) ,
         c.sales : nameof(rtarg.sale) ,
-        c.modi  : nameof(rtarg.modif)
+        c.modi  : nameof(rtarg.modif) ,
+        c.stitl : nameof(rtarg.sales_title) ,
         }
 
-def main() :
-    pass
-
-    ##
-    gdt = gd.GithubData(gu.tmp)
-
-    ##
-    gdt.overwriting_clone()
-
-    ##
-    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
-    df_fp = gdt.local_path / f'{module_n}.prq'
-
-    df = pd.read_parquet(dp_fp)
-
-    ##
-    df[c.err] = None
-    df[c.sales] = None
-
-    df = uwlrd(df , df_fp)
-
-    ##
+def read_data_by_the_pattern(df , targ) :
     df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
 
-    ##
     msk = df[c.fp].apply(lambda x : x.exists())
 
     print(len(msk[msk]))
 
-    ##
     msk &= df[c.err].isna()
 
     print(len(msk[msk]))
 
-    ##
     msk &= df[c.sales].isna()
 
     print(len(msk[msk]))
 
-    _df = df[msk]
-
-    ##
     df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
 
-    ##
-    _df = df[msk]
-
-    ##
     msk &= df[c.sales].notna()
 
     print(f'found ones count: {len(msk[msk])}')
 
-    ##
     c2d = {
             c.fp : None ,
             }
 
     df = df.drop(columns = c2d.keys())
 
-    ##
-    sprq(df , df_fp)
+    return df
+
+def main() :
+    pass
 
     ##
-    msg = f'{df_fp.name} updated'
-    gdt.commit_and_push(msg)
+    new_cols = {
+            c.err   : None ,
+            c.sales : None ,
+            c.modi  : None ,
+            c.stitl : None ,
+            }
+
+    nc = list(new_cols.keys())
+
+    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+
+    ##
+    df = read_data_by_the_pattern(df , targ)
+
+    ##
+    save_cur_module_temp_data_and_push(gdt , module_n , df)
 
 ##
 
@@ -277,6 +263,9 @@ if False :
 
     dft = pd.read_excel(fp)
 
+    ##
+
     targ(Path(fp))
 
     ##
+    find_headers_row_col_n(ilp)
