@@ -6,23 +6,16 @@ import re
 from functools import partial
 from pathlib import Path
 
-import githubdata as gd
-import pandas as pd
-from mirutil.df import df_apply_parallel as dfap
-from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.df import update_with_last_run_data as uwlrd
-
-import ns
+from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import \
     ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
 from py_modules._3_pat_1 import ColName
 from py_modules._3_pat_1 import Dirr
-from py_modules._3_pat_1 import outmap
+from py_modules._3_pat_1 import read_data_by_the_pattern
 from py_modules._3_pat_1 import targ as targ_3
 from py_modules._3_pat_1 import Xl as Xl_3
 
 
-gu = ns.GDU()
 dirr = Dirr()
 c = ColName()
 
@@ -107,49 +100,10 @@ def main() :
     gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
 
     ##
-    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
+    df = read_data_by_the_pattern(df , targ)
 
     ##
-    msk = df[c.fp].apply(lambda x : x.exists())
-
-    print(len(msk[msk]))
-
-    ##
-    msk &= df[c.err].notna()
-
-    print(len(msk[msk]))
-
-    ##
-    msk &= df[c.sales].isna()
-
-    print(len(msk[msk]))
-
-    _df = df[msk]
-
-    ##
-    df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
-
-    ##
-    _df = df[msk]
-
-    ##
-    msk &= df[c.sales].notna()
-
-    print(f'found ones count: {len(msk[msk])}')
-
-    ##
-    c2d = {
-            c.fp : None ,
-            }
-
-    df = df.drop(columns = c2d.keys())
-
-    ##
-    sprq(df , df_fp)
-
-    ##
-    msg = f'{df_fp.name} updated'
-    gdt.commit_and_push(msg)
+    save_cur_module_temp_data_and_push(gdt , module_n , df)
 
 ##
 
@@ -166,11 +120,5 @@ if False :
     pass
 
     ##
-    trc = '449600'
-    fp = dirr.tbls / f'{trc}.xlsx'
-
-    dft = pd.read_excel(fp)
-
-    targ(Path(fp))
 
     ##

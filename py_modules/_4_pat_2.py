@@ -117,7 +117,6 @@ if False :
     import pandas as pd
 
 
-    ##
     trc = '449600'
     fp = dirr.tbls / f'{trc}.xlsx'
 
