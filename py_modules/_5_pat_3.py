@@ -13,10 +13,12 @@ from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
 
 import ns
+from py_modules._1_get_htmls import \
+    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
 from py_modules._3_pat_1 import ColName
 from py_modules._3_pat_1 import Dirr
 from py_modules._3_pat_1 import outmap
-from py_modules._3_pat_1 import targ
+from py_modules._3_pat_1 import targ as targ_3
 from py_modules._3_pat_1 import Xl as Xl_3
 
 
@@ -49,24 +51,6 @@ class IlocPattern :
             (0 , 5)  : p1 ,
             (0 , 6)  : p1 ,
             (0 , 7)  : p5 ,
-            (0 , 8)  : None ,
-            (0 , 9)  : None ,
-            (0 , 10) : None ,
-            (0 , 11) : None ,
-            (0 , 12) : None ,
-            (0 , 13) : None ,
-            (0 , 14) : None ,
-            (0 , 15) : None ,
-            (0 , 16) : None ,
-            (0 , 17) : None ,
-            (0 , 18) : None ,
-            (0 , 19) : None ,
-            (0 , 20) : None ,
-            (0 , 21) : None ,
-            (0 , 22) : None ,
-            (0 , 23) : None ,
-            (0 , 24) : None ,
-            (0 , 25) : None ,
 
             (1 , 0)  : p7 ,
             (1 , 1)  : p8 ,
@@ -93,7 +77,6 @@ class IlocPattern :
             (1 , 22) : p10 ,
             (1 , 23) : p11 ,
             (1 , 24) : p12 ,
-            (1 , 25) : None ,
             }
 
 ilp = IlocPattern()
@@ -108,25 +91,20 @@ class Xl(Xl_3) :
         self.sum_cell_val = 'جمع'
         self.header_rows_n = 2
 
-targ = partial(targ , xl_class = Xl)
+targ = partial(targ_3 , xl_class = Xl)
 
 def main() :
+
     pass
 
     ##
-    gdt = gd.GithubData(gu.tmp)
+    renew_cols = {
+            c.err : None ,
+            }
 
-    ##
-    gdt.overwriting_clone()
+    nc = list(renew_cols.keys())
 
-    ##
-    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
-    df_fp = gdt.local_path / f'{module_n}.prq'
-
-    df = pd.read_parquet(dp_fp)
-
-    ##
-    df = uwlrd(df , df_fp)
+    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
 
     ##
     df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')

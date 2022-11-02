@@ -6,21 +6,17 @@ import re
 from functools import partial
 from pathlib import Path
 
-import githubdata as gd
-import pandas as pd
-from mirutil.df import df_apply_parallel as dfap
-from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.df import update_with_last_run_data as uwlrd
-
 import ns
+from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
+from py_modules._1_get_htmls import \
+    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
 from py_modules._3_pat_1 import ColName
 from py_modules._3_pat_1 import Dirr
-from py_modules._3_pat_1 import outmap
+from py_modules._3_pat_1 import read_data_by_the_pattern
 from py_modules._3_pat_1 import targ
 from py_modules._3_pat_1 import Xl as Xl_3
 
 
-gu = ns.GDU()
 dirr = Dirr()
 c = ColName()
 
@@ -46,21 +42,6 @@ class IlocPattern :
             (0 , 3)  : p3 ,
             (0 , 4)  : p4 ,
             (0 , 5)  : p1 ,
-            (0 , 6)  : None ,
-            (0 , 7)  : None ,
-            (0 , 8)  : None ,
-            (0 , 9)  : None ,
-            (0 , 10) : None ,
-            (0 , 11) : None ,
-            (0 , 12) : None ,
-            (0 , 13) : None ,
-            (0 , 14) : None ,
-            (0 , 15) : None ,
-            (0 , 16) : None ,
-            (0 , 17) : None ,
-            (0 , 18) : None ,
-            (0 , 19) : None ,
-            (0 , 20) : None ,
 
             (1 , 0)  : p7 ,
             (1 , 1)  : p8 ,
@@ -92,75 +73,31 @@ class Xl(Xl_3) :
     def __init__(self , fp: Path) :
         super().__init__(fp)
         self.ilp = ilp
+        self.sum_cell_val = 'جمع'
         self.sum_col = 16
         self.modi_col = 8
-        self.sum_cell_val = 'جمع'
-        self.header_rows_n = 2
+        self.stitl = 'مبلغ فروش (میلیون ریال)'
 
 targ = partial(targ , xl_class = Xl)
 
 def main() :
+
     pass
 
     ##
-    gdt = gd.GithubData(gu.tmp)
-
-    ##
-    gdt.overwriting_clone()
-
-    ##
-    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
-    df_fp = gdt.local_path / f'{module_n}.prq'
-
-    df = pd.read_parquet(dp_fp)
-
-    ##
-    df[c.modi] = None
-
-    df = uwlrd(df , df_fp)
-
-    ##
-    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
-
-    ##
-    msk = df[c.fp].apply(lambda x : x.exists())
-
-    print(len(msk[msk]))
-
-    ##
-    msk &= df[c.err].notna()
-
-    print(len(msk[msk]))
-
-    ##
-    msk &= df[c.sales].isna()
-
-    print(len(msk[msk]))
-
-    ##
-    df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
-
-    ##
-    _df = df[msk]
-
-    ##
-    msk &= df[c.sales].notna()
-
-    print(f'found ones count: {len(msk[msk])}')
-
-    ##
-    c2d = {
-            c.fp : None ,
+    renew_cols = {
+            c.err : None ,
             }
 
-    df = df.drop(columns = c2d.keys())
+    nc = list(renew_cols.keys())
+
+    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
 
     ##
-    sprq(df , df_fp)
+    df = read_data_by_the_pattern(df , targ)
 
     ##
-    msg = f'{df_fp.name} updated'
-    gdt.commit_and_push(msg)
+    save_cur_module_temp_data_and_push(gdt , module_n , df)
 
 ##
 
@@ -177,11 +114,16 @@ if False :
     pass
 
     ##
+    import pandas as pd
+
+
+    ##
     trc = '449600'
     fp = dirr.tbls / f'{trc}.xlsx'
 
     dft = pd.read_excel(fp)
 
+    ##
     targ(Path(fp))
 
     ##

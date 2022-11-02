@@ -42,8 +42,8 @@ afs = rnsvoc(AfterSumRow).values()
 
 def find_headers_row_col_n(ilp) :
     ik = ilp.map.keys()
-    row = max([x[0] for x in ik])
-    col = max([x[1] for x in ik])
+    row = max([x[0] for x in ik]) + 1
+    col = max([x[1] for x in ik]) + 1
     return row , col
 
 class IlocPattern :
@@ -74,6 +74,13 @@ class IlocPattern :
 
 ilp = IlocPattern()
 
+def check_cell_pat(df , iat , map) :
+    if iat in map.keys() :
+        return ddivmp(df , iat , map[iat])
+    elif pd.isna(df.iat[iat]) :
+        return True
+    return False
+
 class Xl :
 
     def __init__(self , fp: Path) :
@@ -87,22 +94,28 @@ class Xl :
     def read(self) :
         self.df = pd.read_excel(self.fp , engine = 'openpyxl')
 
+    def check_shape(self) :
+        self.hdr_rows_n , self.hdr_cols_n = find_headers_row_col_n(self.ilp)
+        self.df_rows_n , self.df_cols_n = self.df.shape
+        if self.df_rows_n < self.hdr_rows_n :
+            return 'Less rows than header'
+        if self.df_cols_n < self.hdr_cols_n :
+            return 'Less cols'
+        if self.df_cols_n > self.hdr_cols_n :
+            return 'More cols'
+
     def check_header_pat(self) :
-        for k , v in self.ilp.map.items() :
-            try :
-                o = ddivmp(self.df , k , v)
+        for r in range(self.hdr_rows_n - 1) :
+            for c in range(self.hdr_cols_n - 1) :
+                o = check_cell_pat(self.df , (r , c) , self.ilp.map)
                 if not o :
-                    return str(k)
-            except IndexError as e :
-                print(e)
-                return str(k) + str(e)
+                    return str((r , c))
 
     def check_is_blank(self) :
-        self.hdr_rows_n , self.hdr_cols_n = find_headers_row_col_n(self.ilp)
         if self.df.shape[0] == self.hdr_rows_n :
             return 'Blank'
 
-    def find_sum_row(self) :
+    def find_1st_sum_row(self) :
         msk = self.df[0].eq(self.sum_cell_val)
         df = self.df[msk]
         if len(df) == 0 :
@@ -143,6 +156,10 @@ class Xl :
         if msk.any() :
             return 'Sum row is not ok'
 
+    def sum_row_is_the_last_row(self) :
+        if self.sum_row != self.df_rows_n - 1 :
+            return 'Sum row is not the last row'
+
     def ret_sales_sum(self) :
         return self.df.iat[self.sum_row , self.sum_col]
 
@@ -164,14 +181,16 @@ def targ(fp: Path , xl_class) -> ReadSalesModifications :
     xo = xl_class(fp)
 
     _fus = {
-            0 : xo.read ,
-            1 : xo.check_header_pat ,
-            2 : xo.check_is_blank ,
-            3 : xo.find_sum_row ,
-            4 : xo.find_1st_nan_row ,
-            5 : xo.find_1st_empty_row ,
-            6 : xo.find_1st_kadr_row ,
-            7 : xo.check_sum_row_is_ok ,
+            0  : xo.read ,
+            10 : xo.check_shape ,
+            1  : xo.check_header_pat ,
+            2  : xo.check_is_blank ,
+            3  : xo.find_1st_sum_row ,
+            4  : xo.find_1st_nan_row ,
+            5  : xo.find_1st_empty_row ,
+            6  : xo.find_1st_kadr_row ,
+            7  : xo.sum_row_is_the_last_row ,
+            8  : xo.check_sum_row_is_ok ,
             }
 
     for _ , fu in _fus.items() :
@@ -200,17 +219,13 @@ def read_data_by_the_pattern(df , targ) :
 
     print(len(msk[msk]))
 
-    msk &= df[c.err].isna()
-
-    print(len(msk[msk]))
-
-    msk &= df[c.sales].isna()
+    msk &= df[c.stitl].isna()
 
     print(len(msk[msk]))
 
     df = dfap(df , targ , [c.fp] , outmap , msk = msk , test = False)
 
-    msk &= df[c.sales].notna()
+    msk &= df[c.stitl].notna()
 
     print(f'found ones count: {len(msk[msk])}')
 
@@ -223,6 +238,7 @@ def read_data_by_the_pattern(df , targ) :
     return df
 
 def main() :
+
     pass
 
     ##
@@ -264,7 +280,6 @@ if False :
     dft = pd.read_excel(fp)
 
     ##
-
     targ(Path(fp))
 
     ##
