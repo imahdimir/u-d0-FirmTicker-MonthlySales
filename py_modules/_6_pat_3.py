@@ -13,18 +13,17 @@ from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
 
 import ns
-from py_modules._3_pat_1 import ColName
-from py_modules._3_pat_1 import Dirr
-from py_modules._3_pat_1 import outmap
-from py_modules._3_pat_1 import targ
-from py_modules._3_pat_1 import Xl as Xl_3
+from py_modules._3_pat_0 import ColName
+from py_modules._3_pat_0 import Dirr
+from py_modules._3_pat_0 import outmap
+from py_modules._3_pat_0 import targ as targ_3
+from py_modules._3_pat_0 import Xl as Xl_3
 
 
-gu = ns.GDU()
 dirr = Dirr()
 c = ColName()
 
-module_n = 7
+module_n = 6
 
 class IlocPattern :
     p0 = 'شرح خدمات یا فروش'
@@ -49,11 +48,7 @@ class IlocPattern :
             (0 , 1) : p1 ,
             (0 , 2) : p2 ,
             (0 , 3) : p3 ,
-            (0 , 4) : None ,
-            (0 , 5) : None ,
-            (0 , 6) : None ,
-            (0 , 7) : None ,
-            (0 , 8) : None ,
+
             (1 , 0) : p4 ,
             (1 , 1) : p5 ,
             (1 , 2) : p6 ,
@@ -75,9 +70,12 @@ class Xl(Xl_3) :
         self.sum_cell_val = 'جمع'
         self.sum_col = 6
         self.modi_col = 4
-        self.header_rows_n = 2
+        self.stitl = 'درآمد شناسایی شده'
+        self.check_sum_row_fr_bottom = True
+        self.sum_row_fr_bottom = -4
+        self.pat_n = 3
 
-targ = partial(targ , xl_class = Xl)
+targ = partial(targ_3 , xl_class = Xl)
 
 def main() :
     pass
@@ -157,9 +155,14 @@ if False :
     pass
 
     ##
+    import pandas as pd
+
+
     trc = '930211'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
+
+    ##
 
     targ(Path(fp))
 

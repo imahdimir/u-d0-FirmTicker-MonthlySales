@@ -12,11 +12,11 @@ from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
 
 import ns
-from py_modules._3_pat_1 import ColName
-from py_modules._3_pat_1 import Dirr
-from py_modules._3_pat_1 import outmap
-from py_modules._3_pat_1 import targ
-from py_modules._3_pat_1 import Xl as Xl_3
+from py_modules._3_pat_0 import ColName
+from py_modules._3_pat_0 import Dirr
+from py_modules._3_pat_0 import outmap
+from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import Xl as Xl_3
 
 
 gu = ns.GDU()

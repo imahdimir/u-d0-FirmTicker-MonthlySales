@@ -31,6 +31,7 @@ class ColName(PreColName) :
     sales = 'Sales'
     modi = 'Modifications'
     stitl = 'SalesTitle'
+    pat_n = 'PatternNumber'
 
 c = ColName()
 
@@ -90,6 +91,9 @@ class Xl :
         self.sum_col = 5
         self.modi_col = None
         self.stitl = 'مبلغ فروش (میلیون ریال)'
+        self.check_sum_row_fr_bottom = True
+        self.sum_row_fr_bottom = -1
+        self.pat_n = 0
 
     def read(self) :
         self.df = pd.read_excel(self.fp , engine = 'openpyxl')
@@ -157,8 +161,9 @@ class Xl :
             return 'Sum row is not ok'
 
     def sum_row_is_the_last_row(self) :
-        if self.sum_row != self.df_rows_n - 1 :
-            return 'Sum row is not the last row'
+        if self.check_sum_row_fr_bottom :
+            if self.sum_row != self.df_rows_n + self.sum_row_fr_bottom :
+                return 'Sum row is not the correc one from bottom'
 
     def ret_sales_sum(self) :
         return self.df.iat[self.sum_row , self.sum_col]
@@ -173,6 +178,7 @@ class ReadSalesModifications :
     sale: (str , None) = None
     modif: (str , None) = None
     sales_title: (str , None) = None
+    pat_n: (int , None) = None
 
 rtarg = ReadSalesModifications()
 
@@ -201,7 +207,11 @@ def targ(fp: Path , xl_class) -> ReadSalesModifications :
     sales_sum = xo.ret_sales_sum()
     modif_sum = xo.ret_modif_sum()
 
-    return ReadSalesModifications(None , sales_sum , modif_sum , xo.stitl)
+    return ReadSalesModifications(None ,
+                                  sales_sum ,
+                                  modif_sum ,
+                                  xo.stitl ,
+                                  xo.pat_n)
 
 targ = partial(targ , xl_class = Xl)
 
@@ -210,6 +220,7 @@ outmap = {
         c.sales : nameof(rtarg.sale) ,
         c.modi  : nameof(rtarg.modif) ,
         c.stitl : nameof(rtarg.sales_title) ,
+        c.pat_n : nameof(rtarg.pat_n) ,
         }
 
 def read_data_by_the_pattern(df , targ) :
@@ -247,6 +258,7 @@ def main() :
             c.sales : None ,
             c.modi  : None ,
             c.stitl : None ,
+            c.pat_n : None ,
             }
 
     nc = list(new_cols.keys())

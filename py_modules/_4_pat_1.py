@@ -6,15 +6,14 @@ import re
 from functools import partial
 from pathlib import Path
 
-import ns
 from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import \
     ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
-from py_modules._3_pat_1 import ColName
-from py_modules._3_pat_1 import Dirr
-from py_modules._3_pat_1 import read_data_by_the_pattern
-from py_modules._3_pat_1 import targ
-from py_modules._3_pat_1 import Xl as Xl_3
+from py_modules._3_pat_0 import ColName
+from py_modules._3_pat_0 import Dirr
+from py_modules._3_pat_0 import read_data_by_the_pattern
+from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import Xl as Xl_3
 
 
 dirr = Dirr()
@@ -77,6 +76,9 @@ class Xl(Xl_3) :
         self.sum_col = 16
         self.modi_col = 8
         self.stitl = 'مبلغ فروش (میلیون ریال)'
+        self.check_sum_row_fr_bottom = True
+        self.sum_row_fr_bottom = -1
+        self.pat_n = 1
 
 targ = partial(targ , xl_class = Xl)
 
