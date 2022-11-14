@@ -18,14 +18,15 @@ from mirutil.utils import ret_clusters_indices as rci
 from requests.exceptions import ReadTimeout
 
 import ns
-from py_modules._0_add_new_letters import ColName as PreColName
-from py_modules._0_add_new_letters import overwrite_clone_temp_data_ret_ghr_obj
-from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
+from py_modules._0_get_letters import overwrite_clone_temp_data_ret_ghr_obj
+from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 
-
-gu = ns.GDU()
 
 module_n = 1
+
+gu = ns.GDU()
+c = ns.Col()
+c1 = ns.DAllCodalLetters()
 
 class Dirr :
     sh = GitHubRepo(gu.trg0).local_path
@@ -34,12 +35,12 @@ class Dirr :
 
 dirr = Dirr()
 
-class ColName(PreColName) :
+class ColName :
     furl = 'FullUrl'
     fp = 'FilePath'
     htt = 'HTMLType'
 
-c = ColName()
+cn = ColName()
 
 class Const :
     codalbase = 'https://codal.ir'
@@ -48,8 +49,14 @@ class Const :
 
 cte = Const()
 
-def ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n: int ,
-                                                    new_cols = None) :
+class HTMLType :
+    sales = 'sales'
+    low_size = 'low_size'
+    att = 'attachment'
+
+htt = HTMLType()
+
+def ret_gdt_obj_updated_pre_df(module_n: int , new_cols = None) :
     gdt = overwrite_clone_temp_data_ret_ghr_obj()
 
     fp = gdt.local_path / f'{module_n - 1}.prq'
@@ -63,25 +70,13 @@ def ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n: int ,
 
     return gdt , df
 
-class HTMLType :
-    sales = 'sales'
-    low_size = 'low_size'
-    att = 'attachment'
-
-htt = HTMLType()
-
 def check_html_being_the_monthly_sales_report(fp) :
     txt = rtf(fp)
-
-    if (cte.sar in txt) and (cte.nsar in txt) :
-        return True
-
-    return False
+    return (cte.sar in txt) and (cte.nsar in txt)
 
 def move_low_size_htmls(src_dir , dst_dir) :
     if not dst_dir.exists() :
         dst_dir.mkdir()
-
     fps = src_dir.glob('*.html')
     for fp in fps :
         if fp.exists() :
@@ -93,7 +88,6 @@ def move_low_size_htmls(src_dir , dst_dir) :
 def move_not_monthly_report_htmls(src_dir , dst_dir) :
     if not dst_dir.exists() :
         dst_dir.mkdir()
-
     fps = src_dir.glob('*.html')
     for fp in fps :
         fu = check_html_being_the_monthly_sales_report
@@ -103,24 +97,23 @@ def move_not_monthly_report_htmls(src_dir , dst_dir) :
             print(f'{fp.name} moved to {nfp}')
 
 def main() :
-
     pass
 
     ##
-    nc = [c.htt]
-    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+    nc = [cn.htt]
+    gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
-    df[c.furl] = cte.codalbase + df[c.Url]
+    df[cn.fp] = df[c1.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
+    df[cn.furl] = cte.codalbase + df[c1.Url]
 
     ##
-    msk = ~ df[c.fp].apply(lambda x : x.exists())
+    msk = ~ df[cn.fp].apply(lambda x : x.exists())
 
     print(len(msk[msk]))
 
     ##
-    msk &= df[c.htt].isna()
+    msk &= df[cn.htt].isna()
 
     print(len(msk[msk]))
 
@@ -144,8 +137,8 @@ def main() :
 
             inds = _df.index[si : ei]
 
-            urls = df.loc[inds , c.furl]
-            fps = df.loc[inds , c.fp]
+            urls = df.loc[inds , cn.furl]
+            fps = df.loc[inds , cn.fp]
 
             o = grhasas(urls , fps , get_timeout = 15 , render_timeout = 60)
 
@@ -177,10 +170,10 @@ def main() :
         fps = dir_.glob('*.html')
         sts = [x.stem for x in fps]
 
-        msk = df[c.TracingNo].isin(sts)
+        msk = df[c1.TracingNo].isin(sts)
         print(len(msk[msk]))
 
-        df.loc[msk , c.htt] = html_type
+        df.loc[msk , cn.htt] = html_type
 
         return df
 
@@ -189,20 +182,20 @@ def main() :
     df = fill_html_type(df , dirr.lh , htt.att)
 
     ##
-    msk = df[c.htt].isna()
+    msk = df[cn.htt].isna()
 
     print(len(msk[msk]))
 
     _df = df[msk]
 
     ##
-    assert df[c.htt].notna().all()
+    assert df[cn.htt].notna().all()
 
     ##
     c2d = {
-            c.Url  : None ,
-            c.furl : None ,
-            c.fp   : None ,
+            c1.Url  : None ,
+            cn.furl : None ,
+            cn.fp   : None ,
             }
 
     df = df.drop(columns = c2d.keys())

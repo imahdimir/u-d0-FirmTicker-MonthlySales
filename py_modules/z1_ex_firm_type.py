@@ -108,7 +108,7 @@ def main() :
     gdt.overwriting_clone()
 
     ##
-    dp_fp = gdt.local_path / 'c.prq'
+    dp_fp = gdt.local_path / 'cn.prq'
     df_fp = gdt.local_path / 'd.prq'
 
     df = pd.read_parquet(dp_fp)

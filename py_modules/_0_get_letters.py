@@ -18,15 +18,12 @@ from ns import DAllCodalLetters
 from ns import Col
 
 
-gu = ns.GDU()
-clc = ns.CodalLetterCode()
-
 module_n = 0
 
-class ColName(DAllCodalLetters , Col) :
-    pass
-
-c = ColName()
+gu = ns.GDU()
+clc = ns.CodalLetterCode()
+c = Col()
+c1 = DAllCodalLetters()
 
 def overwrite_clone_temp_data_ret_ghr_obj() :
     gdt = GitHubRepo(gu.tmp)
@@ -36,11 +33,10 @@ def overwrite_clone_temp_data_ret_ghr_obj() :
 def save_cur_module_temp_data_and_push(ghr: GitHubRepo , module_n: int , df) :
     fp = ghr.local_path / f'{module_n}.prq'
     sprq(df , fp)
-    msg = f'{fp.name} got updated.'
+    msg = f'{fp.name} got updated'
     ghr.commit_and_push(msg)
 
 def main() :
-
     pass
 
     ##
@@ -48,7 +44,7 @@ def main() :
     ds = ghrs.read_data()
 
     ##
-    msk = ds[c.LetterCode].eq(clc.MonthlySalesRep)
+    msk = ds[c1.LetterCode].eq(clc.MonthlySalesRep)
 
     print(len(msk[msk]))
 
@@ -56,21 +52,21 @@ def main() :
     df = ds[msk]
 
     ##
-    df[c.TracingNo] = df[c.TracingNo].astype('string')
+    df[c1.TracingNo] = df[c1.TracingNo].astype('string')
 
     ##
     c2k = {
-            c.TracingNo       : None ,
-            c.CodalTicker     : None ,
-            c.PublishDateTime : None ,
-            c.Title           : None ,
-            c.Url             : None ,
+            c1.TracingNo       : None ,
+            c1.CodalTicker     : None ,
+            c1.PublishDateTime : None ,
+            c1.Title           : None ,
+            c1.Url             : None ,
             }
 
     df = df[list(c2k.keys())]
 
     ##
-    df = fjfdc(df , c.Title , c.jm , sep = '/')
+    df = fjfdc(df , c1.Title , c.jm , sep = '/')
 
     ##
     gdt = overwrite_clone_temp_data_ret_ghr_obj()
@@ -88,8 +84,19 @@ if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')
 
+##
+
+
+if False :
+    pass
+
     ##
+    ghr = GitHubRepo(gu.tmp)
+    ghr.clone_overwrite()
+
+    ##
+    ghr.commit_and_push('test')
 
     ##
 
-    ##
+##

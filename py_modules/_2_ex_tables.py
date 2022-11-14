@@ -18,15 +18,17 @@ from mirutil.html import rm_hidden_elements_of_etree
 from mirutil.str import normalize_fa_str_completely as nfsc
 
 import ns
-from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
+from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ColName as PreColName
 from py_modules._1_get_htmls import Dirr as PreDirr
-from py_modules._1_get_htmls import \
-    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
+from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 
+
+module_n = 2
 
 gu = ns.GDU()
-module_n = 2
+c = ns.Col()
+c1 = ns.DAllCodalLetters()
 
 class Dirr(PreDirr) :
     tbls = GitHubRepo(gu.trg3).local_path
@@ -36,7 +38,7 @@ dirr = Dirr()
 class ColName(PreColName) :
     err = 'err'
 
-c = ColName()
+cn = ColName()
 
 class MonthlyActivityReport :
 
@@ -53,21 +55,16 @@ class MonthlyActivityReport :
 
     def read_tables_by_html_table_parser(self) :
         self.dfs = rthp(self.html)
-
         if len(self.dfs) == 0 :
             return 'no_table'
-
         self.df = pd.concat(self.dfs)
 
-    def _apply_on_df(self , fu) :
-        self.df = fu(self.df)
-
     def make_not_having_alphabet_digits_cells_none(self) :
-        _fu = make_not_having_alphabet_digits_cells_none
-        self._apply_on_df(_fu)
+        f = make_not_having_alphabet_digits_cells_none
+        self.df = f(self.df)
 
     def drop_all_nan_rows_and_cols(self) :
-        self._apply_on_df(danrc)
+        self.df = danrc(self.df)
 
     def normalize_fa_str_completely(self) :
         self.df = self.df.applymap(nfsc)
@@ -84,37 +81,35 @@ def make_not_having_alphabet_digits_cells_none(df) :
     return df
 
 def targ(fp: Path) -> (str , None) :
-
     m = MonthlyActivityReport(fp)
 
-    _fus = {
-            0  : m.read_html ,
-            10 : m.rm_hidden_elements_of_html ,
-            1  : m.read_tables_by_html_table_parser ,
-            4  : m.make_not_having_alphabet_digits_cells_none ,
-            6  : m.drop_all_nan_rows_and_cols ,
-            7  : m.normalize_fa_str_completely ,
-            8  : m.save_table ,
+    fus = {
+            m.read_html                                  : None ,
+            m.rm_hidden_elements_of_html                 : None ,
+            m.read_tables_by_html_table_parser           : None ,
+            m.make_not_having_alphabet_digits_cells_none : None ,
+            m.drop_all_nan_rows_and_cols                 : None ,
+            m.normalize_fa_str_completely                : None ,
+            m.save_table                                 : None ,
             }
 
-    for _ , fu in _fus.items() :
+    for fu in fus.keys() :
         o = fu()
         if o :
             return o
 
 def main() :
-
     pass
 
     ##
-    nc = [c.err]
-    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+    nc = [cn.err]
+    gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
+    df[cn.fp] = df[c1.TracingNo].apply(lambda x : dirr.sh / f'{x}.html')
 
     ##
-    msk = df[c.fp].apply(lambda x : x.exists())
+    msk = df[cn.fp].apply(lambda x : x.exists())
 
     print(len(msk[msk]))
 
@@ -127,15 +122,17 @@ def main() :
 
     fps = [x.stem for x in fps]
 
-    msk &= ~ df[c.TracingNo].isin(fps)
+    msk &= ~ df[c1.TracingNo].isin(fps)
 
     print(len(msk[msk]))
 
-    ##
-    df = dfap(df , targ , [c.fp] , [c.err] , msk = msk , test = False)
+    _df = df[msk]
 
     ##
-    msk1 = df[c.err].notna()
+    df = dfap(df , targ , [cn.fp] , [cn.err] , msk = msk , test = False)
+
+    ##
+    msk1 = df[cn.err].notna()
 
     print(len(msk1[msk1]))
 
@@ -146,7 +143,7 @@ def main() :
 
     ##
     c2d = {
-            c.fp : None ,
+            cn.fp : None ,
             }
 
     df = df.drop(columns = c2d.keys())
