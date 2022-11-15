@@ -10,10 +10,11 @@ from varname import nameof
 
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
+from py_modules._3_pat_0 import _targ
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
+from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import _targ
 from py_modules._3_pat_0 import Xl
 
 
@@ -73,9 +74,10 @@ class Pat1 :
     modif_col = 8
     asr = None
 
-PATN = ''.join(filter(str.isdigit , nameof(Pat1)))
+paTN = ''.join(filter(str.isdigit , nameof(Pat1)))
+paT = make_pat_ready(Pat1)
 
-targ = partial(_targ , xl_class = Xl , pat = Pat1 , patn = PATN)
+targ = partial(_targ , xl_class = Xl , pat = paT , patn = paTN)
 
 def main() :
     pass

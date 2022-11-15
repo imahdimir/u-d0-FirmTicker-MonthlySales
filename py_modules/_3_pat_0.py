@@ -26,6 +26,8 @@ dirr = Dirr()
 c = ns.Col()
 c1 = ns.DAllCodalLetters()
 
+jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
+
 class ColName(PreColName) :
     sales = 'Sales'
     modi = 'Modifications'
@@ -34,15 +36,9 @@ class ColName(PreColName) :
 
 cn = ColName()
 
-def find_headers_row_col_n(ilp) :
-    ik = ilp.hdr.keys()
-    row = max([x[0] for x in ik]) + 1
-    col = max([x[1] for x in ik]) + 1
-    return row , col
-
 class Pat0 :
-    p0 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
-    p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p0 = 'دوره یک ماهه منتهی به' + '\s*' + jdPAT
+    p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + jdPAT
     p2 = 'نام محصول'
     p3 = 'واحد'
     p4 = 'تعداد تولید'
@@ -73,12 +69,7 @@ class Pat0 :
     modif_col: int | None = None
     asr = None
 
-PATN = ''.join(filter(str.isdigit , nameof(Pat0)))
-
-def cell_matches_pat_or_isna(df , iat , map) :
-    if iat in map.keys() :
-        return ddivmp(df , iat , map[iat])
-    return pd.isna(df.iat[iat])
+paTN = ''.join(filter(str.isdigit , nameof(Pat0)))
 
 class Xl :
 
@@ -98,11 +89,18 @@ class Xl :
             return 'Less cols'
 
     def check_header_pat(self) :
+        df = self.df
         fu = cell_matches_pat_or_isna
+
         for r in range(self.hdr_rows_n - 1) :
             for c in range(self.hdr_cols_n - 1) :
-                if not fu(self.df , (r , c) , self.pat.hdr) :
+                if not fu(df , (r , c) , self.pat.hdr) :
                     return str((r , c))
+
+        con = df.iloc[:self.hdr_rows_n , self.hdr_cols_n :].isna()
+        con = con.all(axis = None)
+        if not con :
+            return 'After header cols are not all nan'
 
     def check_is_blank(self) :
         if self.df.shape[0] == self.hdr_rows_n :
@@ -173,6 +171,37 @@ class ReadSalesModifications :
 
 rtarg = ReadSalesModifications()
 
+def cell_matches_pat_or_isna(df , iat , map) :
+    if iat in map.keys() :
+        vl = rm_sapces(df.iat[iat])
+        return re.fullmatch(map[iat] , vl)
+    return pd.isna(df.iat[iat])
+
+def find_headers_row_col_n(ilp) :
+    ik = ilp.hdr.keys()
+    row = max([x[0] for x in ik]) + 1
+    col = max([x[1] for x in ik]) + 1
+    return row , col
+
+def rm_spaces_fr_hdr(pat) :
+    for ky , vl in pat.hdr.items() :
+        pat.hdr[ky] = rm_sapces(vl)
+    return pat
+
+def rm_sapces(obj) :
+    if obj is None :
+        return
+    return re.sub(r'\s+' , '' , obj)
+
+def make_pat_ready(pat) :
+    _pat = pat()
+    _pat = rm_spaces_fr_hdr(_pat)
+    _pat.sum_row_name = rm_sapces(_pat.sum_row_name)
+    _pat.asr = rm_sapces(_pat.asr)
+    return _pat
+
+paT = make_pat_ready(Pat0)
+
 def _targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
 
     xo = xl_class(fp , pat)
@@ -204,7 +233,7 @@ def _targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
                                   xo.pat.sales_title ,
                                   patn)
 
-targ = partial(_targ , xl_class = Xl , pat = Pat0 , patn = PATN)
+targ = partial(_targ , xl_class = Xl , pat = paT , patn = paTN)
 
 outmap = {
         cn.err   : nameof(rtarg.err) ,
@@ -219,17 +248,17 @@ def read_data_by_the_pattern(df , targ) :
 
     msk = df[cn.fp].apply(lambda x : x.exists())
 
-    print(len(msk[msk]))
+    print(f'NO of Excels exist: {len(msk[msk])}')
 
     msk &= df[cn.stitl].isna()
 
-    print(len(msk[msk]))
+    print(f'No of existing excel with not found sales title: {len(msk[msk])}')
 
     df = dfap(df , targ , [cn.fp] , outmap , msk = msk , test = False)
 
     msk &= df[cn.stitl].notna()
 
-    print(f'found ones count: {len(msk[msk])}')
+    print(f'found ones #: {len(msk[msk])}')
 
     c2d = {
             cn.fp : None ,
@@ -250,9 +279,7 @@ def main() :
             cn.stitl : None ,
             cn.pat_n : None ,
             }
-
     nc = list(new_cols.keys())
-
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
@@ -275,5 +302,37 @@ if False :
     pass
 
     ##
+    df[cn.err].value_counts()
 
     ##
+    import ns
+
+
+    c1 = ns.DAllCodalLetters()
+
+    df[cn.fp] = df[c1.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
+
+    ##
+    msk = df[cn.err].eq(str((0 , 0)))
+    print(len(msk[msk]))
+
+    ##
+    def targ(fp) :
+        df = pd.read_excel(fp)
+        return df.iloc[(0 , 1)]
+
+    col = '00'
+    df.loc[msk , col] = df.loc[msk , cn.fp].apply(lambda x : targ(x))
+
+    ##
+    df[col].value_counts()
+
+    ##
+    df.loc[msk , '012'] = df.loc[
+        msk , col].apply(lambda x : ''.join(filter(str.isalpha , str(x))))
+
+    ##
+    df['012'].value_counts()
+
+    ##
+    df.iloc[0 : 1 , 0 :2]
