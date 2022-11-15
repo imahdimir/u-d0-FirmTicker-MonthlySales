@@ -248,11 +248,11 @@ def read_data_by_the_pattern(df , targ) :
 
     msk = df[cn.fp].apply(lambda x : x.exists())
 
-    print(f'NO of Excels exist: {len(msk[msk])}')
+    print(f'Excels exist #: {len(msk[msk])}')
 
     msk &= df[cn.stitl].isna()
 
-    print(f'No of existing excel with not found sales title: {len(msk[msk])}')
+    print(f'Existing excel with not found sales title #: {len(msk[msk])}')
 
     df = dfap(df , targ , [cn.fp] , outmap , msk = msk , test = False)
 
