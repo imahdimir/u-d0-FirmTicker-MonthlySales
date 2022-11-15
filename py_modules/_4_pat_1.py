@@ -6,22 +6,23 @@ import re
 from functools import partial
 from pathlib import Path
 
-from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
-from py_modules._1_get_htmls import \
-    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
+from varname import nameof
+
+from py_modules._0_get_letters import save_cur_module_temp_data_and_push
+from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl as Xl_3
+from py_modules._3_pat_0 import Xl
 
 
 dirr = Dirr()
-c = ColName()
+cn = ColName()
 
 module_n = 4
 
-class IlocPattern :
+class Pat1 :
     p0 = 'شرح'
     p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
     p2 = 'اصلاحات'
@@ -32,9 +33,10 @@ class IlocPattern :
     p9 = 'تعداد تولید'
     p10 = 'تعداد فروش'
     p11 = re.escape('نرخ فروش (ریال)')
-    p12 = re.escape('مبلغ فروش (میلیون ریال)')
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    p12 = re.escape(sales_title)
 
-    map = {
+    hdr = {
             (0 , 0)  : p0 ,
             (0 , 1)  : p1 ,
             (0 , 2)  : p2 ,
@@ -65,35 +67,25 @@ class IlocPattern :
             (1 , 20) : p12 ,
             }
 
-ilp = IlocPattern()
+    sum_row_name = 'جمع'
+    sum_col = 16
+    sum_row_fr_bottom = -1
+    modif_col = 8
+    asr = None
 
-class Xl(Xl_3) :
+PATN = ''.join(filter(str.isdigit , nameof(Pat1)))
 
-    def __init__(self , fp: Path) :
-        super().__init__(fp , ,
-        self.ilp = ilp
-        self.sum_cell_val = 'جمع'
-        self.sum_col = 16
-        self.modi_col = 8
-        self.stitl = 'مبلغ فروش (میلیون ریال)'
-        self.check_sum_row_fr_bottom = True
-        self.sum_row_fr_bottom = -1
-        self.pat_n = 1
-
-targ = partial(targ , xl_class = Xl)
+targ = partial(targ , xl_class = Xl , pat = Pat1 , patn = PATN)
 
 def main() :
-
     pass
 
     ##
     renew_cols = {
-            c.err : None ,
+            cn.err : None ,
             }
-
     nc = list(renew_cols.keys())
-
-    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+    gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
     df = read_data_by_the_pattern(df , targ)
@@ -111,7 +103,6 @@ if __name__ == "__main__" :
 ##
 
 
-# noinspection PyUnreachableCode
 if False :
     pass
 
@@ -126,5 +117,8 @@ if False :
 
     ##
     targ(Path(fp))
+
+    ##
+    df[cn.err].hist()
 
     ##

@@ -48,8 +48,8 @@ class Pat0 :
     p4 = 'تعداد تولید'
     p5 = 'تعداد فروش'
     p6 = re.escape('نرخ فروش (ریال)')
-    _p7 = 'مبلغ فروش (میلیون ریال)'
-    p7 = re.escape(_p7)
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    p7 = re.escape(sales_title)
 
     hdr = {
             (0 , 0) : p0 ,
@@ -67,14 +67,12 @@ class Pat0 :
             (1 , 9) : p7 ,
             }
 
-    sales_title = _p7
     sum_row_name = 'جمع'
     sum_col = 5
     sum_row_fr_bottom: int | None = -1
     modif_col: int | None = None
     asr = None
 
-hdrpat = Pat0()
 PATN = ''.join(filter(str.isdigit , nameof(Pat0)))
 
 def cell_matches_pat_or_isna(df , iat , map) :
@@ -155,7 +153,7 @@ class Xl :
         srf = self.pat.sum_row_fr_bottom
         if srf is not None :
             if self.sum_row != self.df_rows_n + srf :
-                return 'Sum row is not int the correct position from bottom'
+                return 'Sum row is not in the correct position from bottom'
 
     def ret_sales_sum(self) :
         return self.df.iat[self.sum_row , self.pat.sum_col]
