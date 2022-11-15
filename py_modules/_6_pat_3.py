@@ -6,9 +6,10 @@ import re
 from functools import partial
 from pathlib import Path
 
-from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
-from py_modules._1_get_htmls import \
-    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
+from varname import nameof
+
+from py_modules._0_get_letters import save_cur_module_temp_data_and_push
+from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
@@ -21,7 +22,7 @@ c = ColName()
 
 module_n = 6
 
-class IlocPattern :
+class Pat3 :
     p0 = 'شرح خدمات یا فروش'
     p1 = 'قرارد دادها'
     p2 = 'درآمد شناسایی شده'
@@ -39,7 +40,7 @@ class IlocPattern :
     _p11 = 'درامد شناساسی شده تا پایان دوره مالی منتهی به'
     p11 = _p11 + '\s*' + '\d{4}/\d{2}/\d{2}'
 
-    map = {
+    hdr = {
             (0 , 0) : p0 ,
             (0 , 1) : p1 ,
             (0 , 2) : p2 ,
@@ -53,38 +54,27 @@ class IlocPattern :
             (1 , 5) : p9 ,
             (1 , 6) : p10 ,
             (1 , 7) : p11 ,
-            (1 , 8) : None ,
             }
 
-ilp = IlocPattern()
+    sales_title = 'درآمد شناسایی شده'
+    sum_row_name = 'جمع'
+    sum_col = 6
+    sum_row_fr_bottom = -4
+    modif_col = 4
+    asr = 'کادر توضیحات در مورد اصلاحات'
 
-class Xl(Xl_3) :
-
-    def __init__(self , fp: Path) :
-        super().__init__(fp , ,
-        self.ilp = ilp
-        self.sum_cell_val = 'جمع'
-        self.sum_col = 6
-        self.modi_col = 4
-        self.stitl = 'درآمد شناسایی شده'
-        self.check_sum_row_fr_bottom = True
-        self.sum_row_fr_bottom = -4
-        self.pat_n = 3
-
-targ = partial(targ_3 , xl_class = Xl)
+PATN = ''.join(filter(str.isdigit , nameof(Pat3)))
+targ = partial(targ_3 , xl_class = Xl_3 , pat = Pat3 , patn = PATN)
 
 def main() :
-
     pass
 
     ##
     renew_cols = {
             c.err : None ,
             }
-
     nc = list(renew_cols.keys())
-
-    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+    gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
     df = read_data_by_the_pattern(df , targ)
