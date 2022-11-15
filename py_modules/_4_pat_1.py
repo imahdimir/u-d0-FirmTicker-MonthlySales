@@ -13,14 +13,14 @@ from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import _targ
 from py_modules._3_pat_0 import Xl
 
 
+module_n = 4
+
 dirr = Dirr()
 cn = ColName()
-
-module_n = 4
 
 class Pat1 :
     p0 = 'شرح'
@@ -75,7 +75,7 @@ class Pat1 :
 
 PATN = ''.join(filter(str.isdigit , nameof(Pat1)))
 
-targ = partial(targ , xl_class = Xl , pat = Pat1 , patn = PATN)
+targ = partial(_targ , xl_class = Xl , pat = Pat1 , patn = PATN)
 
 def main() :
     pass

@@ -173,7 +173,7 @@ class ReadSalesModifications :
 
 rtarg = ReadSalesModifications()
 
-def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
+def _targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
 
     xo = xl_class(fp , pat)
 
@@ -204,7 +204,7 @@ def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
                                   xo.pat.sales_title ,
                                   patn)
 
-targ = partial(targ , xl_class = Xl , pat = Pat0 , patn = PATN)
+targ = partial(_targ , xl_class = Xl , pat = Pat0 , patn = PATN)
 
 outmap = {
         cn.err   : nameof(rtarg.err) ,
