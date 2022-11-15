@@ -10,7 +10,6 @@ from pathlib import Path
 import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import does_df_iloc_val_matches_ptrn as ddivmp
-from mirutil.str import any_of_patterns_matches as aopm
 from varname import nameof
 
 import ns
@@ -35,20 +34,13 @@ class ColName(PreColName) :
 
 cn = ColName()
 
-aftersumrow = {
-        '^' + 'کادر توضیحی' + '.+$'  : None ,
-        '^' + 'کادر توضیحات' + '.+$' : None
-        }
-
-afs = aftersumrow.keys()
-
 def find_headers_row_col_n(ilp) :
-    ik = ilp.map.keys()
+    ik = ilp.hdr.keys()
     row = max([x[0] for x in ik]) + 1
     col = max([x[1] for x in ik]) + 1
     return row , col
 
-class HdrPat_0 :
+class Pat0 :
     p0 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
     p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
     p2 = 'نام محصول'
@@ -59,7 +51,7 @@ class HdrPat_0 :
     _p7 = 'مبلغ فروش (میلیون ریال)'
     p7 = re.escape(_p7)
 
-    map = {
+    hdr = {
             (0 , 0) : p0 ,
             (0 , 1) : p1 ,
 
@@ -75,43 +67,43 @@ class HdrPat_0 :
             (1 , 9) : p7 ,
             }
 
-ilp = HdrPat_0()
+    sales_title = _p7
+    sum_row_name = 'جمع'
+    sum_col = 5
+    sum_row_fr_bottom: int | None = -1
+    modif_col: int | None = None
+    asr = None
 
-def check_cell_pat(df , iat , map) :
+hdrpat = Pat0()
+PATN = ''.join(filter(str.isdigit , nameof(Pat0)))
+
+def cell_matches_pat_or_isna(df , iat , map) :
     if iat in map.keys() :
         return ddivmp(df , iat , map[iat])
     return pd.isna(df.iat[iat])
 
 class Xl :
 
-    def __init__(self , fp: Path) :
+    def __init__(self , fp: Path , pat) :
         self.fp = Path(fp)
-        self.ilp = ilp
-        self.sum_cell_val = 'جمع'
-        self.sum_col = 5
-        self.modi_col = None
-        self.stitl = self.ilp._p7
-        self.check_sum_row_fr_bottom = True
-        self.sum_row_fr_bottom = -1
-        self.pat_n = nameof(HdrPat_0).split('_')[-1]
+        self.pat = pat
 
     def read(self) :
         self.df = pd.read_excel(self.fp , engine = 'openpyxl')
 
     def check_shape(self) :
-        self.hdr_rows_n , self.hdr_cols_n = find_headers_row_col_n(self.ilp)
+        self.hdr_rows_n , self.hdr_cols_n = find_headers_row_col_n(self.pat)
         self.df_rows_n , self.df_cols_n = self.df.shape
         if self.df_rows_n < self.hdr_rows_n :
             return 'Less rows than header'
         if self.df_cols_n < self.hdr_cols_n :
             return 'Less cols'
-        if self.df_cols_n > self.hdr_cols_n :
-            return 'More cols'
 
     def check_header_pat(self) :
+        fu = cell_matches_pat_or_isna
         for r in range(self.hdr_rows_n - 1) :
             for c in range(self.hdr_cols_n - 1) :
-                if not check_cell_pat(self.df , (r , c) , self.ilp.map) :
+                if not fu(self.df , (r , c) , self.pat.hdr) :
                     return str((r , c))
 
     def check_is_blank(self) :
@@ -119,7 +111,7 @@ class Xl :
             return 'Blank'
 
     def find_1st_sum_row(self) :
-        msk = self.df[0].eq(self.sum_cell_val)
+        msk = self.df[0].eq(self.pat.sum_row_name)
         df = self.df[msk]
         if len(df) == 0 :
             return 'No sum row found'
@@ -141,35 +133,37 @@ class Xl :
         else :
             self.empty_row = None
 
-    def find_1st_kadr_row(self) :
-        msk = self.df[0].apply(lambda x : aopm(x , afs))
-        msk = msk.fillna(False)
-        df = self.df[msk]
-        if len(df) > 0 :
-            self.kadr_row = df.index[0]
-        else :
-            self.kadr_row = None
+    def check_after_sum_row(self) :
+        if self.pat.asr is None :
+            return
+        df = self.df
+        if len(df) == self.sum_row :
+            return
+        if not re.fullmatch(self.pat.asr , df.iat[self.sum_row + 1 , 0]) :
+            return 'After Sum row is not ok'
 
-    def check_sum_row_is_ok(self) :
-        sr = pd.Series([self.nan_row , self.empty_row , self.kadr_row])
+    def check_sum_row_is_not_after_none_or_empty_row(self) :
+        sr = pd.Series([self.nan_row , self.empty_row])
         sr = sr.dropna()
         if len(sr) == 0 :
             return
         msk = sr.lt(self.sum_row)
         if msk.any() :
-            return 'Sum row is not ok'
+            return 'Sum row is after some nan rows'
 
     def check_sum_row_pos(self) :
-        if self.check_sum_row_fr_bottom :
-            if self.sum_row != self.df_rows_n + self.sum_row_fr_bottom :
+        srf = self.pat.sum_row_fr_bottom
+        if srf is not None :
+            if self.sum_row != self.df_rows_n + srf :
                 return 'Sum row is not int the correct position from bottom'
 
     def ret_sales_sum(self) :
-        return self.df.iat[self.sum_row , self.sum_col]
+        return self.df.iat[self.sum_row , self.pat.sum_col]
 
     def ret_modif_sum(self) :
-        if self.modi_col :
-            return self.df.iat[self.sum_row , self.modi_col]
+        mc = self.pat.modif_col
+        if mc is not None :
+            return self.df.iat[self.sum_row , mc]
 
 @dataclass
 class ReadSalesModifications :
@@ -181,9 +175,9 @@ class ReadSalesModifications :
 
 rtarg = ReadSalesModifications()
 
-def targ(fp: Path , xl_class) -> ReadSalesModifications :
+def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
 
-    xo = xl_class(fp)
+    xo = xl_class(fp , pat)
 
     _fus = {
             0  : xo.read ,
@@ -193,9 +187,9 @@ def targ(fp: Path , xl_class) -> ReadSalesModifications :
             3  : xo.find_1st_sum_row ,
             4  : xo.find_1st_nan_row ,
             5  : xo.find_1st_empty_row ,
-            6  : xo.find_1st_kadr_row ,
+            6  : xo.check_after_sum_row ,
             7  : xo.check_sum_row_pos ,
-            8  : xo.check_sum_row_is_ok ,
+            8  : xo.check_sum_row_is_not_after_none_or_empty_row ,
             }
 
     for _ , fu in _fus.items() :
@@ -209,10 +203,10 @@ def targ(fp: Path , xl_class) -> ReadSalesModifications :
     return ReadSalesModifications(None ,
                                   sales_sum ,
                                   modif_sum ,
-                                  xo.stitl ,
-                                  xo.pat_n)
+                                  xo.pat.sales_title ,
+                                  patn)
 
-targ = partial(targ , xl_class = Xl)
+targ = partial(targ , xl_class = Xl , pat = Pat0 , patn = PATN)
 
 outmap = {
         cn.err   : nameof(rtarg.err) ,
@@ -283,6 +277,5 @@ if False :
     pass
 
     ##
-    nameof(HdrPat_0)
 
     ##

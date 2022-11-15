@@ -80,7 +80,7 @@ ilp = IlocPattern()
 class Xl(Xl_3) :
 
     def __init__(self , fp: Path) :
-        super().__init__(fp)
+        super().__init__(fp , ,
         self.ilp = ilp
         self.sum_cell_val = 'جمع'
         self.sum_col = 11
