@@ -13,14 +13,14 @@ from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import tarG as targ_3
+from py_modules._3_pat_0 import targ , make_pat_ready
 from py_modules._3_pat_0 import Xl as Xl_3
 
 
+module_n = 6
+
 dirr = Dirr()
 c = ColName()
-
-module_n = 6
 
 class Pat3 :
     p0 = 'شرح خدمات یا فروش'
@@ -63,8 +63,10 @@ class Pat3 :
     modif_col = 4
     asr = 'کادر توضیحات در مورد اصلاحات'
 
-PATN = ''.join(filter(str.isdigit , nameof(Pat3)))
-targ = partial(targ_3 , xl_class = Xl_3 , pat = Pat3 , patn = PATN)
+paTN = ''.join(filter(str.isdigit , nameof(Pat3)))
+paT = make_pat_ready(Pat3)
+
+tarG = partial(targ , xl_class = Xl_3 , pat = paT , patn = paTN)
 
 def main() :
     pass
@@ -73,13 +75,11 @@ def main() :
     renew_cols = {
             c.err : None ,
             }
-
     nc = list(renew_cols.keys())
-
-    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+    gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df = read_data_by_the_pattern(df , targ)
+    df = read_data_by_the_pattern(df , tarG)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
@@ -107,7 +107,7 @@ if False :
     dft = pd.read_excel(fp)
 
     ##
-    targ(Path(fp))
+    tarG(Path(fp))
 
     ##
 

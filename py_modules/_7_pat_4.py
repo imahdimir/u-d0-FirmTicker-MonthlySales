@@ -16,12 +16,13 @@ from py_modules._3_pat_0 import tarG
 from py_modules._3_pat_0 import Xl as Xl_3
 
 
+module_n = 7
+
 dirr = Dirr()
 c = ColName()
 
-module_n = 7
 
-class IlocPattern :
+class Pat4 :
     p0 = 'شرح'
     _p1 = 'دوره یک ماهه منتهی به'
     p1 = _p1 + '\s*' + '\d{4}/\d{2}/\d{2}'
@@ -33,7 +34,8 @@ class IlocPattern :
     p6 = 'تعداد تولید'
     p7 = 'تعداد فروش'
     p8 = re.escape('نرخ فروش (ریال)')
-    p9 = re.escape('مبلغ فروش (میلیون ریال)')
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    p9 = re.escape(sales_title)
 
     map = {
             (0 , 0)  : p0 ,
@@ -56,10 +58,15 @@ class IlocPattern :
             (1 , 11) : p7 ,
             (1 , 12) : p8 ,
             (1 , 13) : p9 ,
-            (1 , 14) : None ,
             }
 
-ilp = IlocPattern()
+    sum_row_name ='جمع'
+    sum_col = 5
+    sum_row_fr_bottom = -4
+    modif_col = None
+    asr = 'کادر توضیحات در مورد اصلاحات'
+
+
 
 class Xl(Xl_3) :
 
