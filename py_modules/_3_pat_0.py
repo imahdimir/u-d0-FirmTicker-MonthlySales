@@ -107,6 +107,7 @@ class Xl :
             return 'Blank'
 
     def find_1st_sum_row(self) :
+        self.df[0] = self.df[0].str.replace('\s+' , '')
         msk = self.df[0].eq(self.pat.sum_row_name)
         df = self.df[msk]
         if len(df) == 0 :
@@ -202,7 +203,7 @@ def make_pat_ready(pat) :
 
 paT = make_pat_ready(Pat0)
 
-def _targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
+def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
 
     xo = xl_class(fp , pat)
 
@@ -233,7 +234,7 @@ def _targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
                                   xo.pat.sales_title ,
                                   patn)
 
-targ = partial(_targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
 outmap = {
         cn.err   : nameof(rtarg.err) ,
@@ -283,7 +284,7 @@ def main() :
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df = read_data_by_the_pattern(df , targ)
+    df = read_data_by_the_pattern(df , tarG)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
@@ -322,7 +323,7 @@ if False :
         return df.iloc[(0 , 1)]
 
     col = '00'
-    df.loc[msk , col] = df.loc[msk , cn.fp].apply(lambda x : targ(x))
+    df.loc[msk , col] = df.loc[msk , cn.fp].apply(lambda x : tarG(x))
 
     ##
     df[col].value_counts()

@@ -15,7 +15,7 @@ import ns
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import outmap
-from py_modules._3_pat_0 import _targ
+from py_modules._3_pat_0 import tarG
 from py_modules._3_pat_0 import Xl as Xl_3
 
 
@@ -98,7 +98,7 @@ def main() :
     _df = df[msk]
 
     ##
-    df = dfap(df , _targ , [c.fp] , outmap , msk = msk , test = False)
+    df = dfap(df , tarG , [c.fp] , outmap , msk = msk , test = False)
 
     ##
     _df = df[msk]

@@ -12,7 +12,7 @@ from py_modules._1_get_htmls import \
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import _targ
+from py_modules._3_pat_0 import tarG
 from py_modules._3_pat_0 import Xl as Xl_3
 
 
@@ -89,7 +89,7 @@ def main() :
     gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
 
     ##
-    df = read_data_by_the_pattern(df , _targ)
+    df = read_data_by_the_pattern(df , tarG)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)

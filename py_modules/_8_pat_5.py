@@ -12,7 +12,7 @@ from py_modules._1_get_htmls import \
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import _targ as targ_3
+from py_modules._3_pat_0 import tarG as targ_3
 from py_modules._3_pat_0 import Xl as Xl_3
 
 

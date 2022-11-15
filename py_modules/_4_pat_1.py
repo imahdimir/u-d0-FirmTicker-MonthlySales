@@ -10,7 +10,7 @@ from varname import nameof
 
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
-from py_modules._3_pat_0 import _targ
+from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import make_pat_ready
@@ -77,7 +77,7 @@ class Pat1 :
 paTN = ''.join(filter(str.isdigit , nameof(Pat1)))
 paT = make_pat_ready(Pat1)
 
-targ = partial(_targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
 def main() :
     pass
@@ -90,7 +90,7 @@ def main() :
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df = read_data_by_the_pattern(df , targ)
+    df = read_data_by_the_pattern(df , tarG)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
@@ -118,7 +118,7 @@ if False :
     dft = pd.read_excel(fp)
 
     ##
-    targ(Path(fp))
+    tarG(Path(fp))
 
     ##
     df[cn.err].hist()

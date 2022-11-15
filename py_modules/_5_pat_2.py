@@ -13,58 +13,75 @@ from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import _targ as targ_3
-from py_modules._3_pat_0 import Xl as Xl_3
+from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import Xl , make_pat_ready
 
+
+module_n = 5
 
 dirr = Dirr()
 c = ColName()
 
-module_n = 6
-
-class Pat3 :
-    p0 = 'شرح خدمات یا فروش'
-    p1 = 'قرارد دادها'
-    p2 = 'درآمد شناسایی شده'
-    p3 = 'توضیحات'
-    p4 = 'تاریخ عقد قرارداد'
-    p5 = re.escape('مدت قرارداد (ماه)')
-    _p6 = 'درآمد شناساسی شده از ابتدای سال مالی تا پایان دوره مالی منتهی به'
-    p6 = _p6 + '\s*' + '\d{4}/\d{2}/\d{2}'
-    p7 = 'اصلاحات'
-    p8 = p6 + '\s*-\s*' + 'اصلاح شده'
-    _p9 = 'درآمد شناساسی شده طی دوره یک ماهه منتهی به'
-    p9 = _p9 + '\s*' + '\d{4}/\d{2}/\d{2}'
-    _p10 = 'درآمد شناساسی شده از اول سال مالی تا پایان دوره مالی منتهی به'
-    p10 = _p10 + '\s*' + '\d{4}/\d{2}/\d{2}'
-    _p11 = 'درامد شناساسی شده تا پایان دوره مالی منتهی به'
-    p11 = _p11 + '\s*' + '\d{4}/\d{2}/\d{2}'
+class Pat2 :
+    p1 = 'از ابتدای سال مالی تا تاریخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p2 = 'اصلاحات'
+    p3 = p1 + '\s*' + re.escape('(اصلاح شده)')
+    p4 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p5 = 'وضعیت محصول-واحد'
+    p7 = 'نام محصول'
+    p8 = 'واحد'
+    p9 = 'تعداد تولید'
+    p10 = 'تعداد فروش'
+    p11 = re.escape('نرخ فروش (ریال)')
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    p12 = re.escape(sales_title)
 
     hdr = {
-            (0 , 0) : p0 ,
-            (0 , 1) : p1 ,
-            (0 , 2) : p2 ,
-            (0 , 3) : p3 ,
+            (0 , 0)  : p7 ,
+            (0 , 1)  : p8 ,
+            (0 , 2)  : p1 ,
+            (0 , 3)  : p2 ,
+            (0 , 4)  : p3 ,
+            (0 , 5)  : p4 ,
+            (0 , 6)  : p1 ,
+            (0 , 7)  : p1 ,
+            (0 , 8)  : p5 ,
 
-            (1 , 0) : p4 ,
-            (1 , 1) : p5 ,
-            (1 , 2) : p6 ,
-            (1 , 3) : p7 ,
-            (1 , 4) : p8 ,
-            (1 , 5) : p9 ,
-            (1 , 6) : p10 ,
-            (1 , 7) : p11 ,
+            (1 , 0)  : p9 ,
+            (1 , 1)  : p10 ,
+            (1 , 2)  : p11 ,
+            (1 , 3)  : p12 ,
+            (1 , 4)  : p9 ,
+            (1 , 5)  : p10 ,
+            (1 , 6)  : p12 ,
+            (1 , 7)  : p9 ,
+            (1 , 8)  : p10 ,
+            (1 , 9)  : p11 ,
+            (1 , 10) : p12 ,
+            (1 , 11) : p9 ,
+            (1 , 12) : p10 ,
+            (1 , 13) : p11 ,
+            (1 , 14) : p12 ,
+            (1 , 15) : p9 ,
+            (1 , 16) : p10 ,
+            (1 , 17) : p11 ,
+            (1 , 18) : p12 ,
+            (1 , 19) : p9 ,
+            (1 , 20) : p10 ,
+            (1 , 21) : p11 ,
+            (1 , 22) : p12 ,
             }
 
-    sales_title = 'درآمد شناسایی شده'
-    sum_row_name = 'جمع'
-    sum_col = 6
+    sum_row_name = 'جمع درآمدهای عملیاتی'
+    sum_col = 16
     sum_row_fr_bottom = -4
-    modif_col = 4
+    modif_col = 8
     asr = 'کادر توضیحات در مورد اصلاحات'
 
-PATN = ''.join(filter(str.isdigit , nameof(Pat3)))
-targ = partial(targ_3 , xl_class = Xl_3 , pat = Pat3 , patn = PATN)
+paTN = ''.join(filter(str.isdigit , nameof(Pat2)))
+paT = make_pat_ready(Pat2)
+
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
 def main() :
     pass
@@ -77,7 +94,7 @@ def main() :
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df = read_data_by_the_pattern(df , targ)
+    df = read_data_by_the_pattern(df , tarG)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
@@ -100,13 +117,11 @@ if False :
     import pandas as pd
 
 
-    trc = '930211'
+    trc = '930174'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
     ##
-    targ(Path(fp))
-
-    ##
+    tarG(Path(fp))
 
     ##
