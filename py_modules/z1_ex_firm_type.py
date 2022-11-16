@@ -12,10 +12,10 @@ from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
 from mirutil.files import read_txt_file as rtf
 from mirutil.html import parse_html_as_etree as phaet
-
-import ns
 from py_modules._2_ex_tables_by_htp import ColName as PreColName
 from py_modules._2_ex_tables_by_htp import Dirr as PreDirr
+
+import ns
 
 
 gu = ns.GDU()

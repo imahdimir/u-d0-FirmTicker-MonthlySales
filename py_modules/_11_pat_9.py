@@ -57,14 +57,13 @@ ilp = IlocPattern()
 class Xl(Xl_3) :
 
     def __init__(self , fp: Path) :
-        super().__init__(fp , ,
-        self.ilp = ilp
+        super().__init__(fp , , self.ilp = ilp
         self.sum_cell_val = 'جمع'
         self.header_rows_n = 1
         self.modi_col = 2
         self.sum_col = 4
 
-targ = partial(targ , xl_class = Xl)
+        targ = partial(targ , xl_class = Xl)
 
 def main() :
     pass

@@ -5,8 +5,8 @@
 from pathlib import Path
 
 import pandas as pd
-from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from giteasy import GitHubRepo
+from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import drop_all_nan_rows_and_cols as danrc
 from mirutil.dirr import make_dir_if_not_exist as mdine

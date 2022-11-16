@@ -11,7 +11,6 @@ from mirutil.df import df_apply_parallel as dfap
 from mirutil.df import save_as_prq_wo_index as sprq
 from mirutil.df import update_with_last_run_data as uwlrd
 
-import ns
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import outmap
@@ -49,14 +48,13 @@ ilp = IlocPattern()
 class Xl(Xl_3) :
 
     def __init__(self , fp: Path) :
-        super().__init__(fp , ,
-        self.ilp = ilp
+        super().__init__(fp , , self.ilp = ilp
         self.sum_cell_val = 'جمع'
         self.header_rows_n = 1
         self.modi_col = 2
         self.sum_col = 4
 
-targ = partial(targ , xl_class = Xl)
+        targ = partial(targ , xl_class = Xl)
 
 def main() :
 
