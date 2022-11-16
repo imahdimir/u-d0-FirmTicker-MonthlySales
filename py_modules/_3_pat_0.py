@@ -234,7 +234,7 @@ paT = make_pat_ready(Pat0)
 
 tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
-outmap = {
+ouTMAP = {
         cn.err   : nameof(rtarg.err) ,
         cn.sales : nameof(rtarg.sale) ,
         cn.modi  : nameof(rtarg.modif) ,
@@ -242,20 +242,23 @@ outmap = {
         cn.pat_n : nameof(rtarg.pat_n) ,
         }
 
-def read_data_by_the_pattern(df , targ) :
+def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
+    if outmap is None :
+        outmap = ouTMAP
+
     df[cn.fp] = df[c1.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
 
     msk = df[cn.fp].apply(lambda x : x.exists())
 
     print(f'Excels exist #: {len(msk[msk])}')
 
-    msk &= df[cn.stitl].isna()
+    msk &= df[stitle].isna()
 
     print(f'Existing excel with not found sales title #: {len(msk[msk])}')
 
     df = dfap(df , targ , [cn.fp] , outmap , msk = msk , test = False)
 
-    msk &= df[cn.stitl].notna()
+    msk &= df[stitle].notna()
 
     print(f'found ones #: {len(msk[msk])}')
 
@@ -265,7 +268,7 @@ def read_data_by_the_pattern(df , targ) :
 
     df = df.drop(columns = c2d.keys())
 
-    return df
+    return msk , df
 
 def main() :
     pass
@@ -282,7 +285,7 @@ def main() :
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df = read_data_by_the_pattern(df , tarG)
+    _ , df = read_data_by_the_pattern(df , tarG)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
