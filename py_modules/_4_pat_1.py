@@ -13,7 +13,7 @@ from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
-from py_modules._3_pat_0 import make_pat_ready
+from py_modules._3_pat_0 import make_pat_ready , rm_sapces
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import Xl
 
@@ -25,17 +25,17 @@ cn = ColName()
 
 class Pat1 :
     p0 = 'شرح'
-    p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\d{4}/\d{2}/\d{2}'
     p2 = 'اصلاحات'
-    p3 = p1 + '\s*-\s*' + 'اصلاح شده'
-    p4 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p3 = p1 + '-' + 'اصلاح شده'
+    p4 = 'دوره یک ماهه منتهی به' + '\d{4}/\d{2}/\d{2}'
     p7 = 'نام محصول'
     p8 = 'واحد'
     p9 = 'تعداد تولید'
     p10 = 'تعداد فروش'
-    p11 = re.escape('نرخ فروش (ریال)')
+    p11 = re.escape(rm_sapces('نرخ فروش (ریال)'))
     sales_title = 'مبلغ فروش (میلیون ریال)'
-    p12 = re.escape(sales_title)
+    p12 = re.escape(rm_sapces(sales_title))
 
     hdr = {
             (0 , 0)  : p0 ,

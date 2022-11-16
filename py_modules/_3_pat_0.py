@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
-from mirutil.df import does_df_iloc_val_matches_ptrn as ddivmp
 from varname import nameof
 
 import ns
@@ -36,16 +35,22 @@ class ColName(PreColName) :
 
 cn = ColName()
 
+def rm_sapces(obj) :
+    if obj is None :
+        return
+    return re.sub(r'\s+' , '' , obj)
+
 class Pat0 :
-    p0 = 'دوره یک ماهه منتهی به' + '\s*' + jdPAT
-    p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\s*' + jdPAT
+    p0 = 'دوره یک ماهه منتهی به' + jdPAT
+    p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
     p2 = 'نام محصول'
     p3 = 'واحد'
     p4 = 'تعداد تولید'
     p5 = 'تعداد فروش'
-    p6 = re.escape('نرخ فروش (ریال)')
+    _p6 = rm_sapces('نرخ فروش (ریال)')
+    p6 = re.escape(_p6)
     sales_title = 'مبلغ فروش (میلیون ریال)'
-    p7 = re.escape(sales_title)
+    p7 = re.escape(rm_sapces(sales_title))
 
     hdr = {
             (0 , 0) : p0 ,
@@ -68,8 +73,6 @@ class Pat0 :
     sum_row_fr_bottom: int | None = -1
     modif_col: int | None = None
     asr = None
-
-paTN = ''.join(filter(str.isdigit , nameof(Pat0)))
 
 class Xl :
 
@@ -189,19 +192,12 @@ def rm_spaces_fr_hdr(pat) :
         pat.hdr[ky] = rm_sapces(vl)
     return pat
 
-def rm_sapces(obj) :
-    if obj is None :
-        return
-    return re.sub(r'\s+' , '' , obj)
-
 def make_pat_ready(pat) :
     _pat = pat()
     _pat = rm_spaces_fr_hdr(_pat)
     _pat.sum_row_name = rm_sapces(_pat.sum_row_name)
     _pat.asr = rm_sapces(_pat.asr)
     return _pat
-
-paT = make_pat_ready(Pat0)
 
 def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
 
@@ -233,6 +229,9 @@ def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
                                   modif_sum ,
                                   xo.pat.sales_title ,
                                   patn)
+
+paTN = ''.join(filter(str.isdigit , nameof(Pat0)))
+paT = make_pat_ready(Pat0)
 
 tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
@@ -337,3 +336,14 @@ if False :
 
     ##
     df.iloc[0 : 1 , 0 :2]
+
+    ##
+    p = Pat0()
+    p.p7
+    re.fullmatch(p.p7 , 'مبلغ فروش (میلیون ریال)')
+
+    ##
+    p1 = 'مبلغ فروش (میلیون ریال)'
+    p1 = rm_spaces(p1)
+
+    ##

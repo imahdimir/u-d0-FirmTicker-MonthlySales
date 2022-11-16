@@ -6,36 +6,39 @@ import re
 from functools import partial
 from pathlib import Path
 
-from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
-from py_modules._1_get_htmls import \
-    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
+from varname import nameof
+
+from py_modules._0_get_letters import save_cur_module_temp_data_and_push
+from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
+from py_modules._3_pat_0 import jdPAT
+from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import tarG as targ_3
-from py_modules._3_pat_0 import Xl as Xl_3
+from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import Xl
 
+
+module_n = 8
 
 dirr = Dirr()
 c = ColName()
 
-module_n = 8
-
-class IlocPattern :
+class Pat5 :
     p0 = 'شرح'
     _p1 = 'از ابتدای سال مالی تا پایان مورخ'
-    p1 = _p1 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p1 = _p1 + jdPAT
     p2 = 'اصلاحات'
-    p3 = p1 + '\s*-\s*' + 'اصلاح شده'
+    p3 = p1 + '-' + 'اصلاح شده'
     _p4 = 'دوره یک ماهه منتهی به'
-    p4 = _p4 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p4 = _p4 + jdPAT
     p6 = re.escape('حق بیمه صادره (شامل قبولی اتکایی)')
     p7 = 'خسارت پرداختی'
     p9 = 'رشته بیمه ای'
     p10 = re.escape('مبلغ (میلیون ریال)')
     p11 = re.escape('سهم(درصد)')
 
-    map = {
+    hdr = {
             (0 , 0)  : p0 ,
             (0 , 1)  : p1 ,
             (0 , 2)  : p2 ,
@@ -75,22 +78,17 @@ class IlocPattern :
             (2 , 18) : p11 ,
             }
 
-ilp = IlocPattern()
+    sales_title = 'مبلغ حق بیمه صادره (میلیون ریال)'
+    sum_row_name = 'جمع'
+    sum_col = 11
+    sum_row_fr_bottom = -4
+    modif_col = 5
+    asr = 'کادر توضیحات در مورد اصلاحات'
 
-class Xl(Xl_3) :
+paTN = ''.join(filter(str.isdigit , nameof(Pat5)))
+paT = make_pat_ready(Pat5)
 
-    def __init__(self , fp: Path) :
-        super().__init__(fp , ,
-        self.ilp = ilp
-        self.sum_cell_val = 'جمع'
-        self.sum_col = 11
-        self.modi_col = 5
-        self.stitl = 'مبلغ حق بیمه صادره (شامل قبولی اتکایی)'
-        self.check_sum_row_fr_bottom = True
-        self.sum_row_fr_bottom = -4
-        self.pat_n = 5
-
-targ = partial(targ_3 , xl_class = Xl)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
 def main() :
     pass
@@ -99,13 +97,11 @@ def main() :
     renew_cols = {
             c.err : None ,
             }
-
     nc = list(renew_cols.keys())
-
-    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+    gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
-    df = read_data_by_the_pattern(df , targ)
+    df = read_data_by_the_pattern(df , tarG)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
@@ -125,6 +121,9 @@ if False :
     pass
 
     ##
+    import pandas as pd
+
+
     trc = '930156'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)

@@ -6,14 +6,15 @@ import re
 from functools import partial
 from pathlib import Path
 
-from py_modules._0_add_new_letters import save_cur_module_temp_data_and_push
-from py_modules._1_get_htmls import \
-    ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj
+from varname import nameof
+
+from py_modules._0_get_letters import save_cur_module_temp_data_and_push
+from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import tarG
-from py_modules._3_pat_0 import Xl as Xl_3
+from py_modules._3_pat_0 import targ , make_pat_ready
+from py_modules._3_pat_0 import Xl , jdPAT
 
 
 module_n = 7
@@ -21,13 +22,12 @@ module_n = 7
 dirr = Dirr()
 c = ColName()
 
-
 class Pat4 :
     p0 = 'شرح'
     _p1 = 'دوره یک ماهه منتهی به'
-    p1 = _p1 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p1 = _p1 + jdPAT
     _p2 = 'از ابتدای سال مالی تا تاریخ'
-    p2 = _p2 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p2 = _p2 + jdPAT
     p3 = 'وضعیت محصول-واحد'
     p4 = 'نام محصول'
     p5 = 'واحد'
@@ -37,7 +37,7 @@ class Pat4 :
     sales_title = 'مبلغ فروش (میلیون ریال)'
     p9 = re.escape(sales_title)
 
-    map = {
+    hdr = {
             (0 , 0)  : p0 ,
             (0 , 1)  : p1 ,
             (0 , 2)  : p2 ,
@@ -60,28 +60,16 @@ class Pat4 :
             (1 , 13) : p9 ,
             }
 
-    sum_row_name ='جمع'
+    sum_row_name = 'جمع'
     sum_col = 5
     sum_row_fr_bottom = -4
     modif_col = None
-    asr = 'کادر توضیحات در مورد اصلاحات'
+    asr = 'کادر توضیحی مربوط به اطلاعات دوره 1 ماهه منتهی به' + jdPAT
 
+paTN = ''.join(filter(str.isdigit , nameof(Pat4)))
+paT = make_pat_ready(Pat4)
 
-
-class Xl(Xl_3) :
-
-    def __init__(self , fp: Path) :
-        super().__init__(fp , ,
-        self.ilp = ilp
-        self.sum_cell_val = 'جمع'
-        self.sum_col = 5
-        self.modi_col = None
-        self.stitl = 'مبلغ فروش'
-        self.check_sum_row_fr_bottom = True
-        self.sum_row_fr_bottom = -4
-        self.pat_n = 4
-
-targ = partial(targ , xl_class = Xl)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
 def main() :
     pass
@@ -90,10 +78,8 @@ def main() :
     renew_cols = {
             c.err : None ,
             }
-
     nc = list(renew_cols.keys())
-
-    gdt , df = ov_clone_tmp_data_ret_updated_pre_df_and_gd_obj(module_n , nc)
+    gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
     df = read_data_by_the_pattern(df , tarG)
@@ -116,6 +102,9 @@ if False :
     pass
 
     ##
+    import pandas as pd
+
+
     trc = '930157'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)

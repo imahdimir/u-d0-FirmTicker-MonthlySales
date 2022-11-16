@@ -14,7 +14,7 @@ from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl , make_pat_ready
+from py_modules._3_pat_0 import Xl , make_pat_ready , rm_sapces
 
 
 module_n = 5
@@ -23,18 +23,18 @@ dirr = Dirr()
 c = ColName()
 
 class Pat2 :
-    p1 = 'از ابتدای سال مالی تا تاریخ' + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p1 = 'از ابتدای سال مالی تا تاریخ' + '\d{4}/\d{2}/\d{2}'
     p2 = 'اصلاحات'
-    p3 = p1 + '\s*' + re.escape('(اصلاح شده)')
-    p4 = 'دوره یک ماهه منتهی به' + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p3 = p1 + re.escape(rm_sapces('(اصلاح شده)'))
+    p4 = 'دوره یک ماهه منتهی به' + '\d{4}/\d{2}/\d{2}'
     p5 = 'وضعیت محصول-واحد'
     p7 = 'نام محصول'
     p8 = 'واحد'
     p9 = 'تعداد تولید'
     p10 = 'تعداد فروش'
-    p11 = re.escape('نرخ فروش (ریال)')
+    p11 = re.escape(rm_sapces('نرخ فروش (ریال)'))
     sales_title = 'مبلغ فروش (میلیون ریال)'
-    p12 = re.escape(sales_title)
+    p12 = re.escape(rm_sapces(sales_title))
 
     hdr = {
             (0 , 0)  : p7 ,
