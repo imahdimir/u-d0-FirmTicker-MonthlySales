@@ -15,6 +15,7 @@ from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
+from py_modules._3_pat_0 import rm_sapces
 from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import Xl
 
@@ -32,11 +33,11 @@ class Pat5 :
     p3 = p1 + '-' + 'اصلاح شده'
     _p4 = 'دوره یک ماهه منتهی به'
     p4 = _p4 + jdPAT
-    p6 = re.escape('حق بیمه صادره (شامل قبولی اتکایی)')
+    p6 = re.escape(rm_sapces('حق بیمه صادره (شامل قبولی اتکایی)'))
     p7 = 'خسارت پرداختی'
     p9 = 'رشته بیمه ای'
-    p10 = re.escape('مبلغ (میلیون ریال)')
-    p11 = re.escape('سهم(درصد)')
+    p10 = re.escape(rm_sapces('مبلغ (میلیون ریال)'))
+    p11 = re.escape(rm_sapces('سهم(درصد)'))
 
     hdr = {
             (0 , 0)  : p0 ,
