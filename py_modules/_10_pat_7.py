@@ -1,31 +1,31 @@
 """
 
     """
+
 import re
 from functools import partial
 from pathlib import Path
 
-import githubdata as gd
-import pandas as pd
-from mirutil.df import df_apply_parallel as dfap
-from mirutil.df import save_as_prq_wo_index as sprq
-from mirutil.df import update_with_last_run_data as uwlrd
 
-import ns
+from varname import nameof
+
+from py_modules._0_get_letters import save_cur_module_temp_data_and_push
+from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
-from py_modules._3_pat_0 import outmap
-from py_modules._3_pat_0 import tarG
-from py_modules._3_pat_0 import Xl as Xl_3
+from py_modules._3_pat_0 import jdPAT
+from py_modules._3_pat_0 import make_pat_ready, rm_sapces
+from py_modules._3_pat_0 import read_data_by_the_pattern
+from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import Xl
 
+module_n = 10
 
-gu = ns.GDU()
 dirr = Dirr()
 c = ColName()
 
-module_n = 11
 
-class IlocPattern :
+class Pat7 :
     p0 = 'نام پروژه'
     p1 = 'محل پروژه'
     p2 = 'کاربری'
@@ -36,14 +36,14 @@ class IlocPattern :
     p5 = _p5 + '\s*' + '\d{4}/\d{2}/\d{2}'
     p6 = 'فروش در ماه جاری'
     p7 = 'تاثیرات پیشرفت واحدهای فروش رفته در ماههای قبل'
-    p8 = re.escape('بهای تمام شده (میلیون ریال)')
+    p8 = re.escape(r'بهای تمام شده (میلیون ریال)')
     p9 = 'متراژ فروش'
     p10 = re.escape('نرخ فروش (میلیون ریال)')
     p11 = re.escape('مبلغ فروش (میلیون ریال)')
     p12 = re.escape('بهای تمام شده شناسایی شده (میلیون ریال)')
     p13 = re.escape('درآمد شناسایی شده (میلیون ریال)')
 
-    map = {
+    hdr = {
             (0 , 0) : p0 ,
             (0 , 1) : p1 ,
             (0 , 2) : p2 ,
@@ -52,7 +52,15 @@ class IlocPattern :
             (0 , 5) : p5 ,
             }
 
-ilp = IlocPattern()
+    sales_title = 'درآمد محقق شده (میلیون ریال)-لیزینگ'
+    sum_row_name = 'جمع'
+    sum_col = 4
+    sum_row_fr_bottom = None
+    modif_col = 2
+    asr = 'شرح'
+
+
+ilp = Pat7()
 
 class Xl(Xl_3) :
 
@@ -69,64 +77,7 @@ def main() :
     pass
 
     ##
-    gdt = gd.GithubData(gu.tmp)
 
-    ##
-    gdt.overwriting_clone()
-
-    ##
-    dp_fp = gdt.local_path / f'{module_n - 1}.prq'
-    df_fp = gdt.local_path / f'{module_n}.prq'
-
-    df = pd.read_parquet(dp_fp)
-
-    ##
-    df = uwlrd(df , df_fp)
-
-    ##
-    df[c.fp] = df[c.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
-
-    ##
-    msk = df[c.fp].apply(lambda x : x.exists())
-
-    print(len(msk[msk]))
-
-    ##
-    msk &= df[c.err].notna()
-
-    print(len(msk[msk]))
-
-    ##
-    msk &= df[c.sales].isna()
-
-    print(len(msk[msk]))
-
-    _df = df[msk]
-
-    ##
-    df = dfap(df , tarG , [c.fp] , outmap , msk = msk , test = False)
-
-    ##
-    _df = df[msk]
-
-    ##
-    msk &= df[c.sales].notna()
-
-    print(f'found ones count: {len(msk[msk])}')
-
-    ##
-    c2d = {
-            c.fp : None ,
-            }
-
-    df = df.drop(columns = c2d.keys())
-
-    ##
-    sprq(df , df_fp)
-
-    ##
-    msg = f'{df_fp.name} updated'
-    gdt.commit_and_push(msg)
 
 ##
 

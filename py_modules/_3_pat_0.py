@@ -137,10 +137,9 @@ class Xl :
         if self.pat.asr is None :
             return
         df = self.df
-        if len(df) == self.sum_row :
-            return
-        if not re.fullmatch(self.pat.asr , df.iat[self.sum_row + 1 , 0]) :
-            return 'After Sum row is not ok'
+        if len(df) >= self.sum_row + 2 :
+            if not re.fullmatch(self.pat.asr , df.iat[self.sum_row + 1 , 0]) :
+                return 'After Sum row is not ok'
 
     def check_sum_row_is_not_after_none_or_empty_row(self) :
         sr = pd.Series([self.nan_row , self.empty_row])
