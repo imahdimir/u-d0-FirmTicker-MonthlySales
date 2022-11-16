@@ -12,8 +12,9 @@ from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
-from py_modules._3_pat_0 import make_pat_ready , rm_sapces
+from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
+from py_modules._3_pat_0 import rm_sapces
 from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import Xl as Xl_3
 
@@ -29,17 +30,17 @@ class Pat3 :
     p2 = 'درآمد شناسایی شده'
     p3 = 'توضیحات'
     p4 = 'تاریخ عقد قرارداد'
-    p5 = re.escape('مدت قرارداد (ماه)')
+    p5 = re.escape(rm_sapces('مدت قرارداد (ماه)'))
     _p6 = 'درآمد شناساسی شده از ابتدای سال مالی تا پایان دوره مالی منتهی به'
-    p6 = _p6 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p6 = _p6 + '\d{4}/\d{2}/\d{2}'
     p7 = 'اصلاحات'
-    p8 = p6 + '\s*-\s*' + 'اصلاح شده'
+    p8 = p6 + '-' + 'اصلاح شده'
     _p9 = 'درآمد شناساسی شده طی دوره یک ماهه منتهی به'
-    p9 = _p9 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p9 = _p9 + '\d{4}/\d{2}/\d{2}'
     _p10 = 'درآمد شناساسی شده از اول سال مالی تا پایان دوره مالی منتهی به'
-    p10 = _p10 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p10 = _p10 + '\d{4}/\d{2}/\d{2}'
     _p11 = 'درامد شناساسی شده تا پایان دوره مالی منتهی به'
-    p11 = _p11 + '\s*' + '\d{4}/\d{2}/\d{2}'
+    p11 = _p11 + '\d{4}/\d{2}/\d{2}'
 
     hdr = {
             (0 , 0) : p0 ,

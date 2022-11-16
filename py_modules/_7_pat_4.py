@@ -13,7 +13,7 @@ from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import jdPAT
-from py_modules._3_pat_0 import make_pat_ready
+from py_modules._3_pat_0 import make_pat_ready , rm_sapces
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import Xl
@@ -35,9 +35,9 @@ class Pat4 :
     p5 = 'واحد'
     p6 = 'تعداد تولید'
     p7 = 'تعداد فروش'
-    p8 = re.escape('نرخ فروش (ریال)')
+    p8 = re.escape(rm_sapces('نرخ فروش (ریال)'))
     sales_title = 'مبلغ فروش (میلیون ریال)'
-    p9 = re.escape(sales_title)
+    p9 = re.escape(rm_sapces(sales_title))
 
     hdr = {
             (0 , 0)  : p0 ,
