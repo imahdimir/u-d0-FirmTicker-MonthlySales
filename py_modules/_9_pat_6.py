@@ -21,7 +21,7 @@ from py_modules._3_pat_0 import Xl
 module_n = 9
 
 dirr = Dirr()
-c = ColName()
+cn = ColName()
 
 class Pat6 :
     p0 = 'شرح'
@@ -60,7 +60,7 @@ def main() :
 
     ##
     renew_cols = {
-            c.err : None ,
+            cn.err : None ,
             }
     nc = list(renew_cols.keys())
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
@@ -95,5 +95,10 @@ if False :
 
     ##
     targ(Path(fp))
+
+    ##
+    mskt = df[cn.isblank].eq(True)
+    _df = df[mskt]
+    print(len(_df))
 
     ##
