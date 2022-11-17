@@ -125,3 +125,8 @@ if False :
     df[cn.err].hist()
 
     ##
+    mskt = df[cn.isblank].eq(True)
+    _df = df[mskt]
+    print(len(_df))
+
+    ##
