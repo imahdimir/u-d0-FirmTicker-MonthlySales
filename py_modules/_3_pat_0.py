@@ -32,6 +32,7 @@ class ColName(PreColName) :
     modi = 'Modifications'
     stitl = 'SalesTitle'
     pat_n = 'PatternNumber'
+    isblank = 'IsBlank'
 
 cn = ColName()
 
@@ -107,7 +108,7 @@ class Xl :
 
     def check_is_blank(self) :
         if self.df.shape[0] == self.hdr_rows_n :
-            return 'Blank'
+            return cn.isblank
 
     def find_1st_sum_row(self) :
         self.df[0] = self.df[0].str.replace('\s+' , '')
@@ -256,6 +257,10 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     print(f'Existing excel with not found sales title #: {len(msk[msk])}')
 
+    msk &= df[cn.isblank].ne(True)
+
+    print(f'previous conds + not blank #: {len(msk[msk])}')
+
     df = dfap(df , targ , [cn.fp] , outmap , msk = msk , test = False)
 
     msk &= df[stitle].notna()
@@ -268,6 +273,9 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     df = df.drop(columns = c2d.keys())
 
+    ms1 = df[cn.err].eq(cn.isblank)
+    df.loc[ms1 , cn.isblank] = True
+
     return msk , df
 
 def main() :
@@ -275,11 +283,12 @@ def main() :
 
     ##
     new_cols = {
-            cn.err   : None ,
-            cn.sales : None ,
-            cn.modi  : None ,
-            cn.stitl : None ,
-            cn.pat_n : None ,
+            cn.err     : None ,
+            cn.sales   : None ,
+            cn.modi    : None ,
+            cn.stitl   : None ,
+            cn.pat_n   : None ,
+            cn.isblank : None ,
             }
     nc = list(new_cols.keys())
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
@@ -347,5 +356,10 @@ if False :
     ##
     p1 = 'مبلغ فروش (میلیون ریال)'
     p1 = rm_spaces(p1)
+
+    ##
+    mskt = df[cn.isblank].eq(True)
+    _df = df[mskt]
+    print(len(_df))
 
     ##

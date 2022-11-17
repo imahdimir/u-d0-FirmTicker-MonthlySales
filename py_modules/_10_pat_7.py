@@ -120,3 +120,12 @@ if False :
     targ(Path(fp))
 
     ##
+    msk = df[c.stitl].isna()
+    print(len(msk[msk]))
+
+    ##
+    _df = df[msk]
+
+    ##
+
+    ##
