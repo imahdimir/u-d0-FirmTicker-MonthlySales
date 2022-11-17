@@ -275,6 +275,8 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     ms1 = df[cn.err].eq(cn.isblank)
     df.loc[ms1 , cn.isblank] = True
+    
+    print("blank #:" , len(ms1[ms1]))
 
     return msk , df
 

@@ -22,7 +22,7 @@ from py_modules._3_pat_0 import Xl
 module_n = 5
 
 dirr = Dirr()
-c = ColName()
+cn = ColName()
 
 class Pat2 :
     p1 = 'از ابتدای سال مالی تا تاریخ' + '\d{4}/\d{2}/\d{2}'
@@ -90,7 +90,7 @@ def main() :
 
     ##
     renew_cols = {
-            c.err : None ,
+            cn.err : None ,
             }
     nc = list(renew_cols.keys())
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
@@ -125,5 +125,10 @@ if False :
 
     ##
     tarG(Path(fp))
+
+    ##
+    mskt = df[cn.isblank].eq(True)
+    _df = df[mskt]
+    print(len(_df))
 
     ##
