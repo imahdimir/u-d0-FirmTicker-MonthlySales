@@ -16,7 +16,7 @@ from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , jdPAT
 
 
 module_n = 5
@@ -25,10 +25,10 @@ dirr = Dirr()
 cn = ColName()
 
 class Pat2 :
-    p1 = 'از ابتدای سال مالی تا تاریخ' + '\d{4}/\d{2}/\d{2}'
+    p1 = 'از ابتدای سال مالی تا تاریخ' + jdPAT
     p2 = 'اصلاحات'
     p3 = p1 + re.escape(rm_sapces('(اصلاح شده)'))
-    p4 = 'دوره یک ماهه منتهی به' + '\d{4}/\d{2}/\d{2}'
+    p4 = 'دوره یک ماهه منتهی به' + jdPAT
     p5 = 'وضعیت محصول-واحد'
     p7 = 'نام محصول'
     p8 = 'واحد'

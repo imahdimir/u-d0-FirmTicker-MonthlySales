@@ -12,6 +12,7 @@ from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
+from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
@@ -26,10 +27,10 @@ cn = ColName()
 
 class Pat1 :
     p0 = 'شرح'
-    p1 = 'از ابتدای سال مالی تا پایان مورخ' + '\d{4}/\d{2}/\d{2}'
+    p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
     p2 = 'اصلاحات'
     p3 = p1 + '-' + 'اصلاح شده'
-    p4 = 'دوره یک ماهه منتهی به' + '\d{4}/\d{2}/\d{2}'
+    p4 = 'دوره یک ماهه منتهی به' + jdPAT
     p7 = 'نام محصول'
     p8 = 'واحد'
     p9 = 'تعداد تولید'
