@@ -32,7 +32,6 @@ class ColName(PreColName) :
     modi = 'Modifications'
     stitl = 'SalesTitle'
     pat_n = 'PatternNumber'
-    isblank = 'IsBlank'
 
 cn = ColName()
 

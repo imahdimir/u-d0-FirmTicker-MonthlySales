@@ -37,6 +37,7 @@ dirr = Dirr()
 
 class ColName(PreColName) :
     err = 'err'
+    isblank = 'IsBlank'
 
 cn = ColName()
 
@@ -56,8 +57,10 @@ class MonthlyActivityReport :
     def read_tables_by_html_table_parser(self) :
         self.dfs = rthp(self.html)
         if len(self.dfs) == 0 :
-            return 'no_table'
+            return cn.isblank
         self.df = pd.concat(self.dfs)
+        if self.df.empty :
+            return cn.isblank
 
     def make_not_having_alphabet_digits_cells_none(self) :
         f = make_not_having_alphabet_digits_cells_none
@@ -69,12 +72,13 @@ class MonthlyActivityReport :
     def normalize_fa_str_completely(self) :
         self.df = self.df.applymap(nfsc)
 
-    def drop_duplicates_row_or_cols(self) :
+    def drop_duplicated_row_or_cols(self) :
         self.df = self.df.drop_duplicates()
         self.df = self.df.T.drop_duplicates().T
 
     def save_table(self) :
-        self.df = self.df.reset_index(drop = True)
+        self.df = self.df.T.reset_index(drop = True).T
+
         fp = dirr.tbls / (self.fp.stem + '.xlsx')
         self.df.to_excel(fp , index = False)
 
@@ -95,6 +99,7 @@ def targ(fp: Path) -> (str , None) :
             m.make_not_having_alphabet_digits_cells_none : None ,
             m.drop_all_nan_rows_and_cols                 : None ,
             m.normalize_fa_str_completely                : None ,
+            m.drop_duplicated_row_or_cols                : None ,
             m.save_table                                 : None ,
             }
 
@@ -107,7 +112,7 @@ def main() :
     pass
 
     ##
-    nc = [cn.err]
+    nc = [cn.err , cn.isblank]
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
@@ -142,6 +147,14 @@ def main() :
     print(len(msk1[msk1]))
 
     _df = df[msk1]
+
+    ##
+    msk = df[cn.err].eq(cn.isblank)
+    df.loc[msk , cn.isblank] = True
+
+    print(len(msk1[msk1]))
+
+    _df = df[msk]
 
     ##
     puffd(dirr.tbls , '.xlsx' , gu.trg3)

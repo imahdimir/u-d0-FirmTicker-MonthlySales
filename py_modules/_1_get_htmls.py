@@ -30,8 +30,8 @@ c1 = ns.DAllCodalLetters()
 
 class Dirr :
     sh = GitHubRepo(gu.trg0).local_path
-    lh = GitHubRepo(gu.trg2).local_path
     lsh = GitHubRepo(gu.trg1).local_path
+    lh = GitHubRepo(gu.trg2).local_path
 
 dirr = Dirr()
 
