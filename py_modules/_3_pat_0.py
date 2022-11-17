@@ -85,29 +85,28 @@ class Xl :
         self.df = pd.read_excel(self.fp , engine = 'openpyxl')
 
     def check_shape(self) :
-        self.hdr_rows_n , self.hdr_cols_n = find_headers_row_col_n(self.pat)
         self.df_rows_n , self.df_cols_n = self.df.shape
-        if self.df_rows_n < self.hdr_rows_n :
+        if self.df_rows_n < self.pat.hdr_rows :
             return 'Less rows than header'
-        if self.df_cols_n < self.hdr_cols_n :
+        if self.df_cols_n < self.pat.hdr_cols :
             return 'Less cols'
 
     def check_header_pat(self) :
         df = self.df
         fu = cell_matches_pat_or_isna
 
-        for r in range(self.hdr_rows_n - 1) :
-            for c in range(self.hdr_cols_n - 1) :
+        for r in range(self.pat.hdr_rows - 1) :
+            for c in range(self.pat.hdr_cols - 1) :
                 if not fu(df , (r , c) , self.pat.hdr) :
                     return str((r , c))
 
-        con = df.iloc[:self.hdr_rows_n , self.hdr_cols_n :].isna()
+        con = df.iloc[:self.pat.hdr_rows , self.pat.hdr_cols :].isna()
         con = con.all(axis = None)
         if not con :
             return 'After header cols are not all nan'
 
     def check_is_blank(self) :
-        if self.df.shape[0] == self.hdr_rows_n :
+        if self.df.shape[0] == self.pat.hdr_rows :
             return cn.isblank
 
     def find_1st_sum_row(self) :
@@ -197,6 +196,7 @@ def make_pat_ready(pat) :
     _pat = rm_spaces_fr_hdr(_pat)
     _pat.sum_row_name = rm_sapces(_pat.sum_row_name)
     _pat.asr = rm_sapces(_pat.asr)
+    _pat.hdr_rows , _pat.hdr_cols = find_headers_row_col_n(_pat)
     return _pat
 
 def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
@@ -275,10 +275,12 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     ms1 = df[cn.err].eq(cn.isblank)
     df.loc[ms1 , cn.isblank] = True
-    
+
     print("blank #:" , len(ms1[ms1]))
 
     return msk , df
+
+print(find_headers_row_col_n(paT))
 
 def main() :
     pass
@@ -363,5 +365,8 @@ if False :
     mskt = df[cn.isblank].eq(True)
     _df = df[mskt]
     print(len(_df))
+
+    ##
+    dft.shape
 
     ##

@@ -20,14 +20,14 @@ from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import Xl
 
 
-module_n = 10
+module_n = 11
 
 dirr = Dirr()
 cn = ColName()
 
-class Pat7 :
-    p0 = 'نام پروژه'
-    p1 = 'محل پروژه'
+class Pat8 :
+    p0 = 'دوره یک ماهه منتهی به' + jdPAT
+    p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
     p2 = 'کاربری'
     p3 = 'واحد'
     _p4 = 'ماه'
@@ -46,10 +46,6 @@ class Pat7 :
     hdr = {
             (0 , 0) : p0 ,
             (0 , 1) : p1 ,
-            (0 , 2) : p2 ,
-            (0 , 3) : p3 ,
-            (0 , 4) : p4 ,
-            (0 , 5) : p5 ,
 
             (1 , 0) : p6 ,
             (1 , 1) : p7 ,
@@ -73,8 +69,8 @@ class Pat7 :
     modif_col = 9  # تاثیرات پیشرفت واحد های فروش رفته در ماه های قبل درآمد شناسایی شده
     asr = 'نام پروژه'
 
-paTN = ''.join(filter(str.isdigit , nameof(Pat7)))
-paT = make_pat_ready(Pat7)
+paTN = ''.join(filter(str.isdigit , nameof(Pat8)))
+paT = make_pat_ready(Pat8)
 
 tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
@@ -112,7 +108,7 @@ if False :
     import pandas as pd
 
 
-    trc = '930089'
+    trc = '233485'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 

@@ -50,7 +50,7 @@ class Const :
 cte = Const()
 
 class HTMLType :
-    sales = 'sales_title'
+    sales = 'sales'
     low_size = 'low_size'
     att = 'attachment'
 

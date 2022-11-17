@@ -69,7 +69,12 @@ class MonthlyActivityReport :
     def normalize_fa_str_completely(self) :
         self.df = self.df.applymap(nfsc)
 
+    def drop_duplicates_row_or_cols(self) :
+        self.df = self.df.drop_duplicates()
+        self.df = self.df.T.drop_duplicates().T
+
     def save_table(self) :
+        self.df = self.df.reset_index(drop = True)
         fp = dirr.tbls / (self.fp.stem + '.xlsx')
         self.df.to_excel(fp , index = False)
 

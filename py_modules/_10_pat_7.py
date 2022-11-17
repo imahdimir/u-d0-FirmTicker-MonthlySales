@@ -112,7 +112,7 @@ if False :
     import pandas as pd
 
 
-    trc = '930089'
+    trc = '326927'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
@@ -121,9 +121,10 @@ if False :
 
     ##
     msk = df[cn.stitl].isna()
+    msk &= df[cn.isblank].ne(True)
+    msk &= df[cn.htt].eq('sales')
     print(len(msk[msk]))
 
-    ##
     _df = df[msk]
 
     ##
