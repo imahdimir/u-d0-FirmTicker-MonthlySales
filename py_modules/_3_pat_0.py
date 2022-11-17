@@ -279,19 +279,16 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     return msk , df
 
-print(find_headers_row_col_n(paT))
-
 def main() :
     pass
 
     ##
     new_cols = {
-            cn.err     : None ,
-            cn.sales   : None ,
-            cn.modi    : None ,
-            cn.stitl   : None ,
-            cn.pat_n   : None ,
-            cn.isblank : None ,
+            cn.err   : None ,
+            cn.sales : None ,
+            cn.modi  : None ,
+            cn.stitl : None ,
+            cn.pat_n : None ,
             }
     nc = list(new_cols.keys())
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
@@ -367,5 +364,15 @@ if False :
 
     ##
     dft.shape
+
+    ##
+    import pandas as pd
+
+
+    trc = '232768'
+    fp = dirr.tbls / f'{trc}.xlsx'
+    dft = pd.read_excel(fp)
+
+    ##
 
     ##

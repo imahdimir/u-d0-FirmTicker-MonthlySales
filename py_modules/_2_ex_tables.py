@@ -74,7 +74,6 @@ class MonthlyActivityReport :
 
     def drop_duplicated_row_or_cols(self) :
         self.df = self.df.drop_duplicates()
-        self.df = self.df.T.drop_duplicates().T
 
     def save_table(self) :
         self.df = self.df.T.reset_index(drop = True).T
@@ -136,6 +135,10 @@ def main() :
 
     print(len(msk[msk]))
 
+    ##
+    msk &= df[cn.isblank].ne(True)
+    print(len(msk[msk]))
+
     _df = df[msk]
 
     ##
@@ -191,5 +194,29 @@ if False :
     ##
     fp = '/Users/mahdi/Dropbox/1-git-dirs/PyCharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales_title-htmls/337220.html'
     trg_htp(fp)
+
+    ##
+    from pathlib import Path
+
+
+    di = Path('/Users/mahdi/Downloads/GitHub/rd-Codal-monthly-sales-tables')
+    fps = di.glob('*.xlsx')
+    fps = list(fps)
+
+    ##
+    _ = [x.unlink() for x in fps]
+
+    ##
+    import shutil
+
+
+    fps = dirr.tbls.glob('*.xlsx')
+    fps = list(fps)
+
+    ##
+    trg = Path('/Users/mahdi/Downloads/GitHub/rd-Codal-monthly-sales-tables')
+    for _fp in fps :
+        nfp = trg / _fp.name
+        shutil.copy2(_fp , nfp)
 
     ##
