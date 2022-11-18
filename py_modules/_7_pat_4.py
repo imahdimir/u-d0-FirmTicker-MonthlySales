@@ -116,7 +116,7 @@ if False :
     targ(Path(fp))
 
     ##
-    mskt = df[cn.isblank].eq(True)
+    mskt = df[cn.isblnk].eq(True)
     _df = df[mskt]
     print(len(_df))
 

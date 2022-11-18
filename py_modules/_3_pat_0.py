@@ -106,7 +106,7 @@ class Xl :
 
     def check_is_blank(self) :
         if self.df.shape[0] == self.pat.hdr_rows :
-            return cn.isblank
+            return cn.isblnk
 
     def find_1st_sum_row(self) :
         self.df[0] = self.df[0].str.replace('\s+' , '')
@@ -256,7 +256,7 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     print(f'Existing excel with not found sales title #: {len(msk[msk])}')
 
-    msk &= df[cn.isblank].ne(True)
+    msk &= df[cn.isblnk].ne(True)
 
     print(f'previous conds + not blank #: {len(msk[msk])}')
 
@@ -272,8 +272,8 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     df = df.drop(columns = c2d.keys())
 
-    ms1 = df[cn.err].eq(cn.isblank)
-    df.loc[ms1 , cn.isblank] = True
+    ms1 = df[cn.err].eq(cn.isblnk)
+    df.loc[ms1 , cn.isblnk] = True
 
     print("blank #:" , len(ms1[ms1]))
 
@@ -358,7 +358,7 @@ if False :
     p1 = rm_spaces(p1)
 
     ##
-    mskt = df[cn.isblank].eq(True)
+    mskt = df[cn.isblnk].eq(True)
     _df = df[mskt]
     print(len(_df))
 

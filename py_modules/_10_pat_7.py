@@ -121,14 +121,14 @@ if False :
 
     ##
     msk = df[cn.stitl].isna()
-    msk &= df[cn.isblank].ne(True)
+    msk &= df[cn.isblnk].ne(True)
     msk &= df[cn.htt].eq('sales')
     print(len(msk[msk]))
 
     _df = df[msk]
 
     ##
-    mskt = df[cn.isblank].eq(True)
+    mskt = df[cn.isblnk].eq(True)
     _df = df[mskt]
     print(len(_df))
 

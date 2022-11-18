@@ -4,7 +4,6 @@
 
 from pathlib import Path
 
-import pandas as pd
 from giteasy import GitHubRepo
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from mirutil.df import df_apply_parallel as dfap
@@ -37,7 +36,7 @@ dirr = Dirr()
 
 class ColName(PreColName) :
     err = 'err'
-    isblank = 'IsBlank'
+    isblnk = 'is_blank'
 
 cn = ColName()
 
@@ -57,10 +56,10 @@ class MonthlyActivityReport :
     def read_tables_by_html_table_parser(self) :
         self.dfs = rthp(self.html)
         if len(self.dfs) == 0 :
-            return cn.isblank
+            return cn.isblnk
         self.df = pd.concat(self.dfs)
         if self.df.empty :
-            return cn.isblank
+            return cn.isblnk
 
     def make_not_having_alphabet_digits_cells_none(self) :
         f = make_not_having_alphabet_digits_cells_none
@@ -72,12 +71,19 @@ class MonthlyActivityReport :
     def normalize_fa_str_completely(self) :
         self.df = self.df.applymap(nfsc)
 
-    def drop_duplicated_row_or_cols(self) :
+    def drop_duplicated_rows(self) :
         self.df = self.df.drop_duplicates()
+
+    def drop_duplicated_and_contagious_cols(self) :
+        self.df = self.df.T
+        df0 = self.df.fillna('@')
+        df1 = df0.shift()
+        msk = df0.eq(df1).all(axis = 1)
+        self.df = self.df[~ msk]
+        self.df = self.df.T
 
     def save_table(self) :
         self.df = self.df.T.reset_index(drop = True).T
-
         fp = dirr.tbls / (self.fp.stem + '.xlsx')
         self.df.to_excel(fp , index = False)
 
@@ -98,7 +104,8 @@ def targ(fp: Path) -> (str , None) :
             m.make_not_having_alphabet_digits_cells_none : None ,
             m.drop_all_nan_rows_and_cols                 : None ,
             m.normalize_fa_str_completely                : None ,
-            m.drop_duplicated_row_or_cols                : None ,
+            m.drop_duplicated_rows                       : None ,
+            m.drop_duplicated_and_contagious_cols        : None ,
             m.save_table                                 : None ,
             }
 
@@ -111,7 +118,7 @@ def main() :
     pass
 
     ##
-    nc = [cn.err , cn.isblank]
+    nc = [cn.err , cn.isblnk]
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
 
     ##
@@ -136,7 +143,7 @@ def main() :
     print(len(msk[msk]))
 
     ##
-    msk &= df[cn.isblank].ne(True)
+    msk &= df[cn.isblnk].ne(True)
     print(len(msk[msk]))
 
     _df = df[msk]
@@ -152,8 +159,8 @@ def main() :
     _df = df[msk1]
 
     ##
-    msk = df[cn.err].eq(cn.isblank)
-    df.loc[msk , cn.isblank] = True
+    msk = df[cn.err].eq(cn.isblnk)
+    df.loc[msk , cn.isblnk] = True
 
     print(len(msk1[msk1]))
 
@@ -220,3 +227,23 @@ if False :
         shutil.copy2(_fp , nfp)
 
     ##
+    import pandas as pd
+
+
+    fp1 = '/Users/mahdi/Downloads/GitHub/rd-Codal-monthly-sales-tables/326927.xlsx'
+    dft = pd.read_excel(fp1)
+
+    dft = dft.T
+    _dft = dft
+    _dft = _dft.fillna('@')
+
+    ##
+    dft1 = _dft.shift()
+
+    ##
+    msk = _dft.eq(dft1).all(axis = 1)
+
+    ##
+    dft = dft[~ msk]
+
+##
