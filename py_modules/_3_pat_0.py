@@ -9,6 +9,7 @@ from pathlib import Path
 
 from mirutil.df import df_apply_parallel as dfap
 from varname import nameof
+import pandas as pd
 
 import ns
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
@@ -23,6 +24,8 @@ gu = ns.GDU()
 dirr = Dirr()
 c = ns.Col()
 c1 = ns.DAllCodalLetters()
+
+pd1 = pd
 
 jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
 
