@@ -13,16 +13,20 @@ from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import targ , acC_DIGITS
 from py_modules._3_pat_0 import Xl
+import ns
 
 
 module_n = 14
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat11 :
+    ex = '371243'
+
     p0 = 'درآمدهای محقق شده'
     p1 = 'شرح'
     p2 = 'درآمد محقق شده طی ماه'
@@ -36,10 +40,15 @@ class Pat11 :
             (1 , 2) : p3 ,
             }
 
-    sales_title = 'درآمد محقق شده (میلیون ریال)-لیزینگ'
+    afhdr = {
+            (2 , 1) : acC_DIGITS ,
+            (2 , 2) : acC_DIGITS ,
+            }
+
+    sales_title = 'درآمد محقق شده (میلیون ریال)'
+    ft = ft.l
     sum_row_name = 'جمع'
     sum_col = 1
-    sum_row_fr_bottom = None
     modif_col = None
     asr = 'هزینه تامین منابع مالی عملیات لیزینگ محقق شده'
 
@@ -86,7 +95,6 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##
