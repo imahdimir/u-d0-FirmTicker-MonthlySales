@@ -16,16 +16,20 @@ from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
-from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import targ , acC_DIGITS
 from py_modules._3_pat_0 import Xl
+import ns
 
 
 module_n = 7
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat4 :
+    ex = '930157'
+
     p0 = 'شرح'
     _p1 = 'دوره یک ماهه منتهی به'
     p1 = _p1 + jdPAT
@@ -37,8 +41,8 @@ class Pat4 :
     p6 = 'تعداد تولید'
     p7 = 'تعداد فروش'
     p8 = re.escape(rm_sapces('نرخ فروش (ریال)'))
-    sales_title = 'مبلغ فروش (میلیون ریال)'
-    p9 = re.escape(rm_sapces(sales_title))
+    p9 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
+    p10 = 'فروش داخلی:'
 
     hdr = {
             (0 , 0)  : p0 ,
@@ -61,18 +65,37 @@ class Pat4 :
             (1 , 11) : p7 ,
             (1 , 12) : p8 ,
             (1 , 13) : p9 ,
+            (1 , 14) : None ,
+
+            (2 , 0)  : p10 ,
             }
 
+    afhdr = {
+            (3 , 2)  : acC_DIGITS ,
+            (3 , 3)  : acC_DIGITS ,
+            (3 , 4)  : acC_DIGITS ,
+            (3 , 5)  : acC_DIGITS ,
+            (3 , 6)  : acC_DIGITS ,
+            (3 , 7)  : acC_DIGITS ,
+            (3 , 8)  : acC_DIGITS ,
+            (3 , 9)  : acC_DIGITS ,
+            (3 , 10) : acC_DIGITS ,
+            (3 , 11) : acC_DIGITS ,
+            (3 , 12) : acC_DIGITS ,
+            (3 , 13) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    ft = ft.p
     sum_row_name = 'جمع'
     sum_col = 5
-    sum_row_fr_bottom = -4
     modif_col = None
     asr = 'کادر توضیحی مربوط به اطلاعات دوره 1 ماهه منتهی به' + jdPAT
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat4)))
 paT = make_pat_ready(Pat4)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
 
 def main() :
     pass
@@ -112,8 +135,7 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
-    targ(Path(fp))
+    tarG(Path(fp))
 
     ##
     mskt = df[cn.isblnk].eq(True)

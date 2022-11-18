@@ -29,7 +29,7 @@ cn = ColName()
 ft = ns.FirmType()
 
 class Pat3 :
-    ex = ''
+    ex = '930211'
 
     p0 = 'شرح خدمات یا فروش'
     p1 = 'قرارد دادها'
