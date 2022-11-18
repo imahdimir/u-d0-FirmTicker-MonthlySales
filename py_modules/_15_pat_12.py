@@ -16,16 +16,20 @@ from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
-from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import targ , acC_DIGITS
 from py_modules._3_pat_0 import Xl
+import ns
 
 
 module_n = 15
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat12 :
+    ex = '474786'
+
     p0 = 'شرح'
     p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
     p2 = 'اصلاحات'
@@ -69,10 +73,32 @@ class Pat12 :
             (1 , 20) : p12 ,
             }
 
-    sales_title = 'مبلغ فروش (میلیون ریال)-تولیدی'
+    afhdr = {
+            (2 , 2)  : acC_DIGITS ,
+            (2 , 3)  : acC_DIGITS ,
+            (2 , 4)  : acC_DIGITS ,
+            (2 , 5)  : acC_DIGITS ,
+            (2 , 6)  : acC_DIGITS ,
+            (2 , 7)  : acC_DIGITS ,
+            (2 , 8)  : acC_DIGITS ,
+            (2 , 9)  : acC_DIGITS ,
+            (2 , 10) : acC_DIGITS ,
+            (2 , 11) : acC_DIGITS ,
+            (2 , 12) : acC_DIGITS ,
+            (2 , 13) : acC_DIGITS ,
+            (2 , 14) : acC_DIGITS ,
+            (2 , 15) : acC_DIGITS ,
+            (2 , 16) : acC_DIGITS ,
+            (2 , 17) : acC_DIGITS ,
+            (2 , 18) : acC_DIGITS ,
+            (2 , 19) : acC_DIGITS ,
+            (2 , 20) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    ft = ft.p
     sum_row_name = 'جمع'
     sum_col = 16
-    sum_row_fr_bottom = None
     modif_col = 8
     asr = 'کادر توضیحات در مورد اصلاحات'
 
@@ -119,7 +145,6 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##

@@ -17,15 +17,19 @@ from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , acC_DIGITS
+import ns
 
 
 module_n = 16
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat13 :
+    ex = '614984'
+
     p0 = 'شرح'
     p1 = 'دوره یک ماهه منتهی به' + jdPAT
     p2 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
@@ -53,10 +57,21 @@ class Pat13 :
             (1 , 9) : p8 ,
             }
 
-    sales_title = 'مبلغ فروش (میلیون ریال)-تولیدی'
+    afhdr = {
+            (2 , 2) : acC_DIGITS ,
+            (2 , 3) : acC_DIGITS ,
+            (2 , 4) : acC_DIGITS ,
+            (2 , 5) : acC_DIGITS ,
+            (2 , 6) : acC_DIGITS ,
+            (2 , 7) : acC_DIGITS ,
+            (2 , 8) : acC_DIGITS ,
+            (2 , 9) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    ft = ft.p
     sum_row_name = 'جمع'
     sum_col = 5
-    sum_row_fr_bottom = None
     modif_col = None
     asr = 'کادر توضیحی مربوط به اطلاعات دوره 1 ماهه منتهی به' + jdPAT
 
