@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
+from operator import xor
 
 import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
@@ -24,25 +25,30 @@ gu = ns.GDU()
 dirr = Dirr()
 c = ns.Col()
 c1 = ns.DAllCodalLetters()
+ft = ns.FirmType()
 
 pd1 = pd
 
 jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
+acC_DIGITS = '(\((\d+,)*\d+\))|(\d+,)*\d+'
 
 class ColName(PreColName) :
     sales = 'Sales'
     modi = 'Modifications'
     stitl = 'SalesTitle'
     pat_n = 'PatternNumber'
+    ft = 'FirmType'
 
 cn = ColName()
 
 def rm_sapces(obj) :
-    if obj is None :
-        return
+    if not isinstance(obj , str) :
+        return obj
     return re.sub(r'\s+' , '' , obj)
 
 class Pat0 :
+    ex = '232768'
+
     p0 = 'دوره یک ماهه منتهی به' + jdPAT
     p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
     p2 = 'نام محصول'
@@ -51,8 +57,7 @@ class Pat0 :
     p5 = 'تعداد فروش'
     _p6 = rm_sapces('نرخ فروش (ریال)')
     p6 = re.escape(_p6)
-    sales_title = 'مبلغ فروش (میلیون ریال)'
-    p7 = re.escape(rm_sapces(sales_title))
+    p7 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
 
     hdr = {
             (0 , 0) : p0 ,
@@ -70,9 +75,21 @@ class Pat0 :
             (1 , 9) : p7 ,
             }
 
+    afhdr = {
+            (2 , 2) : acC_DIGITS ,
+            (2 , 3) : acC_DIGITS ,
+            (2 , 4) : acC_DIGITS ,
+            (2 , 5) : acC_DIGITS ,
+            (2 , 6) : acC_DIGITS ,
+            (2 , 7) : acC_DIGITS ,
+            (2 , 8) : acC_DIGITS ,
+            (2 , 9) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    ft = ft.p
     sum_row_name = 'جمع'
     sum_col = 5
-    sum_row_fr_bottom: int | None = -1
     modif_col: int | None = None
     asr = None
 
@@ -88,13 +105,13 @@ class Xl :
     def check_shape(self) :
         self.df_rows_n , self.df_cols_n = self.df.shape
         if self.df_rows_n < self.pat.hdr_rows :
-            return 'Less rows than header'
+            return 'Less rows'
         if self.df_cols_n < self.pat.hdr_cols :
             return 'Less cols'
 
     def check_header_pat(self) :
         df = self.df
-        fu = cell_matches_pat_or_isna
+        fu = df_cell_matches_pat_or_isna
 
         for r in range(self.pat.hdr_rows - 1) :
             for c in range(self.pat.hdr_cols - 1) :
@@ -110,13 +127,44 @@ class Xl :
         if self.df.shape[0] == self.pat.hdr_rows :
             return cn.isblnk
 
+    def check_after_hdr(self) :
+        for el in self.pat.afhdr.keys() :
+            if not df_cell_matches_pat_or_isna(self.df , el , self.pat.afhdr) :
+                return f'afhdr: {str(el)}'
+
     def find_1st_sum_row(self) :
         self.df[0] = self.df[0].str.replace('\s+' , '')
         msk = self.df[0].eq(self.pat.sum_row_name)
         df = self.df[msk]
-        if len(df) == 0 :
-            return 'No sum row found'
-        self.sum_row = df.index[0]
+        if len(df) > 0 :
+            self.sum_row = df.index[0]
+            return
+        return 'no sum row'
+
+    def find_sum_row_by_asr(self) :
+        if self.pat.asr is None :
+            return 'no sum row'
+
+        msk = self.df[0].str.fullmatch(self.pat.asr)
+        msk = msk.fillna(False)
+        df = self.df[msk]
+        if len(df) > 0 :
+            self.asr_row = df.index[0]
+            self.sum_row = self.asr_row - 1
+            cnd0 = pd.isna(self.df.iat[self.sum_row , 0])
+            cnd1 = self.df.iat[self.sum_row , 0] == ''
+            if cnd0 or cnd1 :
+                return
+        return 'no sum row'
+
+    def find_sum_row(self) :
+        o = self.find_1st_sum_row()
+        if o is None :
+            return
+        o = self.find_sum_row_by_asr()
+        if o is None :
+            return
+        return o
 
     def check_after_sum_row(self) :
         if self.pat.asr is None :
@@ -126,11 +174,10 @@ class Xl :
             if not re.fullmatch(self.pat.asr , df.iat[self.sum_row + 1 , 0]) :
                 return 'After Sum row is not ok'
 
-    def check_sum_row_pos(self) :
-        srf = self.pat.sum_row_fr_bottom
-        if srf is not None :
-            if self.sum_row != self.df_rows_n + srf :
-                return 'Sum row is not in the correct position from bottom'
+    def check_sum_row_is_the_last_row(self) :
+        if self.pat.asr is None :
+            if self.sum_row != self.df_rows_n - 1 :
+                return 'sum row is not the last row'
 
     def ret_sales_sum(self) :
         return self.df.iat[self.sum_row , self.pat.sum_col]
@@ -147,13 +194,21 @@ class ReadSalesModifications :
     modif: (str , None) = None
     sales_title: (str , None) = None
     pat_n: (int , None) = None
+    ft: (str , None) = None
 
 rtarg = ReadSalesModifications()
 
-def cell_matches_pat_or_isna(df , iat , map) :
+def match(pat , s) :
+    if pd.isna(pat) and pd.isna(s) :
+        return True
+    if xor(pd.isna(pat) , pd.isna(s)) :
+        return False
+    return re.fullmatch(pat , s) is not None
+
+def df_cell_matches_pat_or_isna(df , iat , map) :
     if iat in map.keys() :
         vl = rm_sapces(df.iat[iat])
-        return re.fullmatch(map[iat] , vl)
+        return match(map[iat] , vl)
     return pd.isna(df.iat[iat])
 
 def find_headers_row_col_n(ilp) :
@@ -175,7 +230,7 @@ def make_pat_ready(pat) :
     _pat.hdr_rows , _pat.hdr_cols = find_headers_row_col_n(_pat)
     return _pat
 
-def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
+def targ(fp: Path , xl_class , pat , patn , ft) -> ReadSalesModifications :
 
     xo = xl_class(fp , pat)
 
@@ -184,9 +239,10 @@ def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
             10 : xo.check_shape ,
             1  : xo.check_header_pat ,
             2  : xo.check_is_blank ,
-            3  : xo.find_1st_sum_row ,
+            22 : xo.check_after_hdr ,
+            3  : xo.find_sum_row ,
             6  : xo.check_after_sum_row ,
-            7  : xo.check_sum_row_pos ,
+            7  : xo.check_sum_row_is_the_last_row ,
             }
 
     for _ , fu in _fus.items() :
@@ -201,12 +257,13 @@ def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
                                   sales_sum ,
                                   modif_sum ,
                                   xo.pat.sales_title ,
-                                  patn)
+                                  patn ,
+                                  ft)
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat0)))
 paT = make_pat_ready(Pat0)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
 
 ouTMAP = {
         cn.err   : nameof(rtarg.err) ,
@@ -214,6 +271,7 @@ ouTMAP = {
         cn.modi  : nameof(rtarg.modif) ,
         cn.stitl : nameof(rtarg.sales_title) ,
         cn.pat_n : nameof(rtarg.pat_n) ,
+        cn.ft    : nameof(rtarg.ft) ,
         }
 
 def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
@@ -263,6 +321,7 @@ def main() :
             cn.modi  : None ,
             cn.stitl : None ,
             cn.pat_n : None ,
+            cn.ft    : None ,
             }
     nc = list(new_cols.keys())
     gdt , df = ret_gdt_obj_updated_pre_df(module_n , nc)
@@ -290,57 +349,13 @@ if False :
     df[cn.err].value_counts()
 
     ##
-    import ns
-
-
-    c1 = ns.DAllCodalLetters()
-
-    df[cn.fp] = df[c1.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
-
-    ##
-    msk = df[cn.err].eq(str((0 , 0)))
-    print(len(msk[msk]))
-
-    ##
-
-    ##
-    df[col].value_counts()
-
-    ##
-    df.loc[msk , '012'] = df.loc[
-        msk , col].apply(lambda x : ''.join(filter(str.isalpha , str(x))))
-
-    ##
-    df['012'].value_counts()
-
-    ##
-    df.iloc[0 : 1 , 0 :2]
-
-    ##
-    p = Pat0()
-    p.p7
-    re.fullmatch(p.p7 , 'مبلغ فروش (میلیون ریال)')
-
-    ##
-    p1 = 'مبلغ فروش (میلیون ریال)'
-    p1 = rm_spaces(p1)
-
-    ##
-    mskt = df[cn.isblnk].eq(True)
-    _df = df[mskt]
-    print(len(_df))
-
-    ##
-    dft.shape
-
-    ##
     import pandas as pd
 
 
-    trc = '232768'
+    trc = '233029'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
+    tarG(fp)
 
     ##

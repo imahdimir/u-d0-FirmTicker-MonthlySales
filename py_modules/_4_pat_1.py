@@ -8,8 +8,10 @@ from pathlib import Path
 
 from varname import nameof
 
+import ns
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
+from py_modules._3_pat_0 import acC_DIGITS
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import jdPAT
@@ -24,8 +26,11 @@ module_n = 4
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat1 :
+    ex = '449600'
+
     p0 = 'شرح'
     p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
     p2 = 'اصلاحات'
@@ -36,8 +41,7 @@ class Pat1 :
     p9 = 'تعداد تولید'
     p10 = 'تعداد فروش'
     p11 = re.escape(rm_sapces('نرخ فروش (ریال)'))
-    sales_title = 'مبلغ فروش (میلیون ریال)'
-    p12 = re.escape(rm_sapces(sales_title))
+    p12 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
 
     hdr = {
             (0 , 0)  : p0 ,
@@ -70,16 +74,39 @@ class Pat1 :
             (1 , 20) : p12 ,
             }
 
+    afhdr = {
+            (2 , 2)  : acC_DIGITS ,
+            (2 , 3)  : acC_DIGITS ,
+            (2 , 4)  : acC_DIGITS ,
+            (2 , 5)  : acC_DIGITS ,
+            (2 , 6)  : acC_DIGITS ,
+            (2 , 7)  : acC_DIGITS ,
+            (2 , 8)  : acC_DIGITS ,
+            (2 , 9)  : acC_DIGITS ,
+            (2 , 10) : acC_DIGITS ,
+            (2 , 11) : acC_DIGITS ,
+            (2 , 12) : acC_DIGITS ,
+            (2 , 13) : acC_DIGITS ,
+            (2 , 14) : acC_DIGITS ,
+            (2 , 15) : acC_DIGITS ,
+            (2 , 16) : acC_DIGITS ,
+            (2 , 17) : acC_DIGITS ,
+            (2 , 18) : acC_DIGITS ,
+            (2 , 19) : acC_DIGITS ,
+            (2 , 20) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    ft = ft.p
     sum_row_name = 'جمع'
     sum_col = 16
-    sum_row_fr_bottom = -1
     modif_col = 8
     asr = None
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat1)))
 paT = make_pat_ready(Pat1)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
 
 def main() :
     pass
@@ -119,7 +146,6 @@ if False :
 
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##

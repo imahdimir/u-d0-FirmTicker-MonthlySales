@@ -62,7 +62,7 @@ class Pat3 :
     sales_title = 'درآمد شناسایی شده'
     sum_row_name = 'جمع'
     sum_col = 6
-    sum_row_fr_bottom = -4
+    sum_row_fr_bottom = None
     modif_col = 4
     asr = 'کادر توضیحات در مورد اصلاحات'
 

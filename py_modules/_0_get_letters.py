@@ -91,11 +91,6 @@ if False :
     pass
 
     ##
-    ghr = GitHubRepo(gu.tmp)
-    ghr.clone_overwrite()
-
-    ##
-    ghr.commit_and_push('test')
 
     ##
 

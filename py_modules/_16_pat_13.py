@@ -25,59 +25,43 @@ module_n = 16
 dirr = Dirr()
 cn = ColName()
 
-class Pat12 :
+class Pat13 :
     p0 = 'شرح'
-    p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
-    p2 = 'اصلاحات'
-    p3 = p1 + '-' + 'اصلاح شده'
-    p4 = 'دوره یک ماهه منتهی به' + jdPAT
-    p5 = 'نام محصول'
-    p8 = 'واحد'
-    p9 = 'مقدار/تعداد تولید'
-    p10 = 'مقدار/تعداد فروش'
-    p11 = re.escape(rm_sapces('نرخ فروش (ریال)'))
-    p12 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
+    p1 = 'دوره یک ماهه منتهی به' + jdPAT
+    p2 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
+    p3 = 'نام محصول'
+    p4 = 'واحد'
+    p5 = 'مقدار/تعداد تولید'
+    p6 = 'مقدار/تعداد فروش'
+    p7 = re.escape(rm_sapces('نرخ فروش (ریال)'))
+    p8 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
 
     hdr = {
-            (0 , 0)  : p0 ,
-            (0 , 1)  : p1 ,
-            (0 , 2)  : p2 ,
-            (0 , 3)  : p3 ,
-            (0 , 4)  : p4 ,
-            (0 , 5)  : p1 ,
+            (0 , 0) : p0 ,
+            (0 , 1) : p1 ,
+            (0 , 2) : p2 ,
 
-            (1 , 0)  : p5 ,
-            (1 , 1)  : p8 ,
-            (1 , 2)  : p9 ,
-            (1 , 3)  : p10 ,
-            (1 , 4)  : p11 ,
-            (1 , 5)  : p12 ,
-            (1 , 6)  : p9 ,
-            (1 , 7)  : p10 ,
-            (1 , 8)  : p12 ,
-            (1 , 9)  : p9 ,
-            (1 , 10) : p10 ,
-            (1 , 11) : p11 ,
-            (1 , 12) : p12 ,
-            (1 , 13) : p9 ,
-            (1 , 14) : p10 ,
-            (1 , 15) : p11 ,
-            (1 , 16) : p12 ,
-            (1 , 17) : p9 ,
-            (1 , 18) : p10 ,
-            (1 , 19) : p11 ,
-            (1 , 20) : p12 ,
+            (1 , 0) : p3 ,
+            (1 , 1) : p4 ,
+            (1 , 2) : p5 ,
+            (1 , 3) : p6 ,
+            (1 , 4) : p7 ,
+            (1 , 5) : p8 ,
+            (1 , 6) : p5 ,
+            (1 , 7) : p6 ,
+            (1 , 8) : p7 ,
+            (1 , 9) : p8 ,
             }
 
     sales_title = 'مبلغ فروش (میلیون ریال)-تولیدی'
     sum_row_name = 'جمع'
-    sum_col = 16
+    sum_col = 5
     sum_row_fr_bottom = None
-    modif_col = 8
-    asr = 'کادر توضیحات در مورد اصلاحات'
+    modif_col = None
+    asr = 'کادر توضیحی مربوط به اطلاعات دوره 1 ماهه منتهی به' + jdPAT
 
-paTN = ''.join(filter(str.isdigit , nameof(Pat12)))
-paT = make_pat_ready(Pat12)
+paTN = ''.join(filter(str.isdigit , nameof(Pat13)))
+paT = make_pat_ready(Pat13)
 
 tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
@@ -115,11 +99,10 @@ if False :
     import pandas as pd
 
 
-    trc = '617705'
+    trc = '614984'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##
@@ -131,5 +114,15 @@ if False :
     _df = df[msk]
 
     ##
+
+    ##
+    import pandas as pd
+
+
+    trc = '625807'
+    fp = dirr.tbls / f'{trc}.xlsx'
+    dft = pd.read_excel(fp)
+
+    tarG(Path(fp))
 
     ##

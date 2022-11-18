@@ -242,7 +242,7 @@ def process_and_make_output(self) :
     if self.output[rd.errMsg] is not None :
         return self.output
 
-    self.find_1st_sum_row()
+    self.find_sum_row()
     self.find_sale_cols()
     self.find_current_jdate()
 
