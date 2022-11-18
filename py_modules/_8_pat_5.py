@@ -17,15 +17,19 @@ from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , acC_DIGITS
+import ns
 
 
 module_n = 8
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat5 :
+    ex = '930156'
+
     p0 = 'شرح'
     _p1 = 'از ابتدای سال مالی تا پایان مورخ'
     p1 = _p1 + jdPAT
@@ -79,17 +83,38 @@ class Pat5 :
             (2 , 18) : p11 ,
             }
 
+    afhdr = {
+            (3 , 1)  : acC_DIGITS ,
+            (3 , 2)  : acC_DIGITS ,
+            (3 , 3)  : acC_DIGITS ,
+            (3 , 4)  : acC_DIGITS ,
+            (3 , 5)  : acC_DIGITS ,
+            (3 , 6)  : acC_DIGITS ,
+            (3 , 7)  : acC_DIGITS ,
+            (3 , 8)  : acC_DIGITS ,
+            (3 , 9)  : acC_DIGITS ,
+            (3 , 10) : acC_DIGITS ,
+            (3 , 11) : acC_DIGITS ,
+            (3 , 12) : acC_DIGITS ,
+            (3 , 13) : acC_DIGITS ,
+            (3 , 14) : acC_DIGITS ,
+            (3 , 15) : acC_DIGITS ,
+            (3 , 16) : acC_DIGITS ,
+            (3 , 17) : acC_DIGITS ,
+            (3 , 18) : acC_DIGITS ,
+            }
+
     sales_title = 'مبلغ حق بیمه صادره (میلیون ریال)'
+    ft = ft.i
     sum_row_name = 'جمع'
     sum_col = 11
-    sum_row_fr_bottom = -4
     modif_col = 5
     asr = 'کادر توضیحات در مورد اصلاحات'
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat5)))
 paT = make_pat_ready(Pat5)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
 
 def main() :
     pass
@@ -129,8 +154,7 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
-    targ(Path(fp))
+    tarG(Path(fp))
 
     ##
     mskt = df[cn.isblnk].eq(True)

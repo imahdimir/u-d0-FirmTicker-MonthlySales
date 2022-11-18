@@ -15,15 +15,19 @@ from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , acC_DIGITS
+import ns
 
 
 module_n = 9
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat6 :
+    ex = '930071'
+
     p0 = 'شرح'
     _p1 = 'درآمد محقق شده از ابتدای سال مالی تا پایان مورخ'
     p1 = _p1 + jdPAT
@@ -43,17 +47,25 @@ class Pat6 :
             (0 , 5) : p5 ,
             }
 
+    afhdr = {
+            (1 , 1) : acC_DIGITS ,
+            (1 , 2) : acC_DIGITS ,
+            (1 , 3) : acC_DIGITS ,
+            (1 , 4) : acC_DIGITS ,
+            (1 , 5) : acC_DIGITS ,
+            }
+
     sales_title = 'درآمد محقق شده (میلیون ریال)-لیزینگ'
+    ft = ft.l
     sum_row_name = 'جمع'
     sum_col = 4
-    sum_row_fr_bottom = None
     modif_col = 2
     asr = 'شرح'
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat6)))
 paT = make_pat_ready(Pat6)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
 
 def main() :
     pass
@@ -93,8 +105,7 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
-    targ(Path(fp))
+    tarG(Path(fp))
 
     ##
     mskt = df[cn.isblnk].eq(True)
