@@ -17,15 +17,19 @@ from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , acC_DIGITS
+import ns
 
 
 module_n = 5
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat2 :
+    ex = '930174'
+
     p1 = 'از ابتدای سال مالی تا تاریخ' + jdPAT
     p2 = 'اصلاحات'
     p3 = p1 + re.escape(rm_sapces('(اصلاح شده)'))
@@ -36,8 +40,8 @@ class Pat2 :
     p9 = 'تعداد تولید'
     p10 = 'تعداد فروش'
     p11 = re.escape(rm_sapces('نرخ فروش (ریال)'))
-    sales_title = 'مبلغ فروش (میلیون ریال)'
-    p12 = re.escape(rm_sapces(sales_title))
+    p12 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
+    p13 = 'فروش داخلی:'
 
     hdr = {
             (0 , 0)  : p7 ,
@@ -73,18 +77,50 @@ class Pat2 :
             (1 , 20) : p10 ,
             (1 , 21) : p11 ,
             (1 , 22) : p12 ,
+            (1 , 23) : None ,
+            (1 , 24) : None ,
+            (1 , 25) : None ,
+
+            (2 , 0)  : p13 ,
             }
 
+    afhdr = {
+            (3 , 2)  : acC_DIGITS ,
+            (3 , 3)  : acC_DIGITS ,
+            (3 , 4)  : acC_DIGITS ,
+            (3 , 5)  : acC_DIGITS ,
+            (3 , 6)  : acC_DIGITS ,
+            (3 , 7)  : acC_DIGITS ,
+            (3 , 8)  : acC_DIGITS ,
+            (3 , 9)  : acC_DIGITS ,
+            (3 , 10) : acC_DIGITS ,
+            (3 , 11) : acC_DIGITS ,
+            (3 , 12) : acC_DIGITS ,
+            (3 , 13) : acC_DIGITS ,
+            (3 , 14) : acC_DIGITS ,
+            (3 , 15) : acC_DIGITS ,
+            (3 , 16) : acC_DIGITS ,
+            (3 , 17) : acC_DIGITS ,
+            (3 , 18) : acC_DIGITS ,
+            (3 , 19) : acC_DIGITS ,
+            (3 , 20) : acC_DIGITS ,
+            (3 , 21) : acC_DIGITS ,
+            (3 , 22) : acC_DIGITS ,
+            (3 , 23) : acC_DIGITS ,
+            (3 , 24) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    ft = ft.p
     sum_row_name = 'جمع درآمدهای عملیاتی'
     sum_col = 16
-    sum_row_fr_bottom = -4
     modif_col = 8
     asr = 'کادر توضیحات در مورد اصلاحات'
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat2)))
 paT = make_pat_ready(Pat2)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
 
 def main() :
     pass
@@ -124,7 +160,6 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##

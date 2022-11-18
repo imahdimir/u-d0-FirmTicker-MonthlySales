@@ -203,6 +203,8 @@ def match(pat , s) :
         return True
     if xor(pd.isna(pat) , pd.isna(s)) :
         return False
+    if not isinstance(s , str) :
+        return False
     return re.fullmatch(pat , s) is not None
 
 def df_cell_matches_pat_or_isna(df , iat , map) :
