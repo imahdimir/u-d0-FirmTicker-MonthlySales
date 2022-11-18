@@ -18,12 +18,12 @@ from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import Xl
 
 
-module_n = 11
+module_n = 13
 
 dirr = Dirr()
 cn = ColName()
 
-class Pat8 :
+class Pat10 :
     p0 = 'شرح'
     p1 = 'مانده اول ماه تسهیلات'
     p2 = 'اصلاحات'
@@ -32,34 +32,31 @@ class Pat8 :
     p5 = 'تسهیلات وصولی طی دوره'
     p6 = 'مانده تسهیلات اعطایی پایان دوره'
     p7 = 'درآمد تسهیلات-از ابتدای سال مالی تا پایان مورخ' + jdPAT
-    p8 = 'درآمد تسهیلات از ابتدای سال مالی تا پایان مورخ' + jdPAT + '-' + 'اصلاح شده'
     p9 = 'درآمد تسهیلات اعطایی طی دوره یک ماهه منتهی به' + jdPAT
     p10 = 'جمع درآمد تسهیلات اعطایی از ابتدای سال مالی تا پایان مورخ' + jdPAT
 
     hdr = {
-            (0 , 0)  : p0 ,
-            (0 , 1)  : p1 ,
-            (0 , 2)  : p2 ,
-            (0 , 3)  : p3 ,
-            (0 , 4)  : p4 ,
-            (0 , 5)  : p5 ,
-            (0 , 6)  : p6 ,
-            (0 , 7)  : p7 ,
-            (0 , 8)  : p2 ,
-            (0 , 9)  : p8 ,
-            (0 , 10) : p9 ,
-            (0 , 11) : p10 ,
+            (0 , 0) : p0 ,
+            (0 , 1) : p1 ,
+            (0 , 2) : p2 ,
+            (0 , 3) : p3 ,
+            (0 , 4) : p4 ,
+            (0 , 5) : p5 ,
+            (0 , 6) : p6 ,
+            (0 , 7) : p7 ,
+            (0 , 8) : p9 ,
+            (0 , 9) : p10 ,
             }
 
     sales_title = 'درآمد تسهیلات اعطایی (میلیون ریال)-بانک'
     sum_row_name = 'جمع'
-    sum_col = 10
+    sum_col = 8
     sum_row_fr_bottom = None
-    modif_col = 8
+    modif_col = None
     asr = 'شرح'
 
-paTN = ''.join(filter(str.isdigit , nameof(Pat8)))
-paT = make_pat_ready(Pat8)
+paTN = ''.join(filter(str.isdigit , nameof(Pat10)))
+paT = make_pat_ready(Pat10)
 
 tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
@@ -97,7 +94,7 @@ if False :
     import pandas as pd
 
 
-    trc = '326927'
+    trc = '342979'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 

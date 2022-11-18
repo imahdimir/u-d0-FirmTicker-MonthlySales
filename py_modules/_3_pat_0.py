@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
+import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
 from varname import nameof
-import pandas as pd
 
 import ns
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
@@ -330,12 +330,6 @@ if False :
     print(len(msk[msk]))
 
     ##
-    def targ(fp) :
-        df = pd.read_excel(fp)
-        return df.iloc[(0 , 1)]
-
-    col = '00'
-    df.loc[msk , col] = df.loc[msk , cn.fp].apply(lambda x : tarG(x))
 
     ##
     df[col].value_counts()
