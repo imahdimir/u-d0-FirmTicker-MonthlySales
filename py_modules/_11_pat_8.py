@@ -15,15 +15,19 @@ from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , acC_DIGITS
+import ns
 
 
 module_n = 11
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat8 :
+    ex = '326927'
+
     p0 = 'شرح'
     p1 = 'مانده اول ماه تسهیلات'
     p2 = 'اصلاحات'
@@ -51,10 +55,24 @@ class Pat8 :
             (0 , 11) : p10 ,
             }
 
-    sales_title = 'درآمد تسهیلات اعطایی (میلیون ریال)-بانک'
+    afhdr = {
+            (1 , 1)  : acC_DIGITS ,
+            (1 , 2)  : acC_DIGITS ,
+            (1 , 3)  : acC_DIGITS ,
+            (1 , 4)  : acC_DIGITS ,
+            (1 , 5)  : acC_DIGITS ,
+            (1 , 6)  : acC_DIGITS ,
+            (1 , 7)  : acC_DIGITS ,
+            (1 , 8)  : acC_DIGITS ,
+            (1 , 9)  : acC_DIGITS ,
+            (1 , 10) : acC_DIGITS ,
+            (1 , 11) : acC_DIGITS ,
+            }
+
+    sales_title = 'درآمد تسهیلات اعطایی (میلیون ریال)'
+    ft = ft.b
     sum_row_name = 'جمع'
     sum_col = 10
-    sum_row_fr_bottom = None
     modif_col = 8
     asr = 'شرح'
 
@@ -101,7 +119,6 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##

@@ -15,18 +15,22 @@ from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
-from py_modules._3_pat_0 import targ
+from py_modules._3_pat_0 import targ , acC_DIGITS
 from py_modules._3_pat_0 import Xl
+import ns
 
 
 module_n = 12
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 jms = '(' + 'فروردین' + '|' + 'اردیبهشت' + '|' + 'خرداد' + '|' + 'تیر' + '|' + 'مرداد' + '|' + 'شهریور' + '|' + 'مهر' + '|' + 'آبان' + '|' + 'آذر' + '|' + 'دی' + '|' + 'بهمن' + '|' + 'اسفند' + ')'
 
 class Pat9 :
+    ex = '342024'
+
     p00 = 'پروژه های واگذار شده :'
     p0 = 'نام پروژه'
     p1 = 'محل پروژه'
@@ -44,34 +48,51 @@ class Pat9 :
     p13 = re.escape(rm_sapces('درآمد شناسایی شده (میلیون ریال)'))
 
     hdr = {
-            (0 , 0) : p00 ,
+            (0 , 0)  : p00 ,
 
-            (1 , 0) : p0 ,
-            (1 , 1) : p1 ,
-            (1 , 2) : p2 ,
-            (1 , 3) : p3 ,
-            (1 , 4) : p4 ,
-            (1 , 5) : p5 ,
+            (1 , 0)  : p0 ,
+            (1 , 1)  : p1 ,
+            (1 , 2)  : p2 ,
+            (1 , 3)  : p3 ,
+            (1 , 4)  : p4 ,
+            (1 , 5)  : p5 ,
 
-            (2 , 0) : p6 ,
-            (2 , 1) : p7 ,
+            (2 , 0)  : p6 ,
+            (2 , 1)  : p7 ,
 
-            (3 , 0) : p8 ,
-            (3 , 1) : p9 ,
-            (3 , 2) : p10 ,
-            (3 , 3) : p11 ,
-            (3 , 4) : p12 ,
-            (3 , 5) : p13 ,
-            (3 , 6) : p8 ,
-            (3 , 7) : p9 ,
-            (3 , 8) : p10 ,
-            (3 , 9) : p11 ,
+            (3 , 0)  : p8 ,
+            (3 , 1)  : p9 ,
+            (3 , 2)  : p10 ,
+            (3 , 3)  : p11 ,
+            (3 , 4)  : p12 ,
+            (3 , 5)  : p13 ,
+            (3 , 6)  : p8 ,
+            (3 , 7)  : p9 ,
+            (3 , 8)  : p10 ,
+            (3 , 9)  : p11 ,
+            (3 , 10) : None ,
+            (3 , 11) : None ,
+            (3 , 12) : None ,
+            (3 , 13) : None ,
             }
 
-    sales_title = 'مبلغ فروش در ماه جاری (میلیون ریال)-ساختمان'
+    afhdr = {
+            (4 , 4)  : acC_DIGITS ,
+            (4 , 5)  : acC_DIGITS ,
+            (4 , 6)  : acC_DIGITS ,
+            (4 , 7)  : acC_DIGITS ,
+            (4 , 8)  : acC_DIGITS ,
+            (4 , 9)  : acC_DIGITS ,
+            (4 , 10) : acC_DIGITS ,
+            (4 , 11) : acC_DIGITS ,
+            (4 , 12) : acC_DIGITS ,
+            (4 , 13) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش در ماه جاری (میلیون ریال)'
+    ft = ft.r
     sum_row_name = 'جمع'
     sum_col = 7
-    sum_row_fr_bottom = None
     modif_col = 9  # تاثیرات پیشرفت واحد های فروش رفته در ماه های قبل درآمد شناسایی شده
     asr = 'آمار وضعیت تکمیل پروژه ها :'
 
@@ -118,7 +139,6 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##

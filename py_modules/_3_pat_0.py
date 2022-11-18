@@ -129,6 +129,8 @@ class Xl :
 
     def check_after_hdr(self) :
         for el in self.pat.afhdr.keys() :
+            if pd.isna(self.df.iat[el]) :
+                continue
             if not df_cell_matches_pat_or_isna(self.df , el , self.pat.afhdr) :
                 return f'afhdr: {str(el)}'
 
@@ -232,7 +234,7 @@ def make_pat_ready(pat) :
     _pat.hdr_rows , _pat.hdr_cols = find_headers_row_col_n(_pat)
     return _pat
 
-def targ(fp: Path , xl_class , pat , patn , ft) -> ReadSalesModifications :
+def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
 
     xo = xl_class(fp , pat)
 
@@ -260,12 +262,12 @@ def targ(fp: Path , xl_class , pat , patn , ft) -> ReadSalesModifications :
                                   modif_sum ,
                                   xo.pat.sales_title ,
                                   patn ,
-                                  ft)
+                                  pat.ft)
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat0)))
 paT = make_pat_ready(Pat0)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
 ouTMAP = {
         cn.err   : nameof(rtarg.err) ,
@@ -276,17 +278,14 @@ ouTMAP = {
         cn.ft    : nameof(rtarg.ft) ,
         }
 
-def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
-    if outmap is None :
-        outmap = ouTMAP
-
+def read_data_by_the_pattern(df , targ) :
     df[cn.fp] = df[c1.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
 
     msk = df[cn.fp].apply(lambda x : x.exists())
 
     print(f'Excels exist #: {len(msk[msk])}')
 
-    msk &= df[stitle].isna()
+    msk &= df[cn.stitl].isna()
 
     print(f'Existing excel with not found sales title #: {len(msk[msk])}')
 
@@ -294,9 +293,9 @@ def read_data_by_the_pattern(df , targ , outmap = None , stitle = cn.stitl) :
 
     print(f'previous conds + not blank #: {len(msk[msk])}')
 
-    df = dfap(df , targ , [cn.fp] , outmap , msk = msk , test = False)
+    df = dfap(df , targ , [cn.fp] , ouTMAP , msk = msk , test = False)
 
-    msk &= df[stitle].notna()
+    msk &= df[cn.stitl].notna()
 
     print(f'found ones #: {len(msk[msk])}')
 

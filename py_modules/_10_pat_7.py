@@ -17,15 +17,19 @@ from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules._3_pat_0 import rm_sapces
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , acC_DIGITS
+import ns
 
 
 module_n = 10
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat7 :
+    ex = '336930'
+
     p0 = 'نام پروژه'
     p1 = 'محل پروژه'
     p2 = 'کاربری'
@@ -44,32 +48,49 @@ class Pat7 :
     p13 = re.escape(rm_sapces('درآمد شناسایی شده (میلیون ریال)'))
 
     hdr = {
-            (0 , 0) : p0 ,
-            (0 , 1) : p1 ,
-            (0 , 2) : p2 ,
-            (0 , 3) : p3 ,
-            (0 , 4) : p4 ,
-            (0 , 5) : p5 ,
+            (0 , 0)  : p0 ,
+            (0 , 1)  : p1 ,
+            (0 , 2)  : p2 ,
+            (0 , 3)  : p3 ,
+            (0 , 4)  : p4 ,
+            (0 , 5)  : p5 ,
 
-            (1 , 0) : p6 ,
-            (1 , 1) : p7 ,
+            (1 , 0)  : p6 ,
+            (1 , 1)  : p7 ,
 
-            (2 , 0) : p8 ,
-            (2 , 1) : p9 ,
-            (2 , 2) : p10 ,
-            (2 , 3) : p11 ,
-            (2 , 4) : p12 ,
-            (2 , 5) : p13 ,
-            (2 , 6) : p8 ,
-            (2 , 7) : p9 ,
-            (2 , 8) : p10 ,
-            (2 , 9) : p11 ,
+            (2 , 0)  : p8 ,
+            (2 , 1)  : p9 ,
+            (2 , 2)  : p10 ,
+            (2 , 3)  : p11 ,
+            (2 , 4)  : p12 ,
+            (2 , 5)  : p13 ,
+            (2 , 6)  : p8 ,
+            (2 , 7)  : p9 ,
+            (2 , 8)  : p10 ,
+            (2 , 9)  : p11 ,
+            (2 , 10) : None ,
+            (2 , 11) : None ,
+            (2 , 12) : None ,
+            (2 , 13) : None ,
             }
 
-    sales_title = 'مبلغ فروش در ماه جاری (میلیون ریال)-ساختمان'
+    afhdr = {
+            (3 , 4)  : acC_DIGITS ,
+            (3 , 5)  : acC_DIGITS ,
+            (3 , 6)  : acC_DIGITS ,
+            (3 , 7)  : acC_DIGITS ,
+            (3 , 8)  : acC_DIGITS ,
+            (3 , 9)  : acC_DIGITS ,
+            (3 , 10) : acC_DIGITS ,
+            (3 , 11) : acC_DIGITS ,
+            (3 , 12) : acC_DIGITS ,
+            (3 , 13) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش در ماه جاری (میلیون ریال)'
+    ft = ft.r
     sum_row_name = 'جمع'
     sum_col = 7
-    sum_row_fr_bottom = None
     modif_col = 9  # تاثیرات پیشرفت واحد های فروش رفته در ماه های قبل درآمد شناسایی شده
     asr = 'نام پروژه'
 
@@ -112,12 +133,14 @@ if False :
     import pandas as pd
 
 
-    trc = '332265'
+    trc = '336930'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
+    tarG(Path(fp))
+
     ##
-    targ(Path(fp))
+    pd.isna(dft.iat[3 , 4])
 
     ##
     msk = df[cn.stitl].isna()
@@ -128,18 +151,7 @@ if False :
     _df = df[msk]
 
     ##
-    mskt = df[cn.isblnk].eq(True)
-    _df = df[mskt]
-    print(len(_df))
+    fp = '/Users/mahdi/Downloads/10.prq'
+    df = pd.read_parquet(fp)
 
     ##
-    trc = '332265'
-    fp = dirr.tbls / f'{trc}.xlsx'
-    dft = pd.read_excel(fp)
-
-    ##
-    import re
-
-
-    pat = 'فروردین' + '|' + 'اردیبهشت'
-    re.match(pat , 'اردیبهشت')
