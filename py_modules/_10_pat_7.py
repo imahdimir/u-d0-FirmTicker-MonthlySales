@@ -112,7 +112,7 @@ if False :
     import pandas as pd
 
 
-    trc = '326927'
+    trc = '332265'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
