@@ -118,22 +118,6 @@ class Xl :
             return 'No sum row found'
         self.sum_row = df.index[0]
 
-    def find_1st_nan_row(self) :
-        msk = self.df[0].isna()
-        df = self.df[msk]
-        if len(df) > 0 :
-            self.nan_row = df.index[0]
-        else :
-            self.nan_row = None
-
-    def find_1st_empty_row(self) :
-        msk = self.df[0].eq('')
-        df = self.df[msk]
-        if len(df) > 0 :
-            self.empty_row = df.index[0]
-        else :
-            self.empty_row = None
-
     def check_after_sum_row(self) :
         if self.pat.asr is None :
             return
@@ -141,15 +125,6 @@ class Xl :
         if len(df) >= self.sum_row + 2 :
             if not re.fullmatch(self.pat.asr , df.iat[self.sum_row + 1 , 0]) :
                 return 'After Sum row is not ok'
-
-    def check_sum_row_is_not_after_none_or_empty_row(self) :
-        sr = pd.Series([self.nan_row , self.empty_row])
-        sr = sr.dropna()
-        if len(sr) == 0 :
-            return
-        msk = sr.lt(self.sum_row)
-        if msk.any() :
-            return 'Sum row is after some nan rows'
 
     def check_sum_row_pos(self) :
         srf = self.pat.sum_row_fr_bottom
@@ -210,11 +185,8 @@ def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
             1  : xo.check_header_pat ,
             2  : xo.check_is_blank ,
             3  : xo.find_1st_sum_row ,
-            4  : xo.find_1st_nan_row ,
-            5  : xo.find_1st_empty_row ,
             6  : xo.check_after_sum_row ,
             7  : xo.check_sum_row_pos ,
-            8  : xo.check_sum_row_is_not_after_none_or_empty_row ,
             }
 
     for _ , fu in _fus.items() :
