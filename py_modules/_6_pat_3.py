@@ -8,8 +8,10 @@ from pathlib import Path
 
 from varname import nameof
 
+import ns
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
+from py_modules._3_pat_0 import acC_DIGITS
 from py_modules._3_pat_0 import ColName
 from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import jdPAT
@@ -24,8 +26,11 @@ module_n = 6
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat3 :
+    ex = ''
+
     p0 = 'شرح خدمات یا فروش'
     p1 = 'قرارد دادها'
     p2 = 'درآمد شناسایی شده'
@@ -57,19 +62,31 @@ class Pat3 :
             (1 , 5) : p9 ,
             (1 , 6) : p10 ,
             (1 , 7) : p11 ,
+            (1 , 8) : None ,
             }
 
-    sales_title = 'درآمد شناسایی شده'
+    afhdr = {
+            (2 , 1) : jdPAT ,
+            (2 , 2) : acC_DIGITS ,
+            (2 , 3) : acC_DIGITS ,
+            (2 , 4) : acC_DIGITS ,
+            (2 , 5) : acC_DIGITS ,
+            (2 , 6) : acC_DIGITS ,
+            (2 , 7) : acC_DIGITS ,
+            (2 , 8) : acC_DIGITS ,
+            }
+
+    sales_title = 'درآمد شناسایی شده(میلیون ریال)'
+    ft = ft.s
     sum_row_name = 'جمع'
     sum_col = 6
-    sum_row_fr_bottom = None
     modif_col = 4
     asr = 'کادر توضیحات در مورد اصلاحات'
 
 paTN = ''.join(filter(str.isdigit , nameof(Pat3)))
 paT = make_pat_ready(Pat3)
 
-tarG = partial(targ , xl_class = Xl_3 , pat = paT , patn = paTN)
+tarG = partial(targ , xl_class = Xl_3 , pat = paT , patn = paTN , ft = paT.ft)
 
 def main() :
     pass
@@ -109,7 +126,6 @@ if False :
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     tarG(Path(fp))
 
     ##
