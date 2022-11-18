@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
-import pandas as pd
 from mirutil.df import df_apply_parallel as dfap
 from varname import nameof
 
