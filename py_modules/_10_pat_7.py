@@ -15,7 +15,7 @@ from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import rm_sapces
+from py_modules.common import rm_sapces
 from py_modules._3_pat_0 import targ
 from py_modules._3_pat_0 import Xl , acC_DIGITS
 import ns

@@ -15,19 +15,19 @@ from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import rm_sapces
+from py_modules.common import rm_sapces
 from py_modules._3_pat_0 import targ , acC_DIGITS
 from py_modules._3_pat_0 import Xl
 import ns
 
 
-module_n = 4
+module_n = 18
 
 dirr = Dirr()
 cn = ColName()
 ft = ns.FirmType()
 
-class Pat1 :
+class Pat15 :
     ex = '635453'
 
     p0 = 'شرح'
@@ -117,10 +117,10 @@ class Pat1 :
     modif_col = 8
     asr = 'کادر توضیحات در مورد اصلاحات'
 
-paTN = ''.join(filter(str.isdigit , nameof(Pat1)))
-paT = make_pat_ready(Pat1)
+paTN = ''.join(filter(str.isdigit , nameof(Pat15)))
+paT = make_pat_ready(Pat15)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN , ft = paT.ft)
+tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
 def main() :
     pass

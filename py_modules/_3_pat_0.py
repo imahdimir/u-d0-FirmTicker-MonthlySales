@@ -17,6 +17,7 @@ from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._2_ex_tables import ColName as PreColName
 from py_modules._2_ex_tables import Dirr
+from py_modules.common import rm_sapces
 
 
 module_n = 3
@@ -29,69 +30,14 @@ ft = ns.FirmType()
 
 pd1 = pd
 
-jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
-acC_DIGITS = '(\((\d+,)*\d+\))|(\d+,)*\d+'
-
 class ColName(PreColName) :
     sales = 'Sales'
     modi = 'Modifications'
     stitl = 'SalesTitle'
-    pat_n = 'PatternNumber'
+    pat_n = 'pattern_name'
     ft = 'FirmType'
 
 cn = ColName()
-
-def rm_sapces(obj) :
-    if not isinstance(obj , str) :
-        return obj
-    return re.sub(r'\s+' , '' , obj)
-
-class Pat0 :
-    ex = '232768'
-
-    p0 = 'دوره یک ماهه منتهی به' + jdPAT
-    p1 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
-    p2 = 'نام محصول'
-    p3 = 'واحد'
-    p4 = 'تعداد تولید'
-    p5 = 'تعداد فروش'
-    _p6 = rm_sapces('نرخ فروش (ریال)')
-    p6 = re.escape(_p6)
-    p7 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
-
-    hdr = {
-            (0 , 0) : p0 ,
-            (0 , 1) : p1 ,
-
-            (1 , 0) : p2 ,
-            (1 , 1) : p3 ,
-            (1 , 2) : p4 ,
-            (1 , 3) : p5 ,
-            (1 , 4) : p6 ,
-            (1 , 5) : p7 ,
-            (1 , 6) : p4 ,
-            (1 , 7) : p5 ,
-            (1 , 8) : p6 ,
-            (1 , 9) : p7 ,
-            }
-
-    afhdr = {
-            (2 , 2) : acC_DIGITS ,
-            (2 , 3) : acC_DIGITS ,
-            (2 , 4) : acC_DIGITS ,
-            (2 , 5) : acC_DIGITS ,
-            (2 , 6) : acC_DIGITS ,
-            (2 , 7) : acC_DIGITS ,
-            (2 , 8) : acC_DIGITS ,
-            (2 , 9) : acC_DIGITS ,
-            }
-
-    sales_title = 'مبلغ فروش (میلیون ریال)'
-    ft = ft.p
-    sum_row_name = 'جمع'
-    sum_col = 5
-    modif_col: int | None = None
-    asr = None
 
 class Xl :
 
@@ -234,9 +180,9 @@ def make_pat_ready(pat) :
     _pat.hdr_rows , _pat.hdr_cols = find_headers_row_col_n(_pat)
     return _pat
 
-def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
+def targ(fp: Path , pat) -> ReadSalesModifications :
 
-    xo = xl_class(fp , pat)
+    xo = Xl(fp , pat)
 
     _fus = {
             0  : xo.read ,
@@ -248,7 +194,6 @@ def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
             6  : xo.check_after_sum_row ,
             7  : xo.check_sum_row_is_the_last_row ,
             }
-
     for _ , fu in _fus.items() :
         o = fu()
         if o :
@@ -264,10 +209,9 @@ def targ(fp: Path , xl_class , pat , patn) -> ReadSalesModifications :
                                   patn ,
                                   pat.ft)
 
-paTN = ''.join(filter(str.isdigit , nameof(Pat0)))
 paT = make_pat_ready(Pat0)
 
-tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
+tarG = partial(targ , pat = paT)
 
 ouTMAP = {
         cn.err   : nameof(rtarg.err) ,

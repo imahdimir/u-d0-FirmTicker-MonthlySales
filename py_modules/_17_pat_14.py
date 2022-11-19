@@ -15,17 +15,21 @@ from py_modules._3_pat_0 import Dirr
 from py_modules._3_pat_0 import jdPAT
 from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
-from py_modules._3_pat_0 import rm_sapces
+from py_modules.common import rm_sapces
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl
+from py_modules._3_pat_0 import Xl , acC_DIGITS
+import ns
 
 
 module_n = 17
 
 dirr = Dirr()
 cn = ColName()
+ft = ns.FirmType()
 
 class Pat14 :
+    ex = '626097'
+
     p0 = 'شرح'
     p1 = 'دوره یک ماهه منتهی به' + jdPAT
     p2 = 'از ابتدای سال مالی تا تاریخ' + jdPAT
@@ -36,6 +40,7 @@ class Pat14 :
     p7 = 'تعداد فروش'
     p8 = re.escape(rm_sapces('نرخ فروش (ریال)'))
     p9 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
+    p10 = 'فروش داخلی:'
 
     hdr = {
             (0 , 0)  : p0 ,
@@ -58,12 +63,28 @@ class Pat14 :
             (1 , 11) : p7 ,
             (1 , 12) : p8 ,
             (1 , 13) : p9 ,
+            (1 , 14) : None ,
             }
 
-    sales_title = 'مبلغ فروش (میلیون ریال)-تولیدی'
+    afhdr = {
+            (3 , 2)  : acC_DIGITS ,
+            (3 , 3)  : acC_DIGITS ,
+            (3 , 4)  : acC_DIGITS ,
+            (3 , 5)  : acC_DIGITS ,
+            (3 , 6)  : acC_DIGITS ,
+            (3 , 7)  : acC_DIGITS ,
+            (3 , 8)  : acC_DIGITS ,
+            (3 , 9)  : acC_DIGITS ,
+            (3 , 10) : acC_DIGITS ,
+            (3 , 11) : acC_DIGITS ,
+            (3 , 12) : acC_DIGITS ,
+            (3 , 13) : acC_DIGITS ,
+            }
+
+    sales_title = 'مبلغ فروش (میلیون ریال)'
+    ft = ft.p
     sum_row_name = 'جمع'
     sum_col = 5
-    sum_row_fr_bottom = None
     modif_col = None
     asr = 'کادر توضیحی مربوط به اطلاعات دوره 1 ماهه منتهی به' + jdPAT
 
@@ -106,7 +127,7 @@ if False :
     import pandas as pd
 
 
-    trc = '614984'
+    trc = '626097'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
@@ -121,15 +142,7 @@ if False :
     _df = df[msk]
 
     ##
-
-    ##
-    import pandas as pd
-
-
-    trc = '635453'
-    fp = dirr.tbls / f'{trc}.xlsx'
-    dft = pd.read_excel(fp)
-
-    tarG(Path(fp))
+    fp = '/Users/mahdi/Downloads/17.prq'
+    df = pd.read_parquet(fp)
 
     ##

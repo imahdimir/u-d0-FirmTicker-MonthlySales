@@ -17,66 +17,66 @@ from py_modules._3_pat_0 import make_pat_ready
 from py_modules._3_pat_0 import read_data_by_the_pattern
 from py_modules.common import rm_sapces
 from py_modules._3_pat_0 import targ
-from py_modules._3_pat_0 import Xl , acC_DIGITS
+from py_modules._3_pat_0 import Xl , acC_DIGITS , jdPAT
 import ns
 
 
-module_n = 16
+module_n = 20
 
 dirr = Dirr()
 cn = ColName()
 ft = ns.FirmType()
 
-class Pat13 :
-    ex = '614984'
+class Pat17 :
+    ex = '325432'
 
-    p0 = 'شرح'
-    p1 = 'دوره یک ماهه منتهی به' + jdPAT
-    p2 = 'از ابتدای سال مالی تا پایان مورخ' + jdPAT
-    p3 = 'نام محصول'
-    p4 = 'واحد'
-    p5 = 'مقدار/تعداد تولید'
-    p6 = 'مقدار/تعداد فروش'
-    p7 = re.escape(rm_sapces('نرخ فروش (ریال)'))
-    p8 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
+    p0 = 'شرح خدمات یا فروش'
+    p1 = 'قراردادها'
+    p2 = 'درآمد شناسایی شده'
+    p3 = 'توضیحات'
+    p4 = 'تاریخ عقد قرارداد'
+    p5 = re.escape(rm_sapces('مدت قرارداد (ماه)'))
+    p6 = 'پیش بینی درآمد حاصل از قرارداد در سال مالی جاری'
+    p7 = 'پیش بینی بهای تمام شده قرارداد در سال مالی جاری'
+    p8 = 'درآمد شناسایی شده طی دوره یک ماهه منتهی به' + jdPAT
+    p9 = 'درآمد شناسایی شده از اول سال مالی تا پایان دوره مالی منتهی به' + jdPAT
+    p10 = 'درامد شناسایی شده تا پایان دوره مالی منتهی به' + jdPAT
 
     hdr = {
             (0 , 0) : p0 ,
             (0 , 1) : p1 ,
             (0 , 2) : p2 ,
+            (0 , 3) : p3 ,
 
-            (1 , 0) : p3 ,
-            (1 , 1) : p4 ,
-            (1 , 2) : p5 ,
-            (1 , 3) : p6 ,
-            (1 , 4) : p7 ,
-            (1 , 5) : p8 ,
-            (1 , 6) : p5 ,
-            (1 , 7) : p6 ,
-            (1 , 8) : p7 ,
-            (1 , 9) : p8 ,
+            (1 , 0) : p4 ,
+            (1 , 1) : p5 ,
+            (1 , 2) : p6 ,
+            (1 , 3) : p7 ,
+            (1 , 4) : p8 ,
+            (1 , 5) : p9 ,
+            (1 , 6) : p10 ,
+            (1 , 7) : None ,
             }
 
     afhdr = {
+            (2 , 1) : jdPAT ,
             (2 , 2) : acC_DIGITS ,
             (2 , 3) : acC_DIGITS ,
             (2 , 4) : acC_DIGITS ,
             (2 , 5) : acC_DIGITS ,
             (2 , 6) : acC_DIGITS ,
             (2 , 7) : acC_DIGITS ,
-            (2 , 8) : acC_DIGITS ,
-            (2 , 9) : acC_DIGITS ,
             }
 
     sales_title = 'مبلغ فروش (میلیون ریال)'
-    ft = ft.p
+    ft = ft.s
     sum_row_name = 'جمع'
     sum_col = 5
     modif_col = None
-    asr = 'کادر توضیحی مربوط به اطلاعات دوره 1 ماهه منتهی به' + jdPAT
+    asr = 'کادر توضیحات در مورد اصلاحات'
 
-paTN = ''.join(filter(str.isdigit , nameof(Pat13)))
-paT = make_pat_ready(Pat13)
+paTN = ''.join(filter(str.isdigit , nameof(Pat17)))
+paT = make_pat_ready(Pat17)
 
 tarG = partial(targ , xl_class = Xl , pat = paT , patn = paTN)
 
@@ -114,7 +114,7 @@ if False :
     import pandas as pd
 
 
-    trc = '614984'
+    trc = '325432'
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
@@ -127,17 +127,5 @@ if False :
     print(len(msk[msk]))
 
     _df = df[msk]
-
-    ##
-
-    ##
-    import pandas as pd
-
-
-    trc = '625807'
-    fp = dirr.tbls / f'{trc}.xlsx'
-    dft = pd.read_excel(fp)
-
-    tarG(Path(fp))
 
     ##
