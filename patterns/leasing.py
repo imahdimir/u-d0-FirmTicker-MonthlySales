@@ -2,17 +2,20 @@
 
     """
 
-import re
-
 import ns
-from common import acC_DIGITS
-from common import jdPAT
-from common import rm_sapces
 from common import LeasingCols
+from common import Params
 
 
 ft = ns.FirmType()
 lc = LeasingCols()
+pa = Params()
+
+class LS :
+    a = 'شرح'
+    b = 'جمع'
+
+l = LS()
 
 class L :
     ft = ft.l
@@ -20,18 +23,16 @@ class L :
 class L0(L) :
     ex = '930071'
 
-    p0 = 'شرح'
-    _p1 = 'درآمد محقق شده از ابتدای سال مالی تا پایان مورخ'
-    p1 = _p1 + jdPAT
+    p1 = 'درآمد محقق شده از ابتدای سال مالی تا پایان مورخ' + pa.jdPAT
     p2 = 'اصلاحات'
     p3 = p1 + '-' + 'اصلاح شده'
     _p4 = 'درآمد محقق شده طی دوره یک ماهه منتهی به'
-    p4 = _p4 + jdPAT
+    p4 = _p4 + pa.jdPAT
     _p5 = 'جمع درآمد محقق شده از ابتدای سال مالی تا پایان مورخ'
-    p5 = _p5 + jdPAT
+    p5 = _p5 + pa.jdPAT
 
     hdr = {
-            (0 , 0) : p0 ,
+            (0 , 0) : l.a ,
             (0 , 1) : p1 ,
             (0 , 2) : p2 ,
             (0 , 3) : p3 ,
@@ -42,11 +43,11 @@ class L0(L) :
     hdrcut: int = 1
 
     afhdr = {
-            (1 , 1) : [None , acC_DIGITS] ,
-            (1 , 2) : [None , acC_DIGITS] ,
-            (1 , 3) : [None , acC_DIGITS] ,
-            (1 , 4) : [None , acC_DIGITS] ,
-            (1 , 5) : [None , acC_DIGITS] ,
+            (1 , 1) : pa.a ,
+            (1 , 2) : pa.a ,
+            (1 , 3) : pa.a ,
+            (1 , 4) : pa.a ,
+            (1 , 5) : pa.a ,
             }
 
     cols = {
@@ -58,21 +59,20 @@ class L0(L) :
             5 : lc.rfv ,
             }
 
-    sum_row_id = 'جمع'
-    asr = 'شرح'
+    sum_row_id = l.b
+    asr = l.a
 
 class L1(L) :
     ex = '371243'
 
     p0 = 'درآمدهای محقق شده'
-    p1 = 'شرح'
     p2 = 'درآمد محقق شده طی ماه'
     p3 = 'جمع درآمد محقق شده از ابتدای سال مالی تا پایان ماه جاری'
 
     hdr = {
             (0 , 0) : p0 ,
 
-            (1 , 0) : p1 ,
+            (1 , 0) : l.a ,
             (1 , 1) : p2 ,
             (1 , 2) : p3 ,
             }
@@ -80,8 +80,8 @@ class L1(L) :
     hdrcut: int = 2
 
     afhdr = {
-            (2 , 1) : [None , acC_DIGITS] ,
-            (2 , 2) : [None , acC_DIGITS] ,
+            (2 , 1) : pa.a ,
+            (2 , 2) : pa.a ,
             }
 
     cols = {
@@ -90,5 +90,5 @@ class L1(L) :
             2 : lc.rfv ,
             }
 
-    sum_row_id = 'جمع'
+    sum_row_id = l.b
     asr = 'هزینه تامین منابع مالی عملیات لیزینگ محقق شده'
