@@ -11,7 +11,9 @@ c = ns.Col()
 
 jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
 numpat = '\d{1,3}(,\d{3})*(\.\d+)?'
-acC_DIGITS = f'({numpat})|(\({numpat}\))'
+pureNum = '\d+(\.\d+)?'
+acC_DIGITS = f'({numpat})|(\({numpat}\))|({pureNum})'
+jms = '(' + 'فروردین' + '|' + 'اردیبهشت' + '|' + 'خرداد' + '|' + 'تیر' + '|' + 'مرداد' + '|' + 'شهریور' + '|' + 'مهر' + '|' + 'آبان' + '|' + 'آذر' + '|' + 'دی' + '|' + 'بهمن' + '|' + 'اسفند' + ')'
 
 def make_sub_name(*lst , sub_splice = '.') :
     return sub_splice.join([x for x in lst])
@@ -135,8 +137,60 @@ class LeasingCols :
     rfv = make_sub_name(_rev , _fyc , _val)
 
 class RealEstateCols :
+    _pc = 'ProductionCost(MRial)'
+    _sales = 'Sales'
+    _mtrg = 'Meterage'
+    _prc = 'Price(MRial)'
+    _val = 'Value(MRial)'
+    _usp = 'UnitsSoldInPreviousMonths'
+    _rcn = 'Recognized'
+    _rcnpc = _rcn + _pc
+    _rev = 'Revenue(MRial)'
+    _rcnrv = _rcn + _rev
+    _fyc = 'FiscalYearCumulative'
 
     name = 'Name'
+    loc = 'Location'
+    usg = 'Usage'
+    unit = 'Unit'
+
+    jsp = make_sub_name(c.jm , _sales , _pc)
+    jsm = make_sub_name(c.jm , _sales , _mtrg)
+    jmsp = make_sub_name(c.jm , _sales , _prc)
+    jmsv = make_sub_name(c.jm , _sales , _val)
+
+    urcp = make_sub_name(c.jm , _usp , _rcnpc)
+    urcn = make_sub_name(c.jm , _usp , _rcnrv)
+
+    fsp = make_sub_name(_fyc , _sales , _pc)
+    fsm = make_sub_name(_fyc , _sales , _mtrg)
+    fspr = make_sub_name(_fyc , _sales , _prc)
+    fsv = make_sub_name(_fyc , _sales , _val)
+
+class BankCols :
+    _strt = 'Start'
+    _fac = 'Facilities'
+    _bal = 'Balance'
+    _rv = 'Revision'
+    _rvd = 'Revised'
+    _givn = 'Given'
+    _col = 'Collected'
+    _end = 'End'
+    _fyc = 'FiscalYearCumulative'
+    _fyculm = _fyc + 'UntilLastMonth'
+    _rev = 'Revenue'
+
+    name = 'Name'
+    mslb = c.jm + _strt + _bal
+    rv = _rv
+    rmslb = _rvd + mslb
+    mgf = c.jm + _givn + _fac
+    mcf = c.jm + _col + _fac
+    egf = _end + _givn + _fac + _bal
+    fufr = _fyculm + _fac + _rev
+    rffr = _rvd + fufr
+    jmfr = c.jm + _fac + _rev
+    ffr = _fyc + _fac + _rev
 
 def rm_sapces(obj) :
     if not isinstance(obj , str) :

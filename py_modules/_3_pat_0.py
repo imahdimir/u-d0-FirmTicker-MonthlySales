@@ -158,6 +158,7 @@ class Xl :
         for ky , vl in self.pat.afhdr.items() :
             cnd = self.df[ky[1]].apply(lambda x : match_any(vl , x))
             if not cnd.all() :
+                print(cnd)
                 return f'After header col {ky[1]} is not ok'
 
     def keep_some_cols_and_name_cols(self) :
@@ -173,9 +174,7 @@ def match(pat , s) :
         return True
     if xor(pd.isna(pat) , pd.isna(s)) :
         return False
-    if not isinstance(s , str) :
-        return False
-    return re.fullmatch(pat , s) is not None
+    return re.fullmatch(pat , str(s)) is not None
 
 def match_any(pats , s) :
     for el in pats :
@@ -520,6 +519,91 @@ import patterns.leasing
 importlib.reload(patterns.leasing)
 
 from patterns.leasing import L0 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+import patterns.real_estate
+
+
+importlib.reload(patterns.real_estate)
+
+from patterns.real_estate import R0 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+x = dft.iat[4 , 10]
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+from common import acC_DIGITS
+
+
+pats = [None , acC_DIGITS]
+cnd = dft[10].apply(lambda x : match_any(pats , x))
+
+##
+match_any([None , acC_DIGITS] , x)
+
+##
+import patterns.bank
+
+
+importlib.reload(patterns.bank)
+
+from patterns.bank import B0 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+import patterns.real_estate
+
+
+importlib.reload(patterns.real_estate)
+
+from patterns.real_estate import R1 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+import patterns.bank
+
+
+importlib.reload(patterns.bank)
+
+from patterns.bank import B1 as p
 
 
 trc = p.ex
