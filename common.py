@@ -10,7 +10,8 @@ import ns
 c = ns.Col()
 
 jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
-acC_DIGITS = '(\((\d+,)*\d+\))|(\d+,)*\d+'
+numpat = '\d{1,3}(,\d{3})*(\.\d+)?'
+acC_DIGITS = f'({numpat})|(\({numpat}\))'
 
 def make_sub_name(*lst , sub_splice = '.') :
     return sub_splice.join([x for x in lst])
@@ -26,8 +27,8 @@ class ProductionsCols :
     _rvd = 'Revised'
     _rfyculm = _rvd + _fyculm
 
-    pn = 'Name'
-    un = 'Unit'
+    name = 'Name'
+    unit = 'Unit'
 
     mpq = make_sub_name(c.jm , _pq)
     msq = make_sub_name(c.jm , _sq)
@@ -53,7 +54,7 @@ class ProductionsCols :
     rfyusp = make_sub_name(_rfyculm , _sp)
     rfyusv = make_sub_name(_rfyculm , _sv)
 
-    psun = 'ProductStatus' + '-' + un
+    psun = 'ProductStatus' + '-' + unit
 
 class ServiceCols :
     _cntrct = 'Contracts'
@@ -80,6 +81,62 @@ class ServiceCols :
     rlfyc = make_sub_name(_rev , _lfyc)
 
     cmnt = 'Comments'
+
+class InsuranceCols :
+    _fyc = 'FiscalYearCumulative'
+    _fyculm = _fyc + 'UntilLastMonth'
+    _ipi = 'InsurancePremiumIssued(IncludingReliableAccpetance)'
+    _val = 'Value(MRial)'
+    _pct = 'SharePercentage'
+    _dp = 'DamagesPaid'
+    _rv = 'Revision'
+    _rvd = 'Revised'
+    _rfyculm = _rvd + _fyculm
+
+    name = 'Name'
+
+    fiv = make_sub_name(_fyculm , _ipi , _val)
+    fip = make_sub_name(_fyculm , _ipi , _pct)
+    fdv = make_sub_name(_fyculm , _dp , _val)
+    fdp = make_sub_name(_fyculm , _dp , _pct)
+
+    riv = make_sub_name(_rv , _ipi , _val)
+    rdv = make_sub_name(_rv , _dp , _val)
+
+    rfiv = make_sub_name(_rfyculm , _ipi , _val)
+    rfip = make_sub_name(_rfyculm , _ipi , _pct)
+    rfdv = make_sub_name(_rfyculm , _dp , _val)
+    rfdp = make_sub_name(_rfyculm , _dp , _pct)
+
+    civ = make_sub_name(c.jm , _ipi , _val)
+    cip = make_sub_name(c.jm , _ipi , _pct)
+    cdv = make_sub_name(c.jm , _dp , _val)
+    cdp = make_sub_name(c.jm , _dp , _pct)
+
+    fyiv = make_sub_name(_fyc , _ipi , _val)
+    fyip = make_sub_name(_fyc , _ipi , _pct)
+    fydv = make_sub_name(_fyc , _dp , _val)
+    fydp = make_sub_name(_fyc , _dp , _pct)
+
+class LeasingCols :
+    _fyc = 'FiscalYearCumulative'
+    _fyculm = _fyc + 'UntilLastMonth'
+    _rev = 'Revenue'
+    _val = 'Value(MRial)'
+    _rv = 'Revision'
+    _rvd = 'Revised'
+    _rfyculm = _rvd + _fyculm
+
+    name = 'Name'
+    rulm = make_sub_name(_rev , _fyculm , _val)
+    riv = make_sub_name(_rv , _val)
+    rrv = make_sub_name(_rev , _rfyculm , _val)
+    rjmv = make_sub_name(_rev , c.jm , _val)
+    rfv = make_sub_name(_rev , _fyc , _val)
+
+class RealEstateCols :
+
+    name = 'Name'
 
 def rm_sapces(obj) :
     if not isinstance(obj , str) :

@@ -59,8 +59,8 @@ class P0(P) :
             }
 
     cols = {
-            0 : pc.pn ,
-            1 : pc.un ,
+            0 : pc.name ,
+            1 : pc.unit ,
             2 : pc.mpq ,
             3 : pc.msq ,
             4 : pc.msp ,
@@ -160,8 +160,8 @@ class P1(P) :
             }
 
     cols = {
-            0  : pc.pn ,
-            1  : pc.un ,
+            0  : pc.name ,
+            1  : pc.unit ,
             2  : pc.fyupq ,
             3  : pc.fyusq ,
             4  : pc.fyusp ,
@@ -258,8 +258,8 @@ class P2(P) :
             }
 
     cols = {
-            0  : pc.pn ,
-            1  : pc.un ,
+            0  : pc.name ,
+            1  : pc.unit ,
             2  : pc.fyupq ,
             3  : pc.fyusq ,
             4  : pc.fyusp ,
@@ -370,8 +370,8 @@ class P3(P) :
             }
 
     cols = {
-            0  : pc.pn ,
-            1  : pc.un ,
+            0  : pc.name ,
+            1  : pc.unit ,
             2  : pc.fyupq ,
             3  : pc.fyusq ,
             4  : pc.fyusp ,
@@ -440,24 +440,36 @@ class P4(P) :
             (2 , 0)  : p10 ,
             }
 
+    hdrcut: int = 2
+
     afhdr = {
-            (3 , 2)  : acC_DIGITS ,
-            (3 , 3)  : acC_DIGITS ,
-            (3 , 4)  : acC_DIGITS ,
-            (3 , 5)  : acC_DIGITS ,
-            (3 , 6)  : acC_DIGITS ,
-            (3 , 7)  : acC_DIGITS ,
-            (3 , 8)  : acC_DIGITS ,
-            (3 , 9)  : acC_DIGITS ,
-            (3 , 10) : acC_DIGITS ,
-            (3 , 11) : acC_DIGITS ,
-            (3 , 12) : acC_DIGITS ,
-            (3 , 13) : acC_DIGITS ,
+            (3 , 2)  : [None , acC_DIGITS] ,
+            (3 , 3)  : [None , acC_DIGITS] ,
+            (3 , 4)  : [None , acC_DIGITS] ,
+            (3 , 5)  : [None , acC_DIGITS] ,
+            (3 , 6)  : [None , acC_DIGITS] ,
+            (3 , 7)  : [None , acC_DIGITS] ,
+            (3 , 8)  : [None , acC_DIGITS] ,
+            (3 , 9)  : [None , acC_DIGITS] ,
+            (3 , 10) : [None , '0'] ,
+            (3 , 11) : [None , '0'] ,
+            (3 , 12) : [None , '0'] ,
+            (3 , 13) : [None , '0'] ,
             }
 
-    sales_title = 'مبلغ فروش (میلیون ریال)'
-    ft = ft.p
-    sum_row_name = 'جمع'
-    sum_col = 5
-    modif_col = None
+    cols = {
+            0  : pc.name ,
+            1  : pc.unit ,
+            2  : pc.mpq ,
+            3  : pc.msq ,
+            4  : pc.msp ,
+            5  : pc.msv ,
+            6  : pc.fpq ,
+            7  : pc.fsq ,
+            8  : pc.fsp ,
+            9  : pc.fsv ,
+            14 : pc.psun ,
+            }
+
+    sum_row_id = 'جمع'
     asr = 'کادر توضیحی مربوط به اطلاعات دوره 1 ماهه منتهی به' + jdPAT

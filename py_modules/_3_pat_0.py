@@ -70,10 +70,15 @@ class Xl :
                 if not fu(df , (r , c) , self.pat.hdr) :
                     return str((r , c))
 
-        con = df.iloc[:self.pat.hdr_rows_n , self.pat.hdr_cols_n :].isna()
-        con = con.all(axis = None)
-        if not con :
-            return 'After header cols are not all nan'
+        if self.pat.asr is None :
+            if not self.df.shape[1] == self.pat.hdr_cols_n :
+                return 'Excess Cols'
+
+        else :
+            con = df.iloc[:self.pat.hdr_rows_n , self.pat.hdr_cols_n :].isna()
+            con = con.all(axis = None)
+            if not con :
+                return 'After header cols are not all nan'
 
     def check_is_blank(self) :
         if self.df.shape[0] == self.pat.hdr_rows_n :
@@ -455,9 +460,12 @@ fu = get_pat_ready_ret_targ_fu(p)
 fu(fp)
 
 ##
+import patterns.production
+
+
 importlib.reload(patterns.production)
 
-from patterns.production import P3 as p
+from patterns.production import P4 as p
 
 
 trc = p.ex
@@ -466,7 +474,6 @@ fp = dirr.tbls / f'{trc}.xlsx'
 dft = pd.read_excel(fp)
 
 ##
-
 fu = get_pat_ready_ret_targ_fu(p)
 fu(fp)
 
@@ -477,6 +484,42 @@ import patterns.service
 importlib.reload(patterns.service)
 
 from patterns.service import S0 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+import patterns.insurance
+
+
+importlib.reload(patterns.insurance)
+
+from patterns.insurance import I0 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+import patterns.leasing
+
+
+importlib.reload(patterns.leasing)
+
+from patterns.leasing import L0 as p
 
 
 trc = p.ex
