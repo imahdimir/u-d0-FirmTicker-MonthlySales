@@ -97,6 +97,7 @@ class Xl :
 
     def find_1st_sum_row(self) :
         msk = self.s0.str.fullmatch(self.pat.sum_row_id)
+        msk = msk.fillna(False)
         sr = self.s0[msk]
         if len(sr) > 0 :
             self.sum_row = sr.index[0]
@@ -115,9 +116,9 @@ class Xl :
             if self.asr_row == 0 :
                 return 'asr row is the first row'
             self.sum_row = self.asr_row - 1
-            cnd0 = pd.isna(self.s0.iat[self.sum_row])
-            cnd1 = self.s0.iat[self.sum_row].eq('')
-            if cnd0 or cnd1 :
+            if pd.isna(self.s0.iat[self.sum_row]) :
+                return
+            if self.s0.iat[self.sum_row].eq('') :
                 return
         return 'no sum row'
 
@@ -604,6 +605,59 @@ import patterns.bank
 importlib.reload(patterns.bank)
 
 from patterns.bank import B1 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+
+
+##
+import patterns.leasing
+
+
+importlib.reload(patterns.leasing)
+
+from patterns.leasing import L1 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+import patterns.production
+
+
+importlib.reload(patterns.production)
+
+from patterns.production import P8 as p
+
+
+trc = p.ex
+print(trc)
+fp = dirr.tbls / f'{trc}.xlsx'
+dft = pd.read_excel(fp)
+
+##
+fu = get_pat_ready_ret_targ_fu(p)
+fu(fp)
+
+##
+import patterns.service
+
+
+importlib.reload(patterns.service)
+
+from patterns.service import S2 as p
 
 
 trc = p.ex

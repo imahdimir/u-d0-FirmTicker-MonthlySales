@@ -28,6 +28,7 @@ class ProductionsCols :
     _rv = 'Revision'
     _rvd = 'Revised'
     _rfyculm = _rvd + _fyculm
+    _lfyc = 'Last' + _fyc
 
     name = 'Name'
     unit = 'Unit'
@@ -58,6 +59,11 @@ class ProductionsCols :
 
     psun = 'ProductStatus' + '-' + unit
 
+    lfpq = make_sub_name(_lfyc , _pq)
+    lfsq = make_sub_name(_lfyc , _sq)
+    lfsp = make_sub_name(_lfyc , _sp)
+    lfsv = make_sub_name(_lfyc , _sv)
+
 class ServiceCols :
     _cntrct = 'Contracts'
     _cjd = 'ContractJDate'
@@ -69,6 +75,12 @@ class ServiceCols :
     _rvd = 'Revised'
     _rfyculm = _rvd + _fyculm
     _lfyc = 'LastFiscalYearCumulative'
+    _exp = 'Expected'
+    _fycr = _fyc + _rv
+    _serv = 'Service'
+    _cost = 'Cost'
+    _servc = _serv + _cost
+    _fse = _fyc + _servc
 
     name = 'Name'
 
@@ -83,6 +95,9 @@ class ServiceCols :
     rlfyc = make_sub_name(_rev , _lfyc)
 
     cmnt = 'Comments'
+
+    efy = make_sub_name(_exp , _fycr)
+    efs = make_sub_name(_exp , _fse)
 
 class InsuranceCols :
     _fyc = 'FiscalYearCumulative'

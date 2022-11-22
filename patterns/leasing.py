@@ -80,12 +80,14 @@ class L1(L) :
     hdrcut: int = 2
 
     afhdr = {
-            (2 , 1) : acC_DIGITS ,
-            (2 , 2) : acC_DIGITS ,
+            (2 , 1) : [None , acC_DIGITS] ,
+            (2 , 2) : [None , acC_DIGITS] ,
             }
 
     cols = {
             0 : lc.name ,
+            1 : lc.rjmv ,
+            2 : lc.rfv ,
             }
 
     sum_row_id = 'جمع'
