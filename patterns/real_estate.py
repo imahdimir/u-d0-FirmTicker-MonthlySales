@@ -5,14 +5,30 @@
 import re
 
 import ns
-from common import acC_DIGITS
-from common import jdPAT
+from common import Params
+from common import RealEstateCols
 from common import rm_sapces
-from common import RealEstateCols , jms
 
 
 ft = ns.FirmType()
 rc = RealEstateCols()
+pa = Params()
+
+class RS :
+    a = 'نام پروژه'
+    b = 'محل پروژه'
+    c = 'کاربری'
+    d = 'واحد'
+    e = 'تاثیرات پیشرفت واحدهای فروش رفته در ماههای قبل'
+    f = 'فروش در ماه جاری'
+    g = re.escape(rm_sapces('بهای تمام شده (میلیون ریال)'))
+    h = 'متراژ فروش'
+    i = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
+    j = re.escape(rm_sapces('بهای تمام شده شناسایی شده (میلیون ریال)'))
+    k = re.escape(rm_sapces('درآمد شناسایی شده (میلیون ریال)'))
+    l = 'جمع'
+
+r = RS()
 
 class R :
     ft = ft.r
@@ -20,44 +36,31 @@ class R :
 class R0(R) :
     ex = '336930'
 
-    p0 = 'نام پروژه'
-    p1 = 'محل پروژه'
-    p2 = 'کاربری'
-    p3 = 'واحد'
-    _p4 = 'ماه'
-    p4 = _p4 + jdPAT
-    _p5 = 'از ابتدای سال مالی تا پایان ماه'
-    p5 = _p5 + jdPAT
-    p6 = 'فروش در ماه جاری'
-    p7 = 'تاثیرات پیشرفت واحدهای فروش رفته در ماههای قبل'
-    p8 = re.escape(rm_sapces('بهای تمام شده (میلیون ریال)'))
-    p9 = 'متراژ فروش'
+    p4 = 'ماه' + pa.jdPAT
+    p5 = 'از ابتدای سال مالی تا پایان ماه' + pa.jdPAT
     p10 = re.escape(rm_sapces('نرخ فروش (میلیون ریال)'))
-    p11 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
-    p12 = re.escape(rm_sapces('بهای تمام شده شناسایی شده (میلیون ریال)'))
-    p13 = re.escape(rm_sapces('درآمد شناسایی شده (میلیون ریال)'))
 
     hdr = {
-            (0 , 0)  : p0 ,
-            (0 , 1)  : p1 ,
-            (0 , 2)  : p2 ,
-            (0 , 3)  : p3 ,
+            (0 , 0)  : r.a ,
+            (0 , 1)  : r.b ,
+            (0 , 2)  : r.c ,
+            (0 , 3)  : r.d ,
             (0 , 4)  : p4 ,
             (0 , 5)  : p5 ,
 
-            (1 , 0)  : p6 ,
-            (1 , 1)  : p7 ,
+            (1 , 0)  : r.f ,
+            (1 , 1)  : r.e ,
 
-            (2 , 0)  : p8 ,
-            (2 , 1)  : p9 ,
+            (2 , 0)  : r.g ,
+            (2 , 1)  : r.h ,
             (2 , 2)  : p10 ,
-            (2 , 3)  : p11 ,
-            (2 , 4)  : p12 ,
-            (2 , 5)  : p13 ,
-            (2 , 6)  : p8 ,
-            (2 , 7)  : p9 ,
+            (2 , 3)  : r.i ,
+            (2 , 4)  : r.j ,
+            (2 , 5)  : r.k ,
+            (2 , 6)  : r.g ,
+            (2 , 7)  : r.h ,
             (2 , 8)  : p10 ,
-            (2 , 9)  : p11 ,
+            (2 , 9)  : r.i ,
             (2 , 10) : None ,
             (2 , 11) : None ,
             (2 , 12) : None ,
@@ -67,16 +70,16 @@ class R0(R) :
     hdrcut: int = 3
 
     afhdr = {
-            (3 , 4)  : [None , acC_DIGITS] ,
-            (3 , 5)  : [None , acC_DIGITS] ,
-            (3 , 6)  : [None , acC_DIGITS] ,
-            (3 , 7)  : [None , acC_DIGITS] ,
-            (3 , 8)  : [None , acC_DIGITS] ,
-            (3 , 9)  : [None , acC_DIGITS] ,
-            (3 , 10) : [None , acC_DIGITS] ,
-            (3 , 11) : [None , acC_DIGITS] ,
-            (3 , 12) : [None , acC_DIGITS] ,
-            (3 , 13) : [None , acC_DIGITS] ,
+            (3 , 4)  : pa.a ,
+            (3 , 5)  : pa.a ,
+            (3 , 6)  : pa.a ,
+            (3 , 7)  : pa.a ,
+            (3 , 8)  : pa.a ,
+            (3 , 9)  : pa.a ,
+            (3 , 10) : pa.a ,
+            (3 , 11) : pa.a ,
+            (3 , 12) : pa.a ,
+            (3 , 13) : pa.a ,
             }
 
     cols = {
@@ -96,51 +99,40 @@ class R0(R) :
             13 : rc.fsv ,
             }
 
-    sum_row_id = 'جمع'
+    sum_row_id = r.l
     asr = 'نام پروژه'
 
 class R1(R) :
     ex = '342024'
 
     p00 = 'پروژه های واگذار شده :'
-    p0 = 'نام پروژه'
-    p1 = 'محل پروژه'
-    p2 = 'کاربری'
-    p3 = 'واحد'
-    p4 = jms + '1[34]\d{2}'
-    p5 = 'از ابتدای سال مالی تا پایان' + jms + 'ماه' + '1[34]\d{2}'
-    p6 = 'فروش در ماه جاری'
-    p7 = 'تاثیرات پیشرفت واحدهای فروش رفته در ماههای قبل'
-    p8 = re.escape(rm_sapces('بهای تمام شده (میلیون ریال)'))
-    p9 = 'متراژ فروش'
+    p4 = pa.jms + '1[34]\d{2}'
+    p5 = 'از ابتدای سال مالی تا پایان' + pa.jms + 'ماه' + '1[34]\d{2}'
     p10 = re.escape(rm_sapces('نرخ فروش (ریال)'))
-    p11 = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
-    p12 = re.escape(rm_sapces('بهای تمام شده شناسایی شده (میلیون ریال)'))
-    p13 = re.escape(rm_sapces('درآمد شناسایی شده (میلیون ریال)'))
 
     hdr = {
             (0 , 0)  : p00 ,
 
-            (1 , 0)  : p0 ,
-            (1 , 1)  : p1 ,
-            (1 , 2)  : p2 ,
-            (1 , 3)  : p3 ,
+            (1 , 0)  : r.a ,
+            (1 , 1)  : r.b ,
+            (1 , 2)  : r.c ,
+            (1 , 3)  : r.d ,
             (1 , 4)  : p4 ,
             (1 , 5)  : p5 ,
 
-            (2 , 0)  : p6 ,
-            (2 , 1)  : p7 ,
+            (2 , 0)  : r.f ,
+            (2 , 1)  : r.e ,
 
-            (3 , 0)  : p8 ,
-            (3 , 1)  : p9 ,
+            (3 , 0)  : r.g ,
+            (3 , 1)  : r.h ,
             (3 , 2)  : p10 ,
-            (3 , 3)  : p11 ,
-            (3 , 4)  : p12 ,
-            (3 , 5)  : p13 ,
-            (3 , 6)  : p8 ,
-            (3 , 7)  : p9 ,
+            (3 , 3)  : r.i ,
+            (3 , 4)  : r.j ,
+            (3 , 5)  : r.k ,
+            (3 , 6)  : r.g ,
+            (3 , 7)  : r.h ,
             (3 , 8)  : p10 ,
-            (3 , 9)  : p11 ,
+            (3 , 9)  : r.i ,
             (3 , 10) : None ,
             (3 , 11) : None ,
             (3 , 12) : None ,
@@ -150,16 +142,16 @@ class R1(R) :
     hdrcut: int = 4
 
     afhdr = {
-            (4 , 4)  : [None , acC_DIGITS] ,
-            (4 , 5)  : [None , acC_DIGITS] ,
-            (4 , 6)  : [None , acC_DIGITS] ,
-            (4 , 7)  : [None , acC_DIGITS] ,
-            (4 , 8)  : [None , acC_DIGITS] ,
-            (4 , 9)  : [None , acC_DIGITS] ,
-            (4 , 10) : [None , acC_DIGITS] ,
-            (4 , 11) : [None , acC_DIGITS] ,
-            (4 , 12) : [None , acC_DIGITS] ,
-            (4 , 13) : [None , acC_DIGITS] ,
+            (4 , 4)  : pa.a ,
+            (4 , 5)  : pa.a ,
+            (4 , 6)  : pa.a ,
+            (4 , 7)  : pa.a ,
+            (4 , 8)  : pa.a ,
+            (4 , 9)  : pa.a ,
+            (4 , 10) : pa.a ,
+            (4 , 11) : pa.a ,
+            (4 , 12) : pa.a ,
+            (4 , 13) : pa.a ,
             }
 
     cols = {
@@ -179,5 +171,5 @@ class R1(R) :
             13 : rc.fsv ,
             }
 
-    sum_row_id = 'جمع'
+    sum_row_id = r.l
     asr = 'آمار وضعیت تکمیل پروژه ها :'

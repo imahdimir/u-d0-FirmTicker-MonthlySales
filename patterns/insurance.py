@@ -5,13 +5,14 @@
 import re
 
 import ns
-from common import acC_DIGITS
-from common import jdPAT
-from common import rm_sapces , InsuranceCols
+from common import InsuranceCols
+from common import Params
+from common import rm_sapces
 
 
 ft = ns.FirmType()
 ic = InsuranceCols()
+pa = Params()
 
 class I :
     ft = ft.i
@@ -21,11 +22,11 @@ class I0(I) :
 
     p0 = 'شرح'
     _p1 = 'از ابتدای سال مالی تا پایان مورخ'
-    p1 = _p1 + jdPAT
+    p1 = _p1 + pa.jdPAT
     p2 = 'اصلاحات'
     p3 = p1 + '-' + 'اصلاح شده'
     _p4 = 'دوره یک ماهه منتهی به'
-    p4 = _p4 + jdPAT
+    p4 = _p4 + pa.jdPAT
     p6 = re.escape(rm_sapces('حق بیمه صادره (شامل قبولی اتکایی)'))
     p7 = 'خسارت پرداختی'
     p9 = 'رشته بیمه ای'
@@ -75,24 +76,24 @@ class I0(I) :
     hdrcut: int = 3
 
     afhdr = {
-            (3 , 1)  : [None , acC_DIGITS] ,
-            (3 , 2)  : [None , acC_DIGITS] ,
-            (3 , 3)  : [None , acC_DIGITS] ,
-            (3 , 4)  : [None , acC_DIGITS] ,
-            (3 , 5)  : [None , acC_DIGITS] ,
-            (3 , 6)  : [None , acC_DIGITS] ,
-            (3 , 7)  : [None , acC_DIGITS] ,
-            (3 , 8)  : [None , acC_DIGITS] ,
-            (3 , 9)  : [None , acC_DIGITS] ,
-            (3 , 10) : [None , acC_DIGITS] ,
-            (3 , 11) : [None , acC_DIGITS] ,
-            (3 , 12) : [None , acC_DIGITS] ,
-            (3 , 13) : [None , acC_DIGITS] ,
-            (3 , 14) : [None , acC_DIGITS] ,
-            (3 , 15) : [None , acC_DIGITS] ,
-            (3 , 16) : [None , acC_DIGITS] ,
-            (3 , 17) : [None , acC_DIGITS] ,
-            (3 , 18) : [None , acC_DIGITS] ,
+            (3 , 1)  : pa.a ,
+            (3 , 2)  : pa.a ,
+            (3 , 3)  : pa.a ,
+            (3 , 4)  : pa.a ,
+            (3 , 5)  : pa.a ,
+            (3 , 6)  : pa.a ,
+            (3 , 7)  : pa.a ,
+            (3 , 8)  : pa.a ,
+            (3 , 9)  : pa.a ,
+            (3 , 10) : pa.a ,
+            (3 , 11) : pa.a ,
+            (3 , 12) : pa.a ,
+            (3 , 13) : pa.a ,
+            (3 , 14) : pa.a ,
+            (3 , 15) : pa.a ,
+            (3 , 16) : pa.a ,
+            (3 , 17) : pa.a ,
+            (3 , 18) : pa.a ,
             }
 
     cols = {
