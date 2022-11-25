@@ -63,6 +63,8 @@ class R0(R) :
             (2 , 11) : None ,
             (2 , 12) : None ,
             (2 , 13) : None ,
+            (2 , 14) : None ,
+            (2 , 15) : None ,
             }
 
     hdrcut: int = 3
@@ -78,6 +80,8 @@ class R0(R) :
             (3 , 11) : pa.a ,
             (3 , 12) : pa.a ,
             (3 , 13) : pa.a ,
+            (3 , 14) : None ,
+            (3 , 15) : None ,
             }
 
     cols = {

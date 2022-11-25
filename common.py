@@ -83,7 +83,7 @@ class ServiceCols :
     _rfyculm = _rvd + _fyculm
     _lfyc = 'LastFiscalYearCumulative'
     _exp = 'Expected'
-    _fycr = _fyc + _rv
+    _fycr = _fyc + _rev
     _serv = 'Service'
     _cost = 'Cost'
     _servc = _serv + _cost
@@ -117,6 +117,7 @@ class InsuranceCols :
     _fycurv = _fyculm + _rv
     _rvd = 'Revised'
     _rfyculm = _rvd + _fyculm
+    _cou = 'Count'
 
     name = 'Name'
 
@@ -133,13 +134,17 @@ class InsuranceCols :
     rfdv = make_sub_name(_rfyculm , _dp , _val)
     rfdp = make_sub_name(_rfyculm , _dp , _pct)
 
+    cic = make_sub_name(c.jm , _ipi , _cou)
     civ = make_sub_name(c.jm , _ipi , _val)
     cip = make_sub_name(c.jm , _ipi , _pct)
+    cdc = make_sub_name(c.jm , _dp , _cou)
     cdv = make_sub_name(c.jm , _dp , _val)
     cdp = make_sub_name(c.jm , _dp , _pct)
 
+    fyic = make_sub_name(_fyc , _ipi , _cou)
     fyiv = make_sub_name(_fyc , _ipi , _val)
     fyip = make_sub_name(_fyc , _ipi , _pct)
+    fydc = make_sub_name(_fyc , _dp , _cou)
     fydv = make_sub_name(_fyc , _dp , _val)
     fydp = make_sub_name(_fyc , _dp , _pct)
 

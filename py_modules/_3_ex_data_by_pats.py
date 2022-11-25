@@ -333,6 +333,11 @@ def main() :
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
 
+    ##
+    from patterns.service import S5 as p
+
+    _ , df = read_data_by_the_pattern(df , p)
+
 ##
 
 
@@ -377,20 +382,17 @@ if False :
 
     importlib.reload(patterns.service)
 
-    from patterns.service import S2 as p
+    from patterns.service import S5 as p
 
 
     trc = p.ex
-    trc = '327361'
+    # trc = '435978'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp , engine = 'openpyxl')
 
     fu = get_pat_ready_ret_targ_fu(p)
     fu(fp)
-
-    ##
-    _ , df = read_data_by_the_pattern(df , p)
 
     ##
     import patterns.insurance
@@ -402,11 +404,11 @@ if False :
 
 
     trc = p.ex
+    trc = '444238'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     fu = get_pat_ready_ret_targ_fu(p)
     fu(fp)
 
@@ -416,10 +418,11 @@ if False :
 
     importlib.reload(patterns.leasing)
 
-    from patterns.leasing import L1 as p
+    from patterns.leasing import L2 as p
 
 
     trc = p.ex
+    # trc = '338162'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
@@ -450,14 +453,14 @@ if False :
 
     importlib.reload(patterns.bank)
 
-    from patterns.bank import B0 as p
+    from patterns.bank import B3 as p
 
 
     trc = p.ex
+    # trc = '370952'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
-    ##
     fu = get_pat_ready_ret_targ_fu(p)
     fu(fp)
