@@ -1,7 +1,5 @@
-""" python v. == 3.6.13 only
-    install pkgs in requirements.txt
-    This Script only updates the sale data to the latest data available on Codal.ir
-    set the Code folder PARENT dir as Current Working Direcoty(cwd) to code can be run
+"""
+
     """
 
 import importlib
@@ -21,9 +19,11 @@ def main() :
     print(dct)
     ##
     for v in dct.values() :
-        v.main()  ##
+        v.main()
 
 ##
+
+
 if __name__ == "__main__" :
     main()
     print(f'{Path(__file__).name} Done!')

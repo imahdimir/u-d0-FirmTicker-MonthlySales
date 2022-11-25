@@ -9,12 +9,6 @@ import ns
 
 c = ns.Col()
 
-jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
-numpat = '\d{1,3}(,\d{3})*(\.\d+)?'
-pureNum = '\d+(\.\d+)?'
-acC_DIGITS = f'({numpat})|(\({numpat}\))|({pureNum})'
-jms = '(' + 'فروردین' + '|' + 'اردیبهشت' + '|' + 'خرداد' + '|' + 'تیر' + '|' + 'مرداد' + '|' + 'شهریور' + '|' + 'مهر' + '|' + 'آبان' + '|' + 'آذر' + '|' + 'دی' + '|' + 'بهمن' + '|' + 'اسفند' + ')'
-
 class Params :
     jdPAT = '1[34]\d{2}/\d{2}/\d{2}'
 
@@ -120,6 +114,7 @@ class InsuranceCols :
     _pct = 'SharePercentage'
     _dp = 'DamagesPaid'
     _rv = 'Revision'
+    _fycurv = _fyculm + _rv
     _rvd = 'Revised'
     _rfyculm = _rvd + _fyculm
 
@@ -130,8 +125,8 @@ class InsuranceCols :
     fdv = make_sub_name(_fyculm , _dp , _val)
     fdp = make_sub_name(_fyculm , _dp , _pct)
 
-    riv = make_sub_name(_rv , _ipi , _val)
-    rdv = make_sub_name(_rv , _dp , _val)
+    furv = make_sub_name(_fycurv , _ipi , _val)
+    fudv = make_sub_name(_fycurv , _dp , _val)
 
     rfiv = make_sub_name(_rfyculm , _ipi , _val)
     rfip = make_sub_name(_rfyculm , _ipi , _pct)
@@ -209,13 +204,14 @@ class BankCols :
     _rev = 'Revenue'
 
     name = 'Name'
-    mslb = c.jm + _strt + _bal
-    rv = _rv
+    mslb = c.jm + _fac + _strt + _bal
+    mslbrv = mslb + _rv
     rmslb = _rvd + mslb
     mgf = c.jm + _givn + _fac
     mcf = c.jm + _col + _fac
     egf = _end + _givn + _fac + _bal
     fufr = _fyculm + _fac + _rev
+    fufrrv = fufr + _rv
     rffr = _rvd + fufr
     jmfr = c.jm + _fac + _rev
     ffr = _fyc + _fac + _rev
@@ -224,3 +220,6 @@ def rm_sapces(obj) :
     if not isinstance(obj , str) :
         return obj
     return re.sub(r'\s+' , '' , obj)
+
+def rm_space_then_re_escape(strr) :
+    return re.escape(rm_sapces(strr))

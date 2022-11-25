@@ -74,14 +74,6 @@ class MonthlyActivityReport :
     def drop_duplicated_rows(self) :
         self.df = self.df.drop_duplicates()
 
-    def drop_duplicated_and_contagious_cols(self) :
-        self.df = self.df.T
-        df0 = self.df.fillna('@')
-        df1 = df0.shift()
-        msk = df0.eq(df1).all(axis = 1)
-        self.df = self.df[~ msk]
-        self.df = self.df.T
-
     def save_table(self) :
         self.df = self.df.T.reset_index(drop = True).T
         fp = dirr.tbls / (self.fp.stem + '.xlsx')
@@ -105,7 +97,6 @@ def targ(fp: Path) -> (str , None) :
             m.drop_all_nan_rows_and_cols                 : None ,
             m.normalize_fa_str_completely                : None ,
             m.drop_duplicated_rows                       : None ,
-            m.drop_duplicated_and_contagious_cols        : None ,
             m.save_table                                 : None ,
             }
 
@@ -245,5 +236,11 @@ if False :
 
     ##
     dft = dft[~ msk]
+
+    ##
+    fp = '/Users/mahdi/Downloads/pycharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-htmls/327361.html'
+    dfs = pd.read_html(fp , encoding = 'utf-8' , header = None)
+    dft = pd.concat(dfs)
+    df0 = dfs[0]
 
 ##

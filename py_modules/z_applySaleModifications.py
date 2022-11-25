@@ -1,5 +1,10 @@
+"""
+
+    """
+
 def main() :
     pass
+
     ##
     df = pd.read_parquet(pre_prq)
     df = df.sort_values([rd.PublishDateTime] , ascending = False)
@@ -124,8 +129,8 @@ def main() :
     print(df)
 
 ##
+
+
 if __name__ == "__main__" :
     main()
-    print(f"{script_name}.py done!")
-else :
-    pass  ##
+    print(f"{__file__}.py done!")

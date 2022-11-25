@@ -2,12 +2,10 @@
 
     """
 
-import re
-
 import ns
 from common import Params
 from common import RealEstateCols
-from common import rm_sapces
+from common import rm_space_then_re_escape as rste
 
 
 ft = ns.FirmType()
@@ -21,11 +19,11 @@ class RS :
     d = 'واحد'
     e = 'تاثیرات پیشرفت واحدهای فروش رفته در ماههای قبل'
     f = 'فروش در ماه جاری'
-    g = re.escape(rm_sapces('بهای تمام شده (میلیون ریال)'))
+    g = rste('بهای تمام شده (میلیون ریال)')
     h = 'متراژ فروش'
-    i = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
-    j = re.escape(rm_sapces('بهای تمام شده شناسایی شده (میلیون ریال)'))
-    k = re.escape(rm_sapces('درآمد شناسایی شده (میلیون ریال)'))
+    i = rste('مبلغ فروش (میلیون ریال)')
+    j = rste('بهای تمام شده شناسایی شده (میلیون ریال)')
+    k = rste('درآمد شناسایی شده (میلیون ریال)')
     l = 'جمع'
 
 r = RS()
@@ -38,7 +36,7 @@ class R0(R) :
 
     p4 = 'ماه' + pa.jdPAT
     p5 = 'از ابتدای سال مالی تا پایان ماه' + pa.jdPAT
-    p10 = re.escape(rm_sapces('نرخ فروش (میلیون ریال)'))
+    p10 = rste('نرخ فروش (میلیون ریال)')
 
     hdr = {
             (0 , 0)  : r.a ,
@@ -108,7 +106,7 @@ class R1(R) :
     p00 = 'پروژه های واگذار شده :'
     p4 = pa.jms + '1[34]\d{2}'
     p5 = 'از ابتدای سال مالی تا پایان' + pa.jms + 'ماه' + '1[34]\d{2}'
-    p10 = re.escape(rm_sapces('نرخ فروش (ریال)'))
+    p10 = rste('نرخ فروش (ریال)')
 
     hdr = {
             (0 , 0)  : p00 ,
@@ -137,6 +135,8 @@ class R1(R) :
             (3 , 11) : None ,
             (3 , 12) : None ,
             (3 , 13) : None ,
+            (3 , 14) : None ,
+            (3 , 15) : None ,
             }
 
     hdrcut: int = 4
@@ -152,6 +152,8 @@ class R1(R) :
             (4 , 11) : pa.a ,
             (4 , 12) : pa.a ,
             (4 , 13) : pa.a ,
+            (4 , 14) : None ,
+            (4 , 15) : None ,
             }
 
     cols = {

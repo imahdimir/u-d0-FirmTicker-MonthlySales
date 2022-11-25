@@ -38,6 +38,10 @@ class L0(L) :
             (0 , 3) : p3 ,
             (0 , 4) : p4 ,
             (0 , 5) : p5 ,
+            (0 , 6) : None ,
+            (0 , 7) : None ,
+            (0 , 8) : None ,
+            (0 , 9) : None ,
             }
 
     hdrcut: int = 1
@@ -48,6 +52,10 @@ class L0(L) :
             (1 , 3) : pa.a ,
             (1 , 4) : pa.a ,
             (1 , 5) : pa.a ,
+            (1 , 6) : None ,
+            (1 , 7) : None ,
+            (1 , 8) : None ,
+            (1 , 9) : None ,
             }
 
     cols = {
@@ -75,6 +83,12 @@ class L1(L) :
             (1 , 0) : l.a ,
             (1 , 1) : p2 ,
             (1 , 2) : p3 ,
+            (1 , 3) : None ,
+            (1 , 4) : None ,
+            (1 , 5) : None ,
+            (1 , 6) : None ,
+            (1 , 7) : None ,
+            (1 , 8) : None ,
             }
 
     hdrcut: int = 2
@@ -82,6 +96,12 @@ class L1(L) :
     afhdr = {
             (2 , 1) : pa.a ,
             (2 , 2) : pa.a ,
+            (2 , 3) : None ,
+            (2 , 4) : None ,
+            (2 , 5) : None ,
+            (2 , 6) : None ,
+            (2 , 7) : None ,
+            (2 , 8) : None ,
             }
 
     cols = {

@@ -2,26 +2,27 @@
 
     """
 
+import importlib
 import inspect
 import re
+from _operator import xor
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from operator import xor
-import importlib
 
 import pandas as pd
 from giteasy import GitHubRepo
 from mirutil.df import df_apply_parallel as dfap
+from mirutil.dirr import make_dir_if_not_exist as mdine
 from varname import nameof
+from pprint import pprint
 
 import ns
+from common import rm_sapces
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
 from py_modules._2_ex_tables import ColName as PreColName
 from py_modules._2_ex_tables import Dirr as PreDirr
-from common import rm_sapces
-from mirutil.dirr import make_dir_if_not_exist as mdine
 
 
 module_n = 3
@@ -30,8 +31,6 @@ gu = ns.GDU()
 c = ns.Col()
 c1 = ns.DAllCodalLetters()
 ft = ns.FirmType()
-
-pd1 = pd
 
 class Dirr(PreDirr) :
     tbl0 = GitHubRepo(gu.trg4).local_path
@@ -49,54 +48,45 @@ class Xl :
 
     def __init__(self , fp: Path , pat) :
         self.fp = Path(fp)
-        self.pat = pat
+        self.p = pat
 
     def read(self) :
         self.df = pd.read_excel(self.fp , engine = 'openpyxl')
 
     def check_shape(self) :
         self.df_rows_n , self.df_cols_n = self.df.shape
-        if self.df_rows_n < self.pat.hdr_rows_n :
-            return 'Less rows'
-        if self.df_cols_n < self.pat.hdr_cols_n :
+        if self.df_rows_n < self.p.hdr_rows_n :
+            return 'Less rows than hdr_rows_n'
+        if self.df_cols_n < self.p.hdr_cols_n :
             return 'Less cols'
+        if self.df_cols_n > self.p.hdr_cols_n :
+            return 'More cols'
 
     def check_header_pat(self) :
         df = self.df
-        fu = df_cell_matches_pat_or_isna
+        f = df_cell_matches_pat_or_isna
 
-        for r in range(self.pat.hdr_rows_n - 1) :
-            for c in range(self.pat.hdr_cols_n - 1) :
-                if not fu(df , (r , c) , self.pat.hdr) :
+        for r in range(self.p.hdr_rows_n) :
+            for c in range(self.p.hdr_cols_n) :
+                cnd = f(df , (r , c) , self.p.hdr)
+                if not cnd :
                     return str((r , c))
 
-        if self.pat.asr is None :
-            if not self.df.shape[1] == self.pat.hdr_cols_n :
-                return 'Excess Cols'
-
-        else :
-            con = df.iloc[:self.pat.hdr_rows_n , self.pat.hdr_cols_n :].isna()
-            con = con.all(axis = None)
-            if not con :
-                return 'After header cols are not all nan'
-
     def check_is_blank(self) :
-        if self.df.shape[0] == self.pat.hdr_rows_n :
+        if self.df.shape[0] == self.p.hdr_rows_n :
             return cn.isblnk
 
     def check_after_hdr(self) :
-        for ky , vl in self.pat.afhdr.items() :
-            if not isinstance(vl , list) :
-                vl = [vl]
+        for ky , vl in self.p.afhdr.items() :
             if not match_any(vl , self.df.iat[ky]) :
                 return f'afhdr: {str(ky)}'
 
     def cut_hdr(self) :
-        self.df = self.df.iloc[self.pat.hdrcut : , :self.pat.hdr_cols_n]
+        self.df = self.df.iloc[self.p.hdrcut : , :self.p.hdr_cols_n]
         self.df = self.df.reset_index(drop = True)
 
     def find_1st_sum_row(self) :
-        msk = self.s0.str.fullmatch(self.pat.sum_row_id)
+        msk = self.s0.str.fullmatch(self.p.sum_row_id)
         msk = msk.fillna(False)
         sr = self.s0[msk]
         if len(sr) > 0 :
@@ -105,10 +95,10 @@ class Xl :
         return 'no sum row'
 
     def find_sum_row_by_asr(self) :
-        if self.pat.asr is None :
+        if self.p.asr is None :
             return 'no sum row'
 
-        msk = self.s0.str.fullmatch(self.pat.asr)
+        msk = self.s0.str.fullmatch(self.p.asr)
         msk = msk.fillna(False)
         sr = self.s0[msk]
         if len(sr) > 0 :
@@ -134,18 +124,18 @@ class Xl :
         return o
 
     def check_after_sum_row(self) :
-        if self.pat.asr is None :
+        if self.p.asr is None :
             return
 
         self.asr_row = self.sum_row + 1
         if self.asr_row in self.df.index :
             vl = self.s0.iat[self.asr_row]
-            cnd = re.fullmatch(self.pat.asr , vl) is None
+            cnd = re.fullmatch(self.p.asr , vl) is None
             if cnd :
                 return 'After Sum row is not ok'
 
     def check_sum_row_is_the_last_row(self) :
-        if self.pat.asr is None :
+        if self.p.asr is None :
             if self.sum_row != self.df.shape[0] - 1 :
                 return 'sum row is not the last row'
 
@@ -156,19 +146,24 @@ class Xl :
         self.df.index = list(self.df.index[:-1]) + ['SUM']
 
     def check_after_hdr_cols(self) :
-        for ky , vl in self.pat.afhdr.items() :
+        for ky , vl in self.p.afhdr.items() :
             cnd = self.df[ky[1]].apply(lambda x : match_any(vl , x))
             if not cnd.all() :
-                print(cnd)
                 return f'After header col {ky[1]} is not ok'
 
     def keep_some_cols_and_name_cols(self) :
-        self.df = self.df[list(self.pat.cols.keys())]
-        self.df.columns = self.pat.cols.values()
+        self.df = self.df[list(self.p.cols.keys())]
+        self.df.columns = self.p.cols.values()
 
     def save_df(self) :
-        fp = dirr.tbl0 / f'{self.pat.name}-{self.fp.stem}.xlsx'
+        fp = dirr.tbl0 / f'{self.p.name}-{self.fp.stem}.xlsx'
         self.df.to_excel(fp)
+
+def df_cell_matches_pat_or_isna(df , iat , map) :
+    if iat in map.keys() :
+        vl = rm_sapces(df.iat[iat])
+        return match(map[iat] , vl)
+    return pd.isna(df.iat[iat])
 
 def match(pat , s) :
     if pd.isna(pat) and pd.isna(s) :
@@ -178,16 +173,12 @@ def match(pat , s) :
     return re.fullmatch(pat , str(s)) is not None
 
 def match_any(pats , s) :
+    if not isinstance(pats , list) :
+        pats = [pats]
     for el in pats :
         if match(el , s) :
             return True
     return False
-
-def df_cell_matches_pat_or_isna(df , iat , map) :
-    if iat in map.keys() :
-        vl = rm_sapces(df.iat[iat])
-        return match(map[iat] , vl)
-    return pd.isna(df.iat[iat])
 
 def find_headers_row_col_n(ilp) :
     ik = ilp.hdr.keys()
@@ -210,18 +201,18 @@ def make_pat_ready(pat) :
     return _pat
 
 @dataclass
-class RTarg :
+class RT :
     err: (str , None) = None
     pat_name: (int , None) = None
     ft: (str , None) = None
 
-rtarg = RTarg()
+rt = RT()
 
-def targ(fp: Path , pat) -> RTarg :
+def targ(fp: Path , pat) -> RT :
 
     xo = Xl(fp , pat)
 
-    _fus = {
+    fus = {
             xo.read                          : None ,
             xo.check_shape                   : None ,
             xo.check_header_pat              : None ,
@@ -238,43 +229,49 @@ def targ(fp: Path , pat) -> RTarg :
             xo.save_df                       : None ,
             }
 
-    for fu , _ in _fus.items() :
+    for fu , _ in fus.items() :
         o = fu()
         if o :
-            return RTarg(o)
+            return RT(o)
 
-    return RTarg(None , pat.name , pat.ft)
+    return RT(None , pat.name , pat.ft)
 
 ouTMAP = {
-        cn.err  : nameof(rtarg.err) ,
-        cn.patn : nameof(rtarg.pat_name) ,
-        cn.ft   : nameof(rtarg.ft) ,
+        cn.err  : nameof(rt.err) ,
+        cn.patn : nameof(rt.pat_name) ,
+        cn.ft   : nameof(rt.ft) ,
         }
 
 def get_pat_ready_ret_targ_fu(pat) :
-    _pat = make_pat_ready(pat)
-    return partial(targ , pat = _pat)
+    p = make_pat_ready(pat)
+    print(f'Pat: {p.name}')
+    return partial(targ , pat = p)
 
-def read_data_by_the_pattern(df , pat) :
-    _trg = get_pat_ready_ret_targ_fu(pat)
+def filter_not_done_excels(df) :
+    df[cn.fp] = df[c1.TracingNo].apply(lambda x : dirr.tbls / f'{x}.xlsx')
 
     msk = df[cn.fp].apply(lambda x : x.exists())
     print(f'Excels exist #: {len(msk[msk])}')
 
     msk &= df[cn.patn].isna()
-    print(f'Existing excel not checked #: {len(msk[msk])}')
+    print(f'Existing excels not checked #: {len(msk[msk])}')
 
     msk &= df[cn.isblnk].ne(True)
-    print(f'previous conds + not blank #: {len(msk[msk])}')
+    print(f'Previous conds and not blank #: {len(msk[msk])}')
 
-    df = dfap(df , _trg , [cn.fp] , ouTMAP , msk = msk , test = False)
+    return msk
+
+def read_data_by_the_pattern(df , pat) :
+    fu = get_pat_ready_ret_targ_fu(pat)
+    msk = filter_not_done_excels(df)
+    df = dfap(df , fu , [cn.fp] , ouTMAP , msk = msk , test = False)
 
     msk &= df[cn.patn].notna()
-    print(f'found ones #: {len(msk[msk])}')
+    print(f'Found #: {len(msk[msk])}')
 
     ms1 = df[cn.err].eq(cn.isblnk)
     df.loc[ms1 , cn.isblnk] = True
-    print("blank #:" , len(ms1[ms1]))
+    print("Blank #:" , len(ms1[ms1]) , '\n')
 
     return msk , df
 
@@ -305,7 +302,6 @@ def targ1(df) :
     for pat in cs :
         _ , df = read_data_by_the_pattern(df , pat)
 
-    df = df.drop(columns = cn.fp)
     return df
 
 def main() :
@@ -324,7 +320,15 @@ def main() :
     mdine(dirr.tbl0)
 
     ##
+    import warnings
+
+    warnings.filterwarnings('ignore')
+
+    ##
     df = targ1(df)
+
+    ##
+    df = df.drop(columns = cn.fp)
 
     ##
     save_cur_module_temp_data_and_push(gdt , module_n , df)
@@ -343,330 +347,117 @@ if False :
     pass
 
     ##
-    df[cn.err].value_counts()
+    fps = dirr.tbl0.glob('*.xlsx')
+    _ = [x.unlink() for x in fps]
 
     ##
-    import pandas as pd
+    msk = filter_not_done_excels(df)
+    _df = df[msk]
+
+    ##
+    import patterns.production
 
 
-    trc = '233029'
+    importlib.reload(patterns.production)
+
+    from patterns.production import P8 as p
+
+
+    trc = p.ex
+    print(trc)
+    fp = dirr.tbls / f'{trc}.xlsx'
+    dft = pd.read_excel(fp)
+
+    fu = get_pat_ready_ret_targ_fu(p)
+    fu(fp)
+
+    ##
+    import patterns.service
+
+
+    importlib.reload(patterns.service)
+
+    from patterns.service import S2 as p
+
+
+    trc = p.ex
+    trc = '327361'
+    print(trc)
+    fp = dirr.tbls / f'{trc}.xlsx'
+    dft = pd.read_excel(fp , engine = 'openpyxl')
+
+    fu = get_pat_ready_ret_targ_fu(p)
+    fu(fp)
+
+    ##
+    _ , df = read_data_by_the_pattern(df , p)
+
+    ##
+    import patterns.insurance
+
+
+    importlib.reload(patterns.insurance)
+
+    from patterns.insurance import I1 as p
+
+
+    trc = p.ex
+    print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
     ##
-    from patterns.production import P0
-
-
-    P0.__name__
+    fu = get_pat_ready_ret_targ_fu(p)
+    fu(fp)
 
     ##
-
-    patt = make_pat_ready(P0)
-    targ(fp , patt)
-
-    ##
-
-    mc = get_all_classes_in_module(m)
-
-    ##
-    import importlib
+    import patterns.leasing
 
 
-    m = importlib.import_module(f'{dirr.pats}.production')
-    m
+    importlib.reload(patterns.leasing)
 
-    ##
-    m0 = mc[0]
-    m0
+    from patterns.leasing import L1 as p
+
+
+    trc = p.ex
+    print(trc)
+    fp = dirr.tbls / f'{trc}.xlsx'
+    dft = pd.read_excel(fp)
+
+    fu = get_pat_ready_ret_targ_fu(p)
+    fu(fp)
 
     ##
-    c = getattr(m , 'P0')
+    import patterns.real_estate
 
-    c
+
+    importlib.reload(patterns.real_estate)
+
+    from patterns.real_estate import R1 as p
+
+
+    trc = p.ex
+    print(trc)
+    fp = dirr.tbls / f'{trc}.xlsx'
+    dft = pd.read_excel(fp)
+
+    fu = get_pat_ready_ret_targ_fu(p)
+    fu(fp)
 
     ##
-    issubclass(c , m)
+    import patterns.bank
+
+
+    importlib.reload(patterns.bank)
+
+    from patterns.bank import B0 as p
+
+
+    trc = p.ex
+    print(trc)
+    fp = dirr.tbls / f'{trc}.xlsx'
+    dft = pd.read_excel(fp)
 
     ##
-    c.ex
-
-    ##
-    list(dirr.pats.glob('*.py'))
-
-    ##
-    m = get_all_patterns_in_module('production')
-    m
-
-    ##
-    m[0].ex
-
-##
-str(m[0]).startswith('patterns.production')
-
-##
-len(filter(str.isdigit , m[0].__name__))
-
-##
-get_all_pattern_modules()[0].__name__
-
-##
-targ1()
-
-##
-fps = dirr.tbl0.glob('*.xlsx')
-_ = [x.unlink() for x in fps]
-
-##
-from patterns.production import P0
-
-
-trc = P0.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-fu = get_pat_ready_ret_targ_fu(P0)
-fu(fp)
-
-##
-from patterns.production import P1
-
-
-trc = P1.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-fu = get_pat_ready_ret_targ_fu(P1)
-fu(fp)
-
-##
-import patterns.production
-
-
-importlib.reload(patterns.production)
-
-from patterns.production import P2
-
-
-p = P2
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.production
-
-
-importlib.reload(patterns.production)
-
-from patterns.production import P4 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.service
-
-
-importlib.reload(patterns.service)
-
-from patterns.service import S0 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.insurance
-
-
-importlib.reload(patterns.insurance)
-
-from patterns.insurance import I0 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.leasing
-
-
-importlib.reload(patterns.leasing)
-
-from patterns.leasing import L0 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.real_estate
-
-
-importlib.reload(patterns.real_estate)
-
-from patterns.real_estate import R0 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-x = dft.iat[4 , 10]
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-from common import acC_DIGITS
-
-
-pats = [None , acC_DIGITS]
-cnd = dft[10].apply(lambda x : match_any(pats , x))
-
-##
-match_any([None , acC_DIGITS] , x)
-
-##
-import patterns.bank
-
-
-importlib.reload(patterns.bank)
-
-from patterns.bank import B0 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.real_estate
-
-
-importlib.reload(patterns.real_estate)
-
-from patterns.real_estate import R1 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.bank
-
-
-importlib.reload(patterns.bank)
-
-from patterns.bank import B1 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-
-
-##
-import patterns.leasing
-
-
-importlib.reload(patterns.leasing)
-
-from patterns.leasing import L1 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.production
-
-
-importlib.reload(patterns.production)
-
-from patterns.production import P8 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
-import patterns.service
-
-
-importlib.reload(patterns.service)
-
-from patterns.service import S2 as p
-
-
-trc = p.ex
-print(trc)
-fp = dirr.tbls / f'{trc}.xlsx'
-dft = pd.read_excel(fp)
-
-##
-fu = get_pat_ready_ret_targ_fu(p)
-fu(fp)
-
-##
+    fu = get_pat_ready_ret_targ_fu(p)
+    fu(fp)

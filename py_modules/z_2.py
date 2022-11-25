@@ -4,13 +4,6 @@ import shutil
 from pathlib import Path
 from pathlib import PurePath
 
-from unidecode import unidecode
-
-
-dirs = ns.Dirs()
-vif = ns.VeryImportantFiles()
-cte = ns.Constants()
-td = ns.TexDataFilenames()
 
 def load_pns_of_all_modules_in_the_same_dir_except(py_module_pn: Path) :
     """ """
@@ -54,12 +47,3 @@ def read_accvalue_from_str(string) :
         return -float(string1)
     else :
         return float(string1)
-
-def copytree(src , dst , symlinks = False , ignore = None) :
-    for item in os.listdir(src) :
-        s = os.path.join(src , item)
-        d = os.path.join(dst , item)
-        if os.path.isdir(s) :
-            shutil.copytree(s , d , symlinks , ignore)
-        else :
-            shutil.copy2(s , d)

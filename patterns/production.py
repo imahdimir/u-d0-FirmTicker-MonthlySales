@@ -2,12 +2,10 @@
 
     """
 
-import re
-
 import ns
 from common import Params
 from common import ProductionsCols
-from common import rm_sapces
+from common import rm_space_then_re_escape as rstre
 
 
 ft = ns.FirmType()
@@ -23,10 +21,10 @@ class PS :
     g = 'از ابتدای سال مالی تا تاریخ' + pa.jdPAT
     h = 'تعداد تولید'
     i = 'تعداد فروش'
-    j = re.escape('نرخ فروش (ریال)')
-    k = re.escape(rm_sapces('مبلغ فروش (میلیون ریال)'))
+    j = rstre('نرخ فروش (ریال)')
+    k = rstre('مبلغ فروش (میلیون ریال)')
     l = 'اصلاحات'
-    m = g + re.escape(rm_sapces('(اصلاح شده)'))
+    m = g + rstre('(اصلاح شده)')
     n = 'وضعیت محصول-واحد'
     o = 'فروش داخلی:'
     p = e + '-' + 'اصلاح شده'
