@@ -365,10 +365,11 @@ if False :
 
     importlib.reload(patterns.production)
 
-    from patterns.production import P8 as p
+    from patterns.production import P5 as p
 
 
     trc = p.ex
+    # trc = '928241'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
