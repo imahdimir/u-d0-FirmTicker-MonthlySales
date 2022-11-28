@@ -41,6 +41,7 @@ def main() :
 
     ##
     ghrs = GitHubDataRepo(gu.src0)
+    # ghrs.clone_overwrite()
     ds = ghrs.read_data()
 
     ##
@@ -61,6 +62,7 @@ def main() :
             c1.PublishDateTime : None ,
             c1.Title           : None ,
             c1.Url             : None ,
+            c1.ExcelUrl        : None ,
             }
 
     df = df[list(c2k.keys())]

@@ -10,11 +10,11 @@ import pandas as pd
 from giteasy import GitHubRepo
 from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
 from mirutil.df import update_with_last_run_data as uwlrd
-from mirutil.dirr import make_dir_if_not_exist as mdine
-from mirutil.files import read_txt_file as rtf
-from mirutil.requests_htmll import download_chromium_if_not_installed as dcini
-from mirutil.requests_htmll import get_rendered_htmls_and_save_async_sync as grhasas
-from mirutil.utils import ret_clusters_indices as rci
+from mirutil.dirr import make_dir_if_not_exist
+from mirutil.files import read_txt_file
+from mirutil.requests_htmll import download_chromium_if_not_installed
+from mirutil.requests_htmll import get_rendered_htmls_and_save_async_sync
+from mirutil.utils import ret_clusters_indices
 from requests.exceptions import ReadTimeout
 
 import ns
@@ -71,7 +71,7 @@ def ret_gdt_obj_updated_pre_df(module_n: int , new_cols = None) :
     return gdt , df
 
 def check_html_being_the_monthly_sales_report(fp) :
-    txt = rtf(fp)
+    txt = read_txt_file(fp)
     return (cte.sar in txt) and (cte.nsar in txt)
 
 def move_low_size_htmls(src_dir , dst_dir) :
@@ -108,26 +108,28 @@ def main() :
     df[cn.furl] = cte.codalbase + df[c1.Url]
 
     ##
-    msk = ~ df[cn.fp].apply(lambda x : x.exists())
+    def filter_2_download_htmls(df) :
+        msk = ~ df[cn.fp].apply(lambda x : x.exists())
+        print(len(msk[msk]))
 
-    print(len(msk[msk]))
+        msk &= df[cn.htt].isna()
+        print(len(msk[msk]))
 
-    ##
-    msk &= df[cn.htt].isna()
+        return msk
 
-    print(len(msk[msk]))
-
-    ##
-    mdine(dirr.sh)
-    mdine(dirr.lh)
-    mdine(dirr.lsh)
+    msk = filter_2_download_htmls(df)
 
     ##
-    dcini()
+    make_dir_if_not_exist(dirr.sh)
+    make_dir_if_not_exist(dirr.lh)
+    make_dir_if_not_exist(dirr.lsh)
+
+    ##
+    download_chromium_if_not_installed('https://www.codal.ir')
 
     ##
     _df = df[msk]
-    cls = rci(_df , 20)
+    cls = ret_clusters_indices(_df , 20)
 
     ##
     for se in cls :
@@ -140,11 +142,10 @@ def main() :
             urls = df.loc[inds , cn.furl]
             fps = df.loc[inds , cn.fp]
 
-            o = grhasas(urls , fps , get_timeout = 15 , render_timeout = 60)
+            o = get_rendered_htmls_and_save_async_sync(urls , fps)
 
         except ReadTimeout as e :
             print(e)
-
         except KeyboardInterrupt :
             break
 
@@ -222,6 +223,10 @@ if False :
     pass
 
     ##
-    fp = ''
+    url = '/Reports/Decision.aspx?LetterSerial=0i0N9bcjPUwRZp%2B96apX7Q%3D%3D&rt=0&let=58&ct=0&ft=-1'
+    url = cte.codalbase + url
+    url = 'https://codal.ir/Reports/Decision.aspx?LetterSerial=ikigky6cEqb2SpXYHfGnVw%3D%3D&rt=0&let=58&ct=0&ft=-1'
+
+    grhasas([url] , ['1.html'] , get_timeout = 15 , render_timeout = 60)
 
     ##

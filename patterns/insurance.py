@@ -231,25 +231,15 @@ class I2(I) :
             }
 
     cols = {
-            0  : ic.name ,
-            1  : ic.fiv ,
-            2  : ic.fip ,
-            3  : ic.fdv ,
-            4  : ic.fdp ,
-            5  : ic.furv ,
-            6  : ic.fudv ,
-            7  : ic.rfiv ,
-            8  : ic.rfip ,
-            9  : ic.rfdv ,
-            10 : ic.rfdp ,
-            11 : ic.civ ,
-            12 : ic.cip ,
-            13 : ic.cdv ,
-            14 : ic.cdp ,
-            15 : ic.fyiv ,
-            16 : ic.fyip ,
-            17 : ic.fydv ,
-            18 : ic.fydp ,
+            0 : ic.name ,
+            1 : ic.civ ,
+            2 : ic.cip ,
+            3 : ic.cdv ,
+            4 : ic.cdp ,
+            5 : ic.fyiv ,
+            6 : ic.fyip ,
+            7 : ic.fydv ,
+            8 : ic.fydp ,
             }
 
     sum_row_id = i.i

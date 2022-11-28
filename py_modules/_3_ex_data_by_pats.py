@@ -21,8 +21,8 @@ import ns
 from common import rm_sapces
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
-from py_modules._2_ex_tables import ColName as PreColName
-from py_modules._2_ex_tables import Dirr as PreDirr
+from py_modules._3_ex_tables import ColName as PreColName
+from py_modules._3_ex_tables import Dirr as PreDirr
 
 
 module_n = 3
@@ -334,7 +334,7 @@ def main() :
     save_cur_module_temp_data_and_push(gdt , module_n , df)
 
     ##
-    from patterns.service import S5 as p
+    from patterns.leasing import L4 as p
 
     _ , df = read_data_by_the_pattern(df , p)
 
@@ -365,11 +365,11 @@ if False :
 
     importlib.reload(patterns.production)
 
-    from patterns.production import P5 as p
+    from patterns.production import P9 as p
 
 
     trc = p.ex
-    # trc = '928241'
+    trc = '650413'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
@@ -383,11 +383,11 @@ if False :
 
     importlib.reload(patterns.service)
 
-    from patterns.service import S5 as p
+    from patterns.service import S7 as p
 
 
     trc = p.ex
-    # trc = '435978'
+    # trc = '494948'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp , engine = 'openpyxl')
@@ -401,11 +401,11 @@ if False :
 
     importlib.reload(patterns.insurance)
 
-    from patterns.insurance import I1 as p
+    from patterns.insurance import I2 as p
 
 
     trc = p.ex
-    trc = '444238'
+    # trc = '444238'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
@@ -419,11 +419,11 @@ if False :
 
     importlib.reload(patterns.leasing)
 
-    from patterns.leasing import L2 as p
+    from patterns.leasing import L4 as p
 
 
     trc = p.ex
-    # trc = '338162'
+    # trc = '713081'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
@@ -454,14 +454,27 @@ if False :
 
     importlib.reload(patterns.bank)
 
-    from patterns.bank import B3 as p
+    from patterns.bank import B4 as p
 
 
     trc = p.ex
-    # trc = '370952'
+    trc = '467369'
     print(trc)
     fp = dirr.tbls / f'{trc}.xlsx'
     dft = pd.read_excel(fp)
 
     fu = get_pat_ready_ret_targ_fu(p)
     fu(fp)
+
+    ##
+    fp = '/Users/mahdi/Downloads/1.xls'
+    dft = pd.read_html(fp)[2]
+
+    ##
+    dft = dft.T.reset_index().T
+
+    ##
+
+    ##
+
+    ##

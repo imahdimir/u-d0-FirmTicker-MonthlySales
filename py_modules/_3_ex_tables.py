@@ -11,7 +11,9 @@ from mirutil.df import df_apply_parallel as dfap
 from mirutil.dirr import make_dir_if_not_exist as mdine
 from mirutil.files import read_txt_file as rtf
 from mirutil.html import parse_html_as_etree as phat
+from mirutil.html import etree_to_html as eth
 from mirutil.html import read_tables_in_html_by_html_table_parser as rthp
+from mirutil.html import rm_hidden_elements_of_etree as rheo
 from mirutil.str import normalize_fa_str_completely as nfsc
 
 import ns
@@ -46,7 +48,12 @@ class MonthlyActivityReport :
         self.fp = Path(fp)
 
     def read_html(self) :
-        self.html = rtf(self.fp)
+        self.rawhtml = rtf(self.fp)
+
+    def remove_hidden_elements(self) :
+        tr = phat(self.rawhtml)
+        tr = rheo(tr)
+        self.html = eth(tr)
 
     def read_tables_by_html_table_parser(self) :
         self.dfs = rthp(self.html)
@@ -68,6 +75,12 @@ class MonthlyActivityReport :
     def drop_duplicated_rows(self) :
         self.df = self.df.drop_duplicates()
 
+    def make_inifinity_none(self) :
+        p0 = 'Infinity'
+        p1 = f'\({p0}\)'
+        ptr = f'({p0})|({p1})'
+        self.df = self.df.replace(ptr , None , regex = True)
+
     def rename_columns(self) :
         self.df.columns = range(len(self.df.columns))
 
@@ -81,11 +94,13 @@ def targ(fp: Path) -> (str , None) :
 
     fus = {
             m.read_html                        : None ,
+            m.remove_hidden_elements           : None ,
             m.read_tables_by_html_table_parser : None ,
             m.replace_empty_string_with_none   : None ,
             m.drop_all_nan_rows                : None ,
             m.normalize_fa_str_completely      : None ,
             m.drop_duplicated_rows             : None ,
+            m.make_inifinity_none              : None ,
             m.rename_columns                   : None ,
             m.save_table                       : None ,
             }
@@ -180,10 +195,16 @@ if False :
     _ = [x.unlink() for x in fps]
 
     ##
-    fp = '/Users/mahdi/Downloads/pycharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-htmls/444238.html'
+    fp = '/Users/mahdi/Downloads/pycharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-htmls/617193.html'
     fp = Path(fp)
     targ(fp)
 
     ##
     fp = '/Users/mahdi/Downloads/pycharm/u-d0-FirmTicker-MonthlySales/rd-Codal-monthly-sales-tables/930211.xlsx'
     df = pd.read_excel(fp)
+
+    ##
+    fp = '/Users/mahdi/Downloads/1.xls'
+    dft = rthp(fp)
+
+    ##

@@ -21,6 +21,7 @@ class Params :
     a = [None , acC_DIGITS]
     b = [None , '0']
     c = [None , jdPAT]
+    d = c + ['0']
 
 def make_sub_name(*lst , sub_splice = '.') :
     return sub_splice.join([x for x in lst])

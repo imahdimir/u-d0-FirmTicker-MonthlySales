@@ -9,6 +9,7 @@ ns.py
 /rd-Codal-monthly-sales-raw-html/
 /rd-Codal-monthly-sales-low-size-htmls/
 /rd-Codal-monthly-sales-link-htmls/
+/rd-Codal-monthly-sales-xls/
 
 
 # General
@@ -200,3 +201,4 @@ Network Trash Folder
 Temporary Items
 .apdisk
 /rd-Codal-monthly-sales-tables-0/
+/rd-Codal-monthly-sales-xls/
