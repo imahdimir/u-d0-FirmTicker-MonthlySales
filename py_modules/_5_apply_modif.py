@@ -12,11 +12,11 @@ from varname import nameof
 import ns
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
-from py_modules._3_match_pats import ColName as PreColName
-from py_modules._3_match_pats import Dirr as PreDirr
+from py_modules._4_read_sales import ColName as PreColName
+from py_modules._4_read_sales import Dirr as PreDirr
 
 
-module_n = 4
+module_n = 5
 
 gu = ns.GDU()
 c = ns.Col()
@@ -29,9 +29,8 @@ class Dirr(PreDirr) :
 dirr = Dirr()
 
 class ColName(PreColName) :
-    sales_t = 'SalesTitle'
-    sales = 'Sales'
-    modif = 'SalesModifications'
+    isales = 'Int' + super().sales
+    imodif = 'Int' + super().modif
 
 cn = ColName()
 

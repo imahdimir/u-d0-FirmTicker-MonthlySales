@@ -6,15 +6,15 @@ from pathlib import Path
 
 import pandas as pd
 from giteasy import GitHubRepo
-from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp as puffd
-from mirutil.df import df_apply_parallel as dfap
-from mirutil.dirr import make_dir_if_not_exist as mdine
-from mirutil.files import read_txt_file as rtf
-from mirutil.html import parse_html_as_etree as phat
-from mirutil.html import etree_to_html as eth
-from mirutil.html import read_tables_in_html_by_html_table_parser as rthp
-from mirutil.html import rm_hidden_elements_of_etree as rheo
-from mirutil.str import normalize_fa_str_completely as nfsc
+from giteasy.githubb import persistently_upload_files_from_dir_2_repo_mp
+from mirutil.df import df_apply_parallel
+from mirutil.dirr import make_dir_if_not_exist
+from mirutil.files import read_txt_file
+from mirutil.html import parse_html_as_etree
+from mirutil.html import etree_to_html
+from mirutil.html import read_tables_in_html_by_html_table_parser
+from mirutil.html import rm_hidden_elements_of_etree
+from mirutil.str import normalize_fa_str_completely
 
 import ns
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
@@ -48,15 +48,15 @@ class MonthlyActivityReport :
         self.fp = Path(fp)
 
     def read_html(self) :
-        self.rawhtml = rtf(self.fp)
+        self.rawhtml = read_txt_file(self.fp)
 
     def remove_hidden_elements(self) :
-        tr = phat(self.rawhtml)
-        tr = rheo(tr)
-        self.html = eth(tr)
+        tr = parse_html_as_etree(self.rawhtml)
+        tr = rm_hidden_elements_of_etree(tr)
+        self.html = etree_to_html(tr)
 
     def read_tables_by_html_table_parser(self) :
-        self.dfs = rthp(self.html)
+        self.dfs = read_tables_in_html_by_html_table_parser(self.html)
         if len(self.dfs) == 0 :
             return cn.isblnk
         self.df = pd.concat(self.dfs)
@@ -70,7 +70,7 @@ class MonthlyActivityReport :
         self.df = self.df.dropna(how = 'all')
 
     def normalize_fa_str_completely(self) :
-        self.df = self.df.applymap(nfsc)
+        self.df = self.df.applymap(normalize_fa_str_completely)
 
     def drop_duplicated_rows(self) :
         self.df = self.df.drop_duplicates()
@@ -126,7 +126,7 @@ def main() :
     print(len(msk[msk]))
 
     ##
-    mdine(dirr.tbls)
+    make_dir_if_not_exist(dirr.tbls)
 
     ##
     fps = dirr.tbls.glob('*.xlsx')
@@ -145,7 +145,12 @@ def main() :
     _df = df[msk]
 
     ##
-    df = dfap(df , targ , [cn.fp] , [cn.err] , msk = msk , test = False)
+    df = df_apply_parallel(df ,
+                           targ ,
+                           [cn.fp] ,
+                           [cn.err] ,
+                           msk = msk ,
+                           test = False)
 
     ##
     msk1 = df[cn.err].notna()
@@ -163,7 +168,7 @@ def main() :
     _df = df[msk]
 
     ##
-    puffd(dirr.tbls , '.xlsx' , gu.trg3)
+    persistently_upload_files_from_dir_2_repo_mp(dirr.tbls , '.xlsx' , gu.trg3)
 
     ##
     c2d = {

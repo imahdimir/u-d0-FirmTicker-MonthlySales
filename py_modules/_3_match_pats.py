@@ -21,8 +21,8 @@ import ns
 from common import rm_sapces
 from py_modules._0_get_letters import save_cur_module_temp_data_and_push
 from py_modules._1_get_htmls import ret_gdt_obj_updated_pre_df
-from py_modules._3_ex_tables import ColName as PreColName
-from py_modules._3_ex_tables import Dirr as PreDirr
+from py_modules._2_ex_tables import ColName as PreColName
+from py_modules._2_ex_tables import Dirr as PreDirr
 
 
 module_n = 3
@@ -334,9 +334,10 @@ def main() :
     save_cur_module_temp_data_and_push(gdt , module_n , df)
 
     ##
-    from patterns.leasing import L4 as p
 
-    _ , df = read_data_by_the_pattern(df , p)
+    # from patterns.leasing import L4 as p
+
+    # _ , df = read_data_by_the_pattern(df , p)
 
 ##
 

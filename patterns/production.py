@@ -570,7 +570,7 @@ class P6(P) :
     asr = p.t1
 
 class P7(P) :
-    ex = '626097'
+    ex = '624451'
 
     hdr = {
             (0 , 0)  : p.a ,
